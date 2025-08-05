@@ -1,0 +1,30 @@
+{
+  "name": "hausa-wedding-guide",
+  "version": "1.0.0",
+  "description": "A comprehensive guide to Hausa wedding ceremonies and traditions",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "hausa",
+    "wedding",
+    "guide",
+    "traditions"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.11",
+    "vite": "^7.0.6"
+  }
+}
