@@ -26,20 +26,24 @@ A beautiful, responsive web application showcasing traditional Hausa wedding cer
 ### Installation
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/hausa-wedding-guide.git
    cd hausa-wedding-guide
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Add your PDF guide:
+
    - Place your `Hausa_Wedding_Guide.pdf` file in the `public/` directory
 
 4. Start the development server:
+
    ```bash
    npm run dev
    ```
@@ -67,24 +71,27 @@ src/
 ├── main.jsx         # React entry point
 └── index.css        # Global styles with Tailwind directives
 public/
-├── vite.svg         # Favicon
+├── logowhite.svg    # Favicon/Logo
 └── README_PDF.md    # Instructions for PDF placement
 ```
 
 ## 🎯 Features Overview
 
 ### Landing Page Components
+
 - **Hero Section**: Welcoming introduction with main title
 - **Download Section**: Prominent PDF download button
 - **Feature Cards**: Highlighting key aspects of Hausa wedding traditions
 - **Responsive Grid**: Adaptive layout for different screen sizes
 
 ### PDF Integration
+
 The application is designed to serve a downloadable PDF guide. Simply place your `Hausa_Wedding_Guide.pdf` file in the `public/` directory, and it will be accessible via the download button.
 
 ## 🌍 Cultural Significance
 
 This project celebrates the rich traditions of Hausa wedding ceremonies, including:
+
 - Traditional ceremonies and rituals
 - Cultural customs passed down through generations
 - Practical planning guidance for modern couples
