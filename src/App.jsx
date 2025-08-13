@@ -6,6 +6,8 @@ function App() {
   const [showNav, setShowNav] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagesLoaded, setImagesLoaded] = useState({});
+  const [isPageLoading, setIsPageLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -22,6 +24,32 @@ function App() {
   const handleImageLoad = (imageSrc) => {
     setImagesLoaded((prev) => ({ ...prev, [imageSrc]: true }));
   };
+
+  // Simulate page loading
+  useEffect(() => {
+    // Simulate loading progress
+    const progressInterval = setInterval(() => {
+      setLoadingProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(progressInterval);
+          return 100;
+        }
+        return prev + Math.random() * 15;
+      });
+    }, 150);
+
+    const timer = setTimeout(() => {
+      setLoadingProgress(100);
+      setTimeout(() => {
+        setIsPageLoading(false);
+      }, 300);
+    }, 2000); // 2 second loading simulation
+
+    return () => {
+      clearTimeout(timer);
+      clearInterval(progressInterval);
+    };
+  }, []);
 
   // Navigation scroll handling with throttling
   useEffect(() => {
@@ -96,6 +124,122 @@ function App() {
     },
   ];
 
+  // Loading Skeleton Component
+  const LoadingSkeleton = () => (
+    <div className="min-h-screen relative">
+      {/* Loading Progress Bar */}
+      <div className="fixed top-0 left-0 right-0 z-50">
+        <div className="h-1 bg-gray-200">
+          <div
+            className="h-full bg-gradient-to-r from-[#CE805C] to-[#990200] transition-all duration-300 ease-out"
+            style={{ width: `${Math.min(loadingProgress, 100)}%` }}
+          ></div>
+        </div>
+      </div>
+
+      {/* Loading Text */}
+      <div className="fixed inset-0 bg-gradient-to-b from-[#990200] to-[#531946] flex items-center justify-center z-40">
+        <div className="text-center text-white space-y-4">
+          <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto"></div>
+          <h2 className="text-2xl font-playfair font-bold">
+            Loading Your Wedding Guide
+          </h2>
+          <p className="text-white/80 font-inter">
+            Preparing something beautiful for you...
+          </p>
+          <div className="text-[#CE805C] font-semibold">
+            {Math.round(loadingProgress)}%
+          </div>
+        </div>
+      </div>
+
+      {/* Skeleton Content (hidden behind loading overlay) */}
+      <div className="opacity-30">
+        {/* Header Skeleton */}
+        <div className="h-20 bg-gradient-to-r from-gray-200 to-gray-300 shimmer"></div>
+
+        {/* Hero Section Skeleton */}
+        <div className="min-h-screen bg-gradient-to-b from-gray-300 to-gray-400 p-8">
+          <div className="container mx-auto">
+            <div className="grid md:grid-cols-2 gap-16 items-center min-h-screen">
+              {/* Left side skeleton */}
+              <div className="space-y-6">
+                <div className="h-8 bg-white/30 rounded-full w-64 shimmer"></div>
+                <div className="space-y-4">
+                  <div className="h-16 bg-white/30 rounded-lg w-full shimmer"></div>
+                  <div className="h-16 bg-white/30 rounded-lg w-3/4 shimmer"></div>
+                </div>
+                <div className="h-6 bg-white/30 rounded w-full shimmer"></div>
+                <div className="h-6 bg-white/30 rounded w-2/3 shimmer"></div>
+                <div className="grid grid-cols-2 gap-4 max-w-md">
+                  <div className="h-16 bg-white/30 rounded-lg shimmer"></div>
+                  <div className="h-16 bg-white/30 rounded-lg shimmer"></div>
+                </div>
+                <div className="flex gap-4 pt-4">
+                  <div className="h-14 bg-white/30 rounded-2xl w-48 shimmer"></div>
+                  <div className="h-14 bg-white/30 rounded-2xl w-40 shimmer"></div>
+                </div>
+              </div>
+
+              {/* Right side skeleton */}
+              <div className="flex justify-center">
+                <div className="w-80 h-96 bg-white/30 rounded-3xl shimmer border-4 border-white/20"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Content Sections Skeleton */}
+        <div className="bg-white space-y-20 py-20">
+          {/* Section skeletons */}
+          {[1, 2, 3, 4].map((section) => (
+            <div key={section} className="container mx-auto px-4">
+              <div className="text-center space-y-4 mb-16">
+                <div className="h-12 bg-gray-200 rounded-lg w-96 mx-auto shimmer"></div>
+                <div className="h-6 bg-gray-200 rounded w-2/3 mx-auto shimmer"></div>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-8">
+                {[1, 2, 3].map((item) => (
+                  <div key={item} className="space-y-4">
+                    <div className="h-48 bg-gray-200 rounded-xl shimmer"></div>
+                    <div className="h-6 bg-gray-200 rounded w-3/4 shimmer"></div>
+                    <div className="h-4 bg-gray-200 rounded w-full shimmer"></div>
+                    <div className="h-4 bg-gray-200 rounded w-2/3 shimmer"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {/* FAQ Section Skeleton */}
+          <div className="container mx-auto px-4">
+            <div className="text-center space-y-4 mb-16">
+              <div className="h-12 bg-gray-200 rounded-lg w-80 mx-auto shimmer"></div>
+              <div className="h-6 bg-gray-200 rounded w-96 mx-auto shimmer"></div>
+            </div>
+
+            <div className="max-w-4xl mx-auto space-y-4">
+              {[1, 2, 3, 4, 5, 6].map((faq) => (
+                <div key={faq} className="bg-gray-100 rounded-2xl p-6">
+                  <div className="h-6 bg-gray-200 rounded w-3/4 shimmer"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Skeleton */}
+        <div className="h-32 bg-gradient-to-r from-gray-300 to-gray-400 shimmer"></div>
+      </div>
+    </div>
+  );
+
+  // Show loading skeleton if page is loading
+  if (isPageLoading) {
+    return <LoadingSkeleton />;
+  }
+
   return (
     <div className="min-h-screen">
       {/* Floating Navigation */}
@@ -110,11 +254,11 @@ function App() {
               <img
                 src="/logowhite.svg"
                 alt="Hausa Wedding Guide"
-                className="h-8 sm:h-10 md:h-12 absolute left-0"
+                className="h-6 sm:h-7 md:h-8 absolute left-0"
               />
 
               {/* Navigation Items - Centered on all screen sizes */}
-              <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-4 lg:space-x-6">
+              <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4 lg:space-x-6">
                 {[
                   { id: "about", label: "About" },
                   { id: "features", label: "Features" },
@@ -124,7 +268,7 @@ function App() {
                   <button
                     key={item.id}
                     onClick={() => scrollToSection(item.id)}
-                    className={`text-xs sm:text-sm font-inter font-medium transition-all duration-200 px-1 sm:px-2 md:px-3 py-2 rounded-lg hover:bg-gray-50 min-h-[44px] flex items-center ${
+                    className={`text-sm sm:text-base font-inter font-medium transition-all duration-200 px-3 sm:px-4 py-3 rounded-lg hover:bg-gray-50 min-h-[44px] min-w-[44px] flex items-center justify-center ${
                       activeSection === item.id
                         ? "text-[#CE805C] font-semibold bg-orange-50"
                         : "text-[#1E1E1E] hover:text-[#CE805C]"
@@ -139,7 +283,7 @@ function App() {
                   href="/Hausa_Wedding_Guide.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-2 sm:px-3 md:px-6 py-2 md:py-3 bg-[#CE805C] hover:bg-[#740015] text-white text-xs sm:text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 absolute right-0 min-h-[44px]"
+                  className="px-3 sm:px-4 md:px-6 py-3 md:py-3 bg-[#CE805C] hover:bg-[#740015] text-white text-sm sm:text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 absolute right-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
                 >
                   <span className="hidden sm:inline">Access Guide</span>
                   <span className="sm:hidden">Access</span>
@@ -239,7 +383,7 @@ function App() {
             {/* Right side - Hero image */}
             <div className="flex justify-center">
               <div className="relative group">
-                <div className="w-72 h-[24rem] sm:w-80 sm:h-[28rem] md:w-96 md:h-[32rem] rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20 group-hover:shadow-3xl transition-all duration-500">
+                <div className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20 group-hover:shadow-3xl transition-all duration-500">
                   {!imagesLoaded["/assets/bride1.png"] && (
                     <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-white/5 animate-pulse"></div>
                   )}
@@ -355,7 +499,7 @@ function App() {
 
             <div className="flex justify-center">
               <div className="relative group">
-                <div className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-full overflow-hidden shadow-2xl group-hover:shadow-3xl transition-all duration-500">
+                <div className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg aspect-square rounded-full overflow-hidden shadow-2xl group-hover:shadow-3xl transition-all duration-500">
                   {!imagesLoaded["/assets/couple1.png"] && (
                     <div className="absolute inset-0 bg-gradient-to-br from-orange-100 to-orange-50 animate-pulse"></div>
                   )}
@@ -531,7 +675,7 @@ function App() {
                   <img
                     src={`/assets/samplepage${page.num}.png`}
                     alt={`${page.title} - Click to enlarge`}
-                    className="w-full h-48 sm:h-64 md:h-72 object-cover rounded-lg"
+                    className="w-full aspect-[3/4] object-cover rounded-lg"
                   />
                   <div className="absolute inset-4 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center">
                     <div className="bg-white/90 backdrop-blur-sm rounded-full p-3 transform scale-75 group-hover:scale-100 transition-transform duration-300">
@@ -692,7 +836,7 @@ function App() {
               <img
                 src="/logowhite.svg"
                 alt="Hausa Wedding Guide Logo"
-                className="h-16 md:h-20 mb-4 mx-auto md:mx-0"
+                className="h-12 md:h-14 mb-4 mx-auto md:mx-0"
               />
               <p className="font-inter text-gray-200 text-base leading-relaxed max-w-md mx-auto md:mx-0">
                 Preserving tradition, embracing modernity. Your trusted
