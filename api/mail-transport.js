@@ -9,7 +9,7 @@ export async function sendEmail({
   html,
 }) {
   const API_KEY = process.env.RESEND_API_KEY;
-  const FROM_EMAIL = process.env.FROM_EMAIL || "onboarding@resend.dev";
+  const FROM_EMAIL = process.env.FROM_EMAIL || "k.kabir@devwithdijah.com";
   const FROM_NAME = process.env.FROM_NAME || "HAUSA ROOM";
 
   if (!API_KEY) {
