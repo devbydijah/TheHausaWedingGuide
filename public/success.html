@@ -167,7 +167,7 @@
             if (data.ok) {
               document.getElementById("passwordDisplay").textContent =
                 data.password;
-              document.getElementById("downloadBtn").href = data.url;
+              document.getElementById("downloadBtn").href = data.download_url;
               document.getElementById("downloadSection").classList.add("show");
             } else {
               document.getElementById("loading").innerHTML =
