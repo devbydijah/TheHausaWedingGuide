@@ -20,19 +20,20 @@ export async function sendDownloadEmail({ email, password, downloadUrl }) {
           </h1>
           
           <p style="font-size: 16px; line-height: 1.6; color: #333;">
-            Your Hausa Wedding Guide is ready for download. Use the details below to access your file:
+            Your Hausa Wedding Guide is ready for download. Click the button below and enter your password when prompted:
           </p>
           
           <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0; font-size: 14px; color: #666;">Download Password:</p>
+            <p style="margin: 0; font-size: 14px; color: #666;">Your Download Password:</p>
             <p style="font-size: 24px; font-weight: bold; color: #b45309; margin: 10px 0; font-family: monospace; letter-spacing: 2px;">
               ${password}
             </p>
+            <p style="margin: 5px 0 0 0; font-size: 12px; color: #888;">Copy this password - you'll need it on the download page</p>
           </div>
           
           <div style="text-align: center; margin: 30px 0;">
             <a href="${downloadUrl}" style="background: #b45309; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-size: 16px; font-weight: bold; display: inline-block;">
-              📥 Download Your Guide
+              📥 Enter Password & Download
             </a>
           </div>
           
@@ -58,11 +59,14 @@ Thank you for your purchase!
 
 Your Hausa Wedding Guide is ready for download.
 
-Download Password: ${password}
-Download Link: ${downloadUrl}
+Visit the download page and enter your password:
+${downloadUrl}
 
-Important: This link expires in 5 minutes and you can download up to 3 times.
-Keep your password safe!
+Your Password: ${password}
+
+Copy this password and use it on the download page to access your file.
+
+Important: The download page will ask for your email and this password.
 
 Happy planning!
 The Hausa Wedding Guide Team

@@ -149,6 +149,17 @@
         document.getElementById("loading").innerHTML =
           '<p style="color: #dc2626;">❌ No payment reference found. Please contact support.</p>';
       } else {
+        // First, log to debug API
+        fetch("/api/debug-log", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "success_page_called",
+            reference: reference,
+            timestamp: new Date().toISOString(),
+          }),
+        }).catch((e) => console.error("Debug log failed:", e));
+
         // Call our API to get download details
         console.log("Making API call with reference:", reference);
         fetch("/api/get-download-details", {

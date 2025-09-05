@@ -1,11 +1,12 @@
 {
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "rewrites": [
     {
-      "source": "/assets/(.*)",
-      "destination": "/assets/$1"
-    },
-    {
-      "source": "/(.*)",
+      "source": "/((?!api/|_next/|assets/|images/|static/|favicon.ico|sw.js).*)",
       "destination": "/index.html"
     }
   ]

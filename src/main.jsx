@@ -1,20 +1,23 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import "./index.css";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from "./App.jsx";
-import Success from "./success.jsx";
-import AdminPanel from "./AdminPanel.jsx";
+import SuccessPage from "./SuccessPage.jsx"; // We will create this next
+import "./index.css";
 
-function Router() {
-  const path = window.location.pathname;
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+  },
+  {
+    path: "/success",
+    element: <SuccessPage />,
+  },
+]);
 
-  if (path === "/success") return <Success />;
-  if (path === "/admin") return <AdminPanel />;
-  return <App />;
-}
-
-createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <Router />
-  </StrictMode>
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <RouterProvider router={router} />
+  </React.StrictMode>
 );

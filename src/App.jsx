@@ -101,18 +101,6 @@ function App() {
 
     setIsProcessingPayment(true);
     try {
-      // For development, check if we're on localhost
-      const isDev = window.location.hostname === "localhost";
-
-      if (isDev) {
-        // In development, simulate the flow or redirect to deployed version
-        alert(
-          `Development mode: Would initialize payment for ${email}. Deploy to test full flow.`
-        );
-        setIsProcessingPayment(false);
-        return;
-      }
-
       const res = await fetch("/api/initialize-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -1,11 +1,33 @@
-// Test Resend functionality independently
-// POST /api/test-email
+// Simple test API that bypasses Paystack verification for debugging
+import { createClient } from "@supabase/supabase-js";
+import bcrypt from "bcryptjs";
+import { sendDownloadEmail } from "./email.js";
 
-import { sendEmail } from "./mail-transport.js";
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SUPABASE_STORAGE_BUCKET =
+  process.env.SUPABASE_STORAGE_BUCKET || "private";
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+  auth: { persistSession: false },
+});
+
+function generatePassword(length = 10) {
+  const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+  let out = "";
+  for (let i = 0; i < length; i++)
+    out += chars[Math.floor(Math.random() * chars.length)];
+  return out;
+}
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method Not Allowed" });
+  // Enable CORS
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
   }
 
   const { email } = req.body || {};

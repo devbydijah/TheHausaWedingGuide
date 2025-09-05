@@ -40,11 +40,19 @@ function generatePassword(length = 10) {
 }
 
 export default async function handler(req, res) {
+  console.log("=== GET-DOWNLOAD-DETAILS API CALLED ===");
+  console.log("Method:", req.method);
+  console.log("Body:", req.body);
+  console.log("=======================================");
+
   if (req.method !== "POST")
     return res.status(405).json({ error: "Method Not Allowed" });
 
   const { reference } = req.body || {};
-  if (!reference) return res.status(400).json({ error: "reference required" });
+  if (!reference) {
+    console.log("ERROR: No reference provided");
+    return res.status(400).json({ error: "reference required" });
+  }
 
   try {
     console.log("Verifying Paystack transaction:", reference);
@@ -65,7 +73,7 @@ export default async function handler(req, res) {
     const { data: existing } = await supabase
       .from("sales")
       .select("*")
-      .eq("tx_ref", reference)
+      .eq("paystack_reference", reference)
       .limit(1);
     if (existing && existing.length > 0) {
       console.log("Transaction already processed");
@@ -90,12 +98,11 @@ export default async function handler(req, res) {
 
     // Insert to database
     const payload = {
-      tx_ref: reference,
+      paystack_reference: reference,
       email,
+      amount: paystackResponse.data.amount,
       password_hash: passwordHash,
-      file_name: fileName,
-      downloads: 0,
-      max_downloads: 3,
+      download_count: 0,
       created_at: new Date().toISOString(),
     };
 
@@ -120,6 +127,10 @@ export default async function handler(req, res) {
 
     console.log("Generated signed URL, sending email via Resend API");
 
+    // Use the latest deployment URL
+    const downloadPageUrl =
+      "https://the-hausa-weding-guide-pofbi2rn6-devbydijahprojects.vercel.app/download.html";
+
     // Send email using direct Resend API
     try {
       console.log("Sending email to:", email);
@@ -127,7 +138,7 @@ export default async function handler(req, res) {
       await sendDownloadEmail({
         email: email,
         password: plainPassword,
-        downloadUrl: urlData.signedUrl,
+        downloadUrl: downloadPageUrl, // Full URL to download page
       });
 
       console.log("Email sent successfully via Resend API");

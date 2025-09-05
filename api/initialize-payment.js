@@ -23,7 +23,7 @@ export default async function handler(req, res) {
   const initAmount = amount || process.env.PRICE_KOBO || 100000; // 1000 Naira = 100000 kobo
 
   // Callback URL where Paystack will redirect after payment
-  const callback_url = `${PUBLIC_BASE_URL}/success.html`;
+  const callback_url = `${PUBLIC_BASE_URL}/success`;
 
   try {
     const response = await fetch(
