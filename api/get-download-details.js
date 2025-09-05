@@ -117,17 +117,20 @@ export default async function handler(req, res) {
         .json({ error: "failed to generate download link" });
     }
 
-    console.log("Generated signed URL, sending email via Supabase Edge Function");
+    console.log(
+      "Generated signed URL, sending email via Supabase Edge Function"
+    );
 
     // Send email using Supabase Edge Function
     try {
-      const { data: emailResponse, error: emailError } = await supabase.functions.invoke('resend-email', {
-        body: {
-          to: email,
-          password: plainPassword,
-          downloadUrl: urlData.signedUrl
-        }
-      });
+      const { data: emailResponse, error: emailError } =
+        await supabase.functions.invoke("resend-email", {
+          body: {
+            to: email,
+            password: plainPassword,
+            downloadUrl: urlData.signedUrl,
+          },
+        });
 
       if (emailError) {
         console.error("Edge Function error:", emailError);

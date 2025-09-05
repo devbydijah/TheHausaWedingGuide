@@ -173,13 +173,17 @@
               document.getElementById("loading").innerHTML =
                 '<p style="color: #dc2626;">❌ ' +
                 (data.error || "Failed to generate download link") +
-                "</p><p style=\"font-size: 0.8em; color: #666; margin-top: 10px;\">Debug info: " + JSON.stringify(data) + "</p>";
+                '</p><p style="font-size: 0.8em; color: #666; margin-top: 10px;">Debug info: ' +
+                JSON.stringify(data) +
+                "</p>";
             }
           })
           .catch((error) => {
             console.error("Error:", error);
             document.getElementById("loading").innerHTML =
-              '<p style="color: #dc2626;">❌ Failed to process request. Please contact support.</p><p style=\"font-size: 0.8em; color: #666; margin-top: 10px;\">Debug: ' + error.message + '</p>';
+              '<p style="color: #dc2626;">❌ Failed to process request. Please contact support.</p><p style="font-size: 0.8em; color: #666; margin-top: 10px;">Debug: ' +
+              error.message +
+              "</p>";
           });
       }
     </script>
