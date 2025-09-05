@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Successful - Hausa Wedding Guide</title>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        background: white;
+        border-radius: 16px;
+        padding: 40px;
+        max-width: 500px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      }
+      .success-icon {
+        width: 80px;
+        height: 80px;
+        background: #059669;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px;
+        color: white;
+        font-size: 36px;
+      }
+      h1 {
+        color: #1f2937;
+        margin-bottom: 16px;
+        font-size: 28px;
+      }
+      p {
+        color: #6b7280;
+        margin-bottom: 24px;
+        line-height: 1.6;
+      }
+      .loading {
+        margin: 20px 0;
+      }
+      .spinner {
+        border: 3px solid #f3f4f6;
+        border-top: 3px solid #b45309;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .download-section {
+        background: #f9fafb;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+        display: none;
+      }
+      .download-section.show {
+        display: block;
+      }
+      .password {
+        font-family: monospace;
+        background: #1f2937;
+        color: white;
+        padding: 12px;
+        border-radius: 6px;
+        font-size: 18px;
+        margin: 12px 0;
+        word-break: break-all;
+      }
+      .download-btn {
+        background: #b45309;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 16px;
+      }
+      .download-btn:hover {
+        background: #92400e;
+      }
+      .email-note {
+        background: #eff6ff;
+        border-left: 4px solid #3b82f6;
+        padding: 12px;
+        margin-top: 20px;
+        text-align: left;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="success-icon">✓</div>
+      <h1>Payment Successful!</h1>
+      <p>
+        Thank you for purchasing the Hausa Wedding Guide. We're processing your
+        download details...
+      </p>
+
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Verifying payment and generating download link...</p>
+      </div>
+
+      <div class="download-section" id="downloadSection">
+        <h3>Your Download Details</h3>
+        <p>Your unique password:</p>
+        <div class="password" id="passwordDisplay"></div>
+        <a href="#" class="download-btn" id="downloadBtn" target="_blank"
+          >Download Your Guide</a
+        >
+
+        <div class="email-note">
+          <strong>📧 Check Your Email</strong><br />
+          We've also sent these details to your email address for your records.
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Get reference from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const reference = urlParams.get("reference");
+
+      if (!reference) {
+        document.getElementById("loading").innerHTML =
+          '<p style="color: #dc2626;">❌ No payment reference found. Please contact support.</p>';
+      } else {
+        // Call our API to get download details
+        fetch("/api/get-download-details", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reference }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("loading").style.display = "none";
+
+            if (data.ok) {
+              document.getElementById("passwordDisplay").textContent =
+                data.password;
+              document.getElementById("downloadBtn").href = data.url;
+              document.getElementById("downloadSection").classList.add("show");
+            } else {
+              document.getElementById("loading").innerHTML =
+                '<p style="color: #dc2626;">❌ ' +
+                (data.error || "Failed to generate download link") +
+                "</p>";
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            document.getElementById("loading").innerHTML =
+              '<p style="color: #dc2626;">❌ Failed to process request. Please contact support.</p>';
+          });
+      }
+    </script>
+  </body>
+</html>

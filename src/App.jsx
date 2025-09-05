@@ -8,6 +8,8 @@ function App() {
   const [imagesLoaded, setImagesLoaded] = useState({});
   const [isPageLoading, setIsPageLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [email, setEmail] = useState("");
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -89,6 +91,53 @@ function App() {
 
   const scrollToSection = (sectionId) => {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handlePurchase = async () => {
+    if (!email) {
+      alert("Please enter your email address");
+      return;
+    }
+
+    setIsProcessingPayment(true);
+    try {
+      // For development, check if we're on localhost
+      const isDev = window.location.hostname === "localhost";
+
+      if (isDev) {
+        // In development, simulate the flow or redirect to deployed version
+        alert(
+          `Development mode: Would initialize payment for ${email}. Deploy to test full flow.`
+        );
+        setIsProcessingPayment(false);
+        return;
+      }
+
+      const res = await fetch("/api/initialize-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, amount: 100000 }), // 1000 Naira in kobo
+      });
+
+      // Check if response is empty or not JSON
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error(
+          "Server returned invalid response. API endpoint may not exist."
+        );
+      }
+
+      const data = await res.json();
+      if (!res.ok)
+        throw new Error(data.error || "Payment initialization failed");
+
+      // Redirect to Paystack
+      window.location.href = data.authorization_url;
+    } catch (err) {
+      console.error("Payment error:", err);
+      alert("Payment failed: " + err.message);
+      setIsProcessingPayment(false);
+    }
   };
 
   const faqs = [
@@ -279,15 +328,29 @@ function App() {
                 ))}
 
                 {/* Access Guide Button */}
-                <a
-                  href="/Hausa_Wedding_Guide.pdf"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-3 sm:px-4 md:px-6 py-3 md:py-3 bg-[#CE805C] hover:bg-[#740015] text-white text-sm sm:text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 absolute right-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
-                >
-                  <span className="hidden sm:inline">Access Guide</span>
-                  <span className="sm:hidden">Access</span>
-                </a>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#CE805C] min-w-[180px]"
+                  />
+                  <button
+                    onClick={handlePurchase}
+                    disabled={isProcessingPayment}
+                    className="px-3 sm:px-4 md:px-6 py-3 md:py-3 bg-[#CE805C] hover:bg-[#740015] text-white text-sm sm:text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 min-h-[44px] min-w-[44px] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isProcessingPayment ? (
+                      <span>Processing...</span>
+                    ) : (
+                      <>
+                        <span className="hidden sm:inline">Purchase Guide</span>
+                        <span className="sm:hidden">Purchase</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -350,27 +413,37 @@ function App() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <a
-                  href="/Hausa_Wedding_Guide.pdf"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center px-8 py-4 bg-[#CE805C] hover:bg-[#740015] text-white font-semibold rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 group"
-                >
-                  <svg
-                    className="w-5 h-5 mr-2 group-hover:animate-bounce"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                <div className="flex flex-col gap-3">
+                  <input
+                    type="email"
+                    placeholder="Enter your email to purchase"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="px-4 py-3 rounded-xl text-gray-800 border-2 border-white/30 focus:border-white focus:outline-none bg-white/90 placeholder-gray-500"
+                  />
+                  <button
+                    onClick={handlePurchase}
+                    disabled={isProcessingPayment}
+                    className="inline-flex items-center justify-center px-8 py-4 bg-[#CE805C] hover:bg-[#740015] text-white font-semibold rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 group disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                  Access Your Guide
-                </a>
+                    <svg
+                      className="w-5 h-5 mr-2 group-hover:animate-bounce"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                    {isProcessingPayment
+                      ? "Processing..."
+                      : "Purchase Your Guide"}
+                  </button>
+                </div>
                 <button
                   onClick={() => scrollToSection("about")}
                   className="inline-flex items-center justify-center px-6 py-4 border-2 border-white/80 text-white font-semibold rounded-2xl hover:bg-white hover:text-[#990200] transition-all duration-300 backdrop-blur-sm"
@@ -793,27 +866,37 @@ function App() {
             </div>
 
             <div className="space-y-4">
-              <a
-                href="/Hausa_Wedding_Guide.pdf"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center px-8 py-4 bg-[#CE805C] hover:bg-[#740015] text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-lg"
-              >
-                <svg
-                  className="w-6 h-6 mr-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              <div className="flex flex-col gap-3">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="px-4 py-3 rounded-xl text-gray-800 border-2 border-gray-200 focus:border-[#CE805C] focus:outline-none"
+                />
+                <button
+                  onClick={handlePurchase}
+                  disabled={isProcessingPayment}
+                  className="inline-flex items-center px-8 py-4 bg-[#CE805C] hover:bg-[#740015] text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                Access Your Complete Guide
-              </a>
+                  <svg
+                    className="w-6 h-6 mr-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  {isProcessingPayment
+                    ? "Processing..."
+                    : "Purchase Your Complete Guide"}
+                </button>
+              </div>
               <p className="text-sm text-gray-600">
                 💝 Your authentic Hausa wedding planning resource is ready to
                 download
