@@ -4,7 +4,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
-import { sendMailerSendEmail } from "./mail-transport.js";
+import { sendEmail } from "./mail-transport.js";
 
 const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET;
 const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -132,7 +132,7 @@ export default async function handler(req, res) {
         <p>Note: You have up to 3 downloads available.</p>
       `;
 
-      await sendMailerSendEmail({
+      await sendEmail({
         toEmail: email,
         subject,
         html,
