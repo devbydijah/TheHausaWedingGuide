@@ -4,7 +4,6 @@
 
 import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
-import { sendEmail } from "./mail-transport.js";
 
 const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET;
 const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -118,27 +117,24 @@ export default async function handler(req, res) {
         .json({ error: "failed to generate download link" });
     }
 
-    console.log("Generated signed URL, sending email");
+    console.log("Generated signed URL, sending email via Supabase Edge Function");
 
-    // Send email
+    // Send email using Supabase Edge Function
     try {
-      const downloadUrl = `${PUBLIC_BASE_URL}/download.html`;
-      const subject = "Your Hausa Wedding Guide — download details";
-      const html = `
-        <h2>Thank you for your purchase!</h2>
-        <p>Your download password: <strong>${plainPassword}</strong></p>
-        <p>You can download directly using this link (valid for 5 minutes): <a href="${urlData.signedUrl}">Download Now</a></p>
-        <p>Or visit our download page: <a href="${downloadUrl}">${downloadUrl}</a></p>
-        <p>Note: You have up to 3 downloads available.</p>
-      `;
-
-      await sendEmail({
-        toEmail: email,
-        subject,
-        html,
-        text: `Your password: ${plainPassword}\nDownload at: ${downloadUrl}`,
+      const { data: emailResponse, error: emailError } = await supabase.functions.invoke('resend-email', {
+        body: {
+          to: email,
+          password: plainPassword,
+          downloadUrl: urlData.signedUrl
+        }
       });
-      console.log("Email sent successfully");
+
+      if (emailError) {
+        console.error("Edge Function error:", emailError);
+        // Continue anyway - user will still get the password on screen
+      } else {
+        console.log("Email sent successfully via Edge Function");
+      }
     } catch (e) {
       console.error("Email send error", e);
       // Continue anyway - user will still get the password on screen
