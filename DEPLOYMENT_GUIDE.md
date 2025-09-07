@@ -3,6 +3,7 @@
 ## 🚀 Setup Instructions
 
 ### 1. Environment Variables
+
 Add these to your Vercel environment variables:
 
 ```env
@@ -12,22 +13,26 @@ FROM_EMAIL=noreply@yourdomain.com
 ```
 
 ### 2. Paystack Webhook Configuration
+
 Set your Paystack webhook URL to:
+
 ```
 https://hausaroom.ng/wc-api/Tbz_WC_Paystack_Webhook/
 ```
 
 ### 3. Update Storefront URL
+
 In `src/App.jsx`, update the `PAYSTACK_STOREFRONT_URL` constant with your actual Paystack storefront URL:
 
 ```javascript
-const PAYSTACK_STOREFRONT_URL = "https://paystack.com/pay/your-actual-storefront-code";
+const PAYSTACK_STOREFRONT_URL =
+  "https://paystack.com/pay/your-actual-storefront-code";
 ```
 
 ## 📋 How It Works
 
 1. **Customer visits your website** - Views the guide details
-2. **Customer clicks "Buy Now"** - Redirected to Paystack storefront  
+2. **Customer clicks "Buy Now"** - Redirected to Paystack storefront
 3. **Customer completes payment** - On Paystack's secure platform
 4. **Paystack sends webhook** - To your webhook endpoint
 5. **System generates download token** - 24-hour temporary access
@@ -37,7 +42,7 @@ const PAYSTACK_STOREFRONT_URL = "https://paystack.com/pay/your-actual-storefront
 ## 🔧 Technical Details
 
 - **Frontend**: React with Tailwind CSS
-- **Backend**: Vercel serverless functions  
+- **Backend**: Vercel serverless functions
 - **Email**: Resend API
 - **Payment**: Paystack storefront + webhook
 - **File Storage**: Static PDF in `/public` folder
@@ -46,7 +51,7 @@ const PAYSTACK_STOREFRONT_URL = "https://paystack.com/pay/your-actual-storefront
 ## 📁 Core Files
 
 - `src/App.jsx` - Main React application with download logic
-- `api/paystack-webhook.js` - Processes payment webhooks  
+- `api/paystack-webhook.js` - Processes payment webhooks
 - `api/email.js` - Sends download emails via Resend
 - `public/Hausa_Wedding_Guide.pdf` - The product file
 

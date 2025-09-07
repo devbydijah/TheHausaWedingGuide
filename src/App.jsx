@@ -12,7 +12,8 @@ function App() {
   const [downloadStatus, setDownloadStatus] = useState(null); // 'valid', 'expired', 'downloading', null
 
   // Paystack storefront URL - Replace with your actual storefront URL
-  const PAYSTACK_STOREFRONT_URL = "https://paystack.com/pay/your-storefront-code";
+  const PAYSTACK_STOREFRONT_URL =
+    "https://paystack.com/pay/your-storefront-code";
 
   // Check for download token in URL
   useEffect(() => {
@@ -134,7 +135,7 @@ function App() {
 
   const handleBuyNow = () => {
     // Redirect to Paystack storefront
-    window.open(PAYSTACK_STOREFRONT_URL, '_blank');
+    window.open(PAYSTACK_STOREFRONT_URL, "_blank");
   };
 
   const faqs = [
@@ -395,7 +396,9 @@ function App() {
 
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 max-w-lg">
                   <p className="text-white/80 text-sm">
-                    <strong className="text-[#CE805C]">How it works:</strong> Click "Buy Now" → Complete payment on our secure Paystack store → Receive download link in your email
+                    <strong className="text-[#CE805C]">How it works:</strong>{" "}
+                    Click "Buy Now" → Complete payment on our secure Paystack
+                    store → Receive download link in your email
                   </p>
                 </div>
 
@@ -931,7 +934,8 @@ function App() {
                 Get Your Complete Guide Now
               </button>
               <p className="text-sm text-gray-600">
-                💝 Click to visit our secure Paystack store and get instant access
+                💝 Click to visit our secure Paystack store and get instant
+                access
               </p>
             </div>
           </div>
