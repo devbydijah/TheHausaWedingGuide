@@ -10,6 +10,43 @@ function App() {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [email, setEmail] = useState("");
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [downloadStatus, setDownloadStatus] = useState(null); // 'valid', 'expired', 'downloading', null
+
+  // Check for download token in URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const downloadToken = urlParams.get("download");
+    const expires = urlParams.get("expires");
+    const emailParam = urlParams.get("email");
+
+    if (downloadToken && expires && emailParam) {
+      const now = Date.now();
+      const expiration = parseInt(expires);
+
+      if (now < expiration) {
+        setDownloadStatus("valid");
+        setEmail(emailParam);
+      } else {
+        setDownloadStatus("expired");
+      }
+    }
+  }, []);
+
+  const handleDownload = () => {
+    setDownloadStatus("downloading");
+
+    // Create a link to download the PDF directly
+    const link = document.createElement("a");
+    link.href = "/Hausa_Wedding_Guide.pdf";
+    link.download = "Hausa_Wedding_Guide.pdf";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setTimeout(() => {
+      setDownloadStatus("valid");
+    }, 2000);
+  };
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -400,18 +437,24 @@ function App() {
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <div className="flex flex-col gap-3">
-                  <input
-                    type="email"
-                    placeholder="Enter your email to purchase"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="px-4 py-3 rounded-xl text-gray-800 border-2 border-white/30 focus:border-white focus:outline-none bg-white/90 placeholder-gray-500"
-                  />
+              {/* Conditional Purchase/Download Section */}
+              {downloadStatus === "valid" ? (
+                // Download Interface
+                <div className="flex flex-col gap-4 pt-4">
+                  <div className="bg-green-500/20 backdrop-blur-sm border border-green-300/30 rounded-xl p-4">
+                    <h3 className="text-white font-semibold mb-2">
+                      ✅ Purchase Complete!
+                    </h3>
+                    <p className="text-white/90 text-sm mb-3">
+                      Thank you for your purchase! Your Hausa Wedding Guide is
+                      ready for download.
+                    </p>
+                    <p className="text-white/80 text-xs">Sent to: {email}</p>
+                  </div>
+
                   <button
-                    onClick={handlePurchase}
-                    disabled={isProcessingPayment}
+                    onClick={handleDownload}
+                    disabled={downloadStatus === "downloading"}
                     className="inline-flex items-center justify-center px-8 py-4 bg-[#CE805C] hover:bg-[#740015] text-white font-semibold rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 group disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <svg
@@ -427,18 +470,66 @@ function App() {
                         d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                       />
                     </svg>
-                    {isProcessingPayment
-                      ? "Processing..."
-                      : "Purchase Your Guide"}
+                    {downloadStatus === "downloading"
+                      ? "Downloading..."
+                      : "Download Your Guide Now"}
                   </button>
                 </div>
-                <button
-                  onClick={() => scrollToSection("about")}
-                  className="inline-flex items-center justify-center px-6 py-4 border-2 border-white/80 text-white font-semibold rounded-2xl hover:bg-white hover:text-[#990200] transition-all duration-300 backdrop-blur-sm"
-                >
-                  Explore Contents
-                </button>
-              </div>
+              ) : downloadStatus === "expired" ? (
+                // Expired Token
+                <div className="flex flex-col gap-4 pt-4">
+                  <div className="bg-red-500/20 backdrop-blur-sm border border-red-300/30 rounded-xl p-4">
+                    <h3 className="text-white font-semibold mb-2">
+                      ⚠️ Download Link Expired
+                    </h3>
+                    <p className="text-white/90 text-sm">
+                      Your download link has expired. Please contact support if
+                      you need assistance.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                // Purchase Interface (Default)
+                <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                  <div className="flex flex-col gap-3">
+                    <input
+                      type="email"
+                      placeholder="Enter your email to purchase"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="px-4 py-3 rounded-xl text-gray-800 border-2 border-white/30 focus:border-white focus:outline-none bg-white/90 placeholder-gray-500"
+                    />
+                    <button
+                      onClick={handlePurchase}
+                      disabled={isProcessingPayment}
+                      className="inline-flex items-center justify-center px-8 py-4 bg-[#CE805C] hover:bg-[#740015] text-white font-semibold rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 group disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <svg
+                        className="w-5 h-5 mr-2 group-hover:animate-bounce"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                      {isProcessingPayment
+                        ? "Processing..."
+                        : "Purchase Your Guide"}
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => scrollToSection("about")}
+                    className="inline-flex items-center justify-center px-6 py-4 border-2 border-white/80 text-white font-semibold rounded-2xl hover:bg-white hover:text-[#990200] transition-all duration-300 backdrop-blur-sm"
+                  >
+                    Explore Contents
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Right side - Hero image */}
