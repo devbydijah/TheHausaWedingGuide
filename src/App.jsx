@@ -11,9 +11,9 @@ function App() {
   const [email, setEmail] = useState("");
   const [downloadStatus, setDownloadStatus] = useState(null); // 'valid', 'expired', 'downloading', null
 
-  // Paystack storefront URL - Replace with your actual storefront URL
+  // Paystack storefront URL - Live store for Hausa Wedding Guide
   const PAYSTACK_STOREFRONT_URL =
-    "https://paystack.com/pay/your-storefront-code";
+    "https://paystack.shop/hausaroom-wedding-guide";
 
   // Check for download token in URL
   useEffect(() => {

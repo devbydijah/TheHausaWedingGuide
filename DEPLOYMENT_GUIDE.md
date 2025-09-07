@@ -20,14 +20,15 @@ Set your Paystack webhook URL to:
 https://hausaroom.ng/wc-api/Tbz_WC_Paystack_Webhook/
 ```
 
-### 3. Update Storefront URL
+### 3. Storefront URL ✅ CONFIGURED
 
-In `src/App.jsx`, update the `PAYSTACK_STOREFRONT_URL` constant with your actual Paystack storefront URL:
+The Paystack storefront URL has been set to:
 
 ```javascript
-const PAYSTACK_STOREFRONT_URL =
-  "https://paystack.com/pay/your-actual-storefront-code";
+const PAYSTACK_STOREFRONT_URL = "https://paystack.shop/hausaroom-wedding-guide";
 ```
+
+✅ This is already configured in `src/App.jsx`
 
 ## 📋 How It Works
 
