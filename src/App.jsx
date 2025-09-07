@@ -9,8 +9,10 @@ function App() {
   const [isPageLoading, setIsPageLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [email, setEmail] = useState("");
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [downloadStatus, setDownloadStatus] = useState(null); // 'valid', 'expired', 'downloading', null
+
+  // Paystack storefront URL - Replace with your actual storefront URL
+  const PAYSTACK_STOREFRONT_URL = "https://paystack.com/pay/your-storefront-code";
 
   // Check for download token in URL
   useEffect(() => {
@@ -130,39 +132,9 @@ function App() {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handlePurchase = async () => {
-    if (!email) {
-      alert("Please enter your email address");
-      return;
-    }
-
-    setIsProcessingPayment(true);
-    try {
-      const res = await fetch("/api/initialize-payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, amount: 100000 }), // 1000 Naira in kobo
-      });
-
-      // Check if response is empty or not JSON
-      const contentType = res.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error(
-          "Server returned invalid response. API endpoint may not exist."
-        );
-      }
-
-      const data = await res.json();
-      if (!res.ok)
-        throw new Error(data.error || "Payment initialization failed");
-
-      // Redirect to Paystack
-      window.location.href = data.authorization_url;
-    } catch (err) {
-      console.error("Payment error:", err);
-      alert("Payment failed: " + err.message);
-      setIsProcessingPayment(false);
-    }
+  const handleBuyNow = () => {
+    // Redirect to Paystack storefront
+    window.open(PAYSTACK_STOREFRONT_URL, '_blank');
   };
 
   const faqs = [
@@ -421,6 +393,12 @@ function App() {
                   guidance, and authentic cultural customs is ready for you.
                 </p>
 
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 max-w-lg">
+                  <p className="text-white/80 text-sm">
+                    <strong className="text-[#CE805C]">How it works:</strong> Click "Buy Now" → Complete payment on our secure Paystack store → Receive download link in your email
+                  </p>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4 max-w-md">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-[#CE805C]">
@@ -489,39 +467,27 @@ function App() {
                   </div>
                 </div>
               ) : (
-                // Purchase Interface (Default)
+                // Purchase Interface (Default) - Paystack Storefront
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                  <div className="flex flex-col gap-3">
-                    <input
-                      type="email"
-                      placeholder="Enter your email to purchase"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="px-4 py-3 rounded-xl text-gray-800 border-2 border-white/30 focus:border-white focus:outline-none bg-white/90 placeholder-gray-500"
-                    />
-                    <button
-                      onClick={handlePurchase}
-                      disabled={isProcessingPayment}
-                      className="inline-flex items-center justify-center px-8 py-4 bg-[#CE805C] hover:bg-[#740015] text-white font-semibold rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 group disabled:opacity-50 disabled:cursor-not-allowed"
+                  <button
+                    onClick={handleBuyNow}
+                    className="inline-flex items-center justify-center px-8 py-4 bg-[#CE805C] hover:bg-[#740015] text-white font-semibold rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 group"
+                  >
+                    <svg
+                      className="w-5 h-5 mr-2 group-hover:animate-bounce"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
                     >
-                      <svg
-                        className="w-5 h-5 mr-2 group-hover:animate-bounce"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                      </svg>
-                      {isProcessingPayment
-                        ? "Processing..."
-                        : "Purchase Your Guide"}
-                    </button>
-                  </div>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13v8a2 2 0 002 2h6a2 2 0 002-2v-8M9 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H9a2 2 0 01-2-2V5z"
+                      />
+                    </svg>
+                    Buy Your Guide Now
+                  </button>
                   <button
                     onClick={() => scrollToSection("about")}
                     className="inline-flex items-center justify-center px-6 py-4 border-2 border-white/80 text-white font-semibold rounded-2xl hover:bg-white hover:text-[#990200] transition-all duration-300 backdrop-blur-sm"
@@ -945,40 +911,27 @@ function App() {
             </div>
 
             <div className="space-y-4">
-              <div className="flex flex-col gap-3">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="px-4 py-3 rounded-xl text-gray-800 border-2 border-gray-200 focus:border-[#CE805C] focus:outline-none"
-                />
-                <button
-                  onClick={handlePurchase}
-                  disabled={isProcessingPayment}
-                  className="inline-flex items-center px-8 py-4 bg-[#CE805C] hover:bg-[#740015] text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              <button
+                onClick={handleBuyNow}
+                className="inline-flex items-center px-8 py-4 bg-[#CE805C] hover:bg-[#740015] text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-lg"
+              >
+                <svg
+                  className="w-6 h-6 mr-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  <svg
-                    className="w-6 h-6 mr-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                  {isProcessingPayment
-                    ? "Processing..."
-                    : "Purchase Your Complete Guide"}
-                </button>
-              </div>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13v8a2 2 0 002 2h6a2 2 0 002-2v-8M9 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H9a2 2 0 01-2-2V5z"
+                  />
+                </svg>
+                Get Your Complete Guide Now
+              </button>
               <p className="text-sm text-gray-600">
-                💝 Your authentic Hausa wedding planning resource is ready to
-                download
+                💝 Click to visit our secure Paystack store and get instant access
               </p>
             </div>
           </div>
