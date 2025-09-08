@@ -327,12 +327,26 @@ function App() {
 
                 {/* Access Guide Button */}
                 <div className="flex items-center gap-2">
+                  <input
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#CE805C] min-w-[180px]"
+                  />
                   <button
-                    onClick={handleBuyNow}
-                    className="px-3 sm:px-4 md:px-6 py-3 md:py-3 bg-[#CE805C] hover:bg-[#740015] text-white text-sm sm:text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                    onClick={handlePurchase}
+                    disabled={isProcessingPayment}
+                    className="px-3 sm:px-4 md:px-6 py-3 md:py-3 bg-[#CE805C] hover:bg-[#740015] text-white text-sm sm:text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 min-h-[44px] min-w-[44px] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <span className="hidden sm:inline">Buy Guide</span>
-                    <span className="sm:hidden">Buy</span>
+                    {isProcessingPayment ? (
+                      <span>Processing...</span>
+                    ) : (
+                      <>
+                        <span className="hidden sm:inline">Purchase Guide</span>
+                        <span className="sm:hidden">Purchase</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
