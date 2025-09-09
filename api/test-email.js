@@ -20,16 +20,29 @@ export default async function handler(req, res) {
       return res.status(405).json({ error: "Method not allowed" });
     }
 
-    const q = req.query || {};
-    const to = q.to;
-    const token = q.token;
-    const providedLink = q.link;
+    // Robust query parsing (works even if req.query is unavailable)
+    const origin = req.headers.host?.startsWith("localhost")
+      ? "http://" + req.headers.host
+      : "https://" + req.headers.host;
+    const u = new URL(req.url, origin);
+    const to = u.searchParams.get("to");
+    const token = u.searchParams.get("token");
+    const providedLink = u.searchParams.get("link");
 
     const shared = process.env.TEST_EMAIL_TOKEN;
-    if (!shared) {
+    const resendKey = process.env.RESEND_API_KEY;
+    const fromEmail = process.env.FROM_EMAIL;
+    const missing = [];
+    if (!shared) missing.push("TEST_EMAIL_TOKEN");
+    if (!resendKey) missing.push("RESEND_API_KEY");
+    if (!fromEmail) missing.push("FROM_EMAIL");
+    if (missing.length) {
       return res.status(500).json({
-        error:
-          "TEST_EMAIL_TOKEN is not set. Add it in Vercel env to use this endpoint.",
+        ok: false,
+        error: "Missing required environment variables",
+        missing,
+        hint:
+          "Set these in Vercel → Project → Settings → Environment Variables, then redeploy.",
       });
     }
     if (!token || token !== shared) {
@@ -46,17 +59,28 @@ export default async function handler(req, res) {
     )}`;
     const downloadLink = providedLink || fallbackLink;
 
-    await sendDownloadEmail(to, downloadLink);
-
-    return res.status(200).json({
-      ok: true,
-      to,
-      downloadLink,
-      message: "Email dispatched via Resend.",
-    });
+    try {
+      await sendDownloadEmail(to, downloadLink);
+      return res.status(200).json({
+        ok: true,
+        to,
+        downloadLink,
+        message: "Email dispatched via Resend.",
+      });
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: e?.message || String(e),
+        hint:
+          "Verify RESEND_API_KEY is valid, FROM_EMAIL is a verified sender/domain in Resend, and check Resend Logs.",
+      });
+    }
   } catch (err) {
     console.error("/api/test-email error:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({
+      ok: false,
+      error: err?.message || "Internal server error",
+    });
   }
 }
 // Simple test API that bypasses Paystack verification for debugging
