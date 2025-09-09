@@ -8,11 +8,13 @@ const PUBLIC_BASE_URL = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : "http://localhost:3000";
 
-// Verify Paystack signature
-function verifySignature(rawBody, signature) {
+// Verify Paystack signature using the raw request body string
+function verifySignature(rawBodyString, signature) {
+  if (!signature || !PAYSTACK_SECRET) return false;
   const hmac = crypto.createHmac("sha512", PAYSTACK_SECRET);
-  hmac.update(rawBody);
-  return hmac.digest("hex") === signature;
+  hmac.update(rawBodyString);
+  const digest = hmac.digest("hex");
+  return digest === signature;
 }
 
 export default async function handler(req, res) {
@@ -23,9 +25,21 @@ export default async function handler(req, res) {
   try {
     // Verify webhook signature
     const signature = req.headers["x-paystack-signature"];
-    const rawBody = JSON.stringify(req.body);
+    // Compute raw body string in a resilient way (prefer rawBody when available)
+    let rawBodyString;
+    if (req.rawBody) {
+      rawBodyString = Buffer.isBuffer(req.rawBody)
+        ? req.rawBody.toString("utf8")
+        : String(req.rawBody);
+    } else if (typeof req.body === "string") {
+      rawBodyString = req.body;
+    } else if (Buffer.isBuffer(req.body)) {
+      rawBodyString = req.body.toString("utf8");
+    } else {
+      rawBodyString = JSON.stringify(req.body || {});
+    }
 
-    if (!verifySignature(rawBody, signature)) {
+    if (!verifySignature(rawBodyString, signature)) {
       console.log("Invalid signature");
       return res.status(401).json({ error: "Invalid signature" });
     }

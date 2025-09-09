@@ -28,7 +28,6 @@ export async function sendDownloadEmail(email, downloadLink) {
           <div style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 30px;">
             <p style="color: #666; font-size: 14px;">
               • This link expires in 24 hours<br>
-              • You can download the guide up to 3 times<br>
               • The link will take you to our website
             </p>
           </div>
@@ -42,7 +41,7 @@ export async function sendDownloadEmail(email, downloadLink) {
 
 Click here to download: ${downloadLink}
 
-This link expires in 24 hours and allows up to 3 downloads.
+This link expires in 24 hours.
 
 Happy wedding planning!`,
     });
