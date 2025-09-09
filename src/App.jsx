@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 function App() {
   const [openFaq, setOpenFaq] = useState(null);
@@ -10,12 +10,14 @@ function App() {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [email, setEmail] = useState("");
   const [downloadStatus, setDownloadStatus] = useState(null); // 'valid', 'expired', 'downloading', null
+  const [downloadExpires, setDownloadExpires] = useState(null); // timestamp (ms) when token expires
+  const [timeLeft, setTimeLeft] = useState("");
   const [claimMode, setClaimMode] = useState(false);
-  const [refInput, setRefInput] = useState("");
   const [claimBusy, setClaimBusy] = useState(false);
   const [claimMsg, setClaimMsg] = useState("");
   const [autoClaimTried, setAutoClaimTried] = useState(false);
   const [claimEmail, setClaimEmail] = useState("");
+  const claimInputRef = useRef(null);
 
   // Paystack storefront URLs (live and optional test). Use ?test=1 to open the test URL.
   const PROD_STOREFRONT_URL =
@@ -44,11 +46,34 @@ function App() {
       if (now < expiration) {
         setDownloadStatus("valid");
         setEmail(emailParam);
+        setDownloadExpires(expiration);
       } else {
         setDownloadStatus("expired");
+        setDownloadExpires(expiration);
       }
     }
   }, []);
+
+  // Show a live countdown while a valid token is present
+  useEffect(() => {
+    if (downloadStatus !== "valid" || !downloadExpires) return;
+    const format = (ms) => {
+      if (ms <= 0) return "00:00:00";
+      const total = Math.floor(ms / 1000);
+      const h = String(Math.floor(total / 3600)).padStart(2, "0");
+      const m = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
+      const s = String(total % 60).padStart(2, "0");
+      return `${h}:${m}:${s}`;
+    };
+    const tick = () => {
+      const msLeft = downloadExpires - Date.now();
+      setTimeLeft(format(msLeft));
+      if (msLeft <= 0) setDownloadStatus("expired");
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [downloadStatus, downloadExpires]);
 
   // Auto-claim: after redirect, show email-only claim form (no reference required)
   useEffect(() => {
@@ -61,6 +86,22 @@ function App() {
       setClaimMsg("Enter your email to receive your download link.");
     }
   }, [autoClaimTried]);
+
+  // When claim mode opens, auto-focus the email input and scroll into view
+  useEffect(() => {
+    if (claimMode) {
+      // Focus after render
+      setTimeout(() => {
+        try {
+          claimInputRef.current?.focus();
+          claimInputRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        } catch {}
+      }, 0);
+    }
+  }, [claimMode]);
 
   const handleDownload = () => {
     setDownloadStatus("downloading");
@@ -446,7 +487,13 @@ function App() {
                   <p className="text-white/80 text-sm">
                     <strong className="text-[#CE805C]">How it works:</strong>{" "}
                     Click "Buy Now" → Complete payment on our secure Paystack
-                    store → Receive download link in your email
+                    store → Receive download link in your email.
+                    <br />
+                    <span className="text-white/70">
+                      Use the same email you used at checkout. We do not
+                      manually resend download links—please save your PDF after
+                      download.
+                    </span>
                   </p>
                 </div>
 
@@ -455,13 +502,18 @@ function App() {
                     <p className="text-white/90 text-sm font-semibold">
                       Already paid? Get your download by email
                     </p>
-                    <form onSubmit={handleClaim} className="flex gap-2">
+                    <form
+                      onSubmit={handleClaim}
+                      className="flex gap-2"
+                      aria-busy={claimBusy ? "true" : "false"}
+                    >
                       <input
                         type="email"
                         value={claimEmail}
                         onChange={(e) => setClaimEmail(e.target.value)}
                         placeholder="Enter your email"
-                        className="flex-1 rounded-lg px-3 py-2 text-sm text-[#1E1E1E]"
+                        className="flex-1 rounded-lg px-3 py-2 text-sm text-[#1E1E1E] placeholder-white/80"
+                        ref={claimInputRef}
                         required
                       />
                       <button
@@ -472,12 +524,21 @@ function App() {
                         {claimBusy ? "Sending..." : "Send link"}
                       </button>
                     </form>
-                    {claimMsg && (
-                      <p className="text-white/90 text-sm">{claimMsg}</p>
-                    )}
+                    <div
+                      role="status"
+                      aria-live="polite"
+                      className="min-h-[1rem]"
+                    >
+                      {claimMsg && (
+                        <p className="text-white/90 text-sm">{claimMsg}</p>
+                      )}
+                    </div>
                     <p className="text-white/70 text-xs">
-                      We’ll match your email to a recent successful payment and
-                      send your link.
+                      Use the <strong>same email</strong> you used at checkout.
+                      We’ll match it to a recent successful payment and email
+                      your link. We{" "}
+                      <strong>do not resend links manually</strong>—please save
+                      your PDF after download.
                     </p>
                   </div>
                 )}
@@ -510,7 +571,13 @@ function App() {
                       Thank you for your purchase! Your Hausa Wedding Guide is
                       ready for download.
                     </p>
-                    <p className="text-white/80 text-xs">Sent to: {email}</p>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <p className="text-white/80 text-xs">Sent to: {email}</p>
+                      <span className="text-white/60 text-xs">•</span>
+                      <p className="text-white/80 text-xs">
+                        Expires in {timeLeft}
+                      </p>
+                    </div>
                   </div>
 
                   <button
@@ -535,6 +602,11 @@ function App() {
                       ? "Downloading..."
                       : "Download Your Guide Now"}
                   </button>
+                  <p className="text-white/70 text-xs">
+                    PDF file. Please <strong>save a copy</strong> after
+                    download. We
+                    <strong> do not resend links manually</strong>.
+                  </p>
                 </div>
               ) : downloadStatus === "expired" ? (
                 // Expired Token
@@ -544,8 +616,15 @@ function App() {
                       ⚠️ Download Link Expired
                     </h3>
                     <p className="text-white/90 text-sm">
-                      Your download link has expired. Please contact support if
-                      you need assistance.
+                      Your download link has expired. For security, links are
+                      valid for 24 hours.
+                    </p>
+                    <p className="text-white/70 text-xs mt-2">
+                      Use the email claim box above with the{" "}
+                      <strong>same email</strong> used at checkout to get a
+                      fresh link. We{" "}
+                      <strong>do not resend links manually</strong>—please save
+                      your PDF after download.
                     </p>
                   </div>
                 </div>
