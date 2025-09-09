@@ -64,7 +64,14 @@ export default async function handler(req, res) {
     }
 
     const { event, data } = req.body || {};
-    console.log("Webhook event received:", event, "status:", data?.status);
+    console.log(
+      "Webhook event received:",
+      event,
+      "status:",
+      data?.status,
+      "reference:",
+      data?.reference
+    );
 
     // Only process successful payments
     if (event === "charge.success" && data?.status === "success") {
@@ -77,19 +84,54 @@ export default async function handler(req, res) {
         })`
       );
 
-      // Generate a simple temporary token
-      const token = crypto.randomBytes(32).toString("hex");
-      const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+      // Verify transaction via Paystack API as an extra safety net (handles signature/bypass edge cases)
+      try {
+        const keyForVerify =
+          verification.mode === "live"
+            ? PAYSTACK_LIVE_SECRET || PAYSTACK_TEST_SECRET
+            : verification.mode === "test"
+              ? PAYSTACK_TEST_SECRET || PAYSTACK_LIVE_SECRET
+              : PAYSTACK_LIVE_SECRET || PAYSTACK_TEST_SECRET; // fallback
 
-      // Create download URL with token
-      const downloadLink = `${PUBLIC_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
-        email
-      )}`;
+        if (!keyForVerify) {
+          console.error("No Paystack secret available for verification");
+          return res.status(500).json({ error: "Server not configured" });
+        }
 
-      // Send email with download link using Resend
-      await sendDownloadEmail(email, downloadLink);
+        const resp = await fetch(
+          `https://api.paystack.co/transaction/verify/${encodeURIComponent(
+            reference || ""
+          )}`,
+          {
+            headers: {
+              Authorization: `Bearer ${keyForVerify}`,
+              Accept: "application/json",
+            },
+          }
+        );
+        const verifyJson = await resp.json();
+        if (!resp.ok || verifyJson?.data?.status !== "success") {
+          console.error("Paystack verify failed", verifyJson);
+          return res.status(400).json({ error: "Verification failed" });
+        }
 
-      console.log("Download email sent successfully to:", email);
+        // Generate a simple temporary token
+        const token = crypto.randomBytes(32).toString("hex");
+        const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+
+        // Create download URL with token
+        const downloadLink = `${PUBLIC_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
+          email
+        )}`;
+
+        // Send email with download link using Resend
+        await sendDownloadEmail(email, downloadLink);
+
+        console.log("Download email sent successfully to:", email);
+      } catch (e) {
+        console.error("Error verifying/sending email:", e);
+        return res.status(500).json({ error: "Verification/email failed" });
+      }
     }
 
     res.status(200).json({ received: true });
