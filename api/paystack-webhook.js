@@ -1,6 +1,6 @@
 // Simple Paystack webhook that sends download links via email using Resend
 import crypto from "crypto";
-import { sendDownloadEmail } from "./email.js";
+import { sendDownloadEmail } from "../lib/email.js";
 
 // Environment variables
 const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET_KEY;
