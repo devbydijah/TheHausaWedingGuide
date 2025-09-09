@@ -15,6 +15,7 @@ function App() {
   const [claimBusy, setClaimBusy] = useState(false);
   const [claimMsg, setClaimMsg] = useState("");
   const [autoClaimTried, setAutoClaimTried] = useState(false);
+  const [claimEmail, setClaimEmail] = useState("");
 
   // Paystack storefront URLs (live and optional test). Use ?test=1 to open the test URL.
   const PROD_STOREFRONT_URL =
@@ -49,50 +50,15 @@ function App() {
     }
   }, []);
 
-  // Auto-claim: if redirected from Paystack with a reference, verify without manual input
+  // Auto-claim: after redirect, show email-only claim form (no reference required)
   useEffect(() => {
     const url = new URL(window.location.href);
     const params = url.searchParams;
-    const ref =
-      params.get("reference") || params.get("trxref") || params.get("ref");
     const claimFlag = params.get("claim");
-    if (!autoClaimTried && (ref || claimFlag === "1")) {
+    if (!autoClaimTried && claimFlag === "1") {
       setAutoClaimTried(true);
-      // If we have a reference, auto submit; otherwise, show claim UI
-      if (ref) {
-        setClaimMode(true);
-        setRefInput(ref);
-        // Fire and forget; messages show in UI
-        (async () => {
-          try {
-            setClaimBusy(true);
-            setClaimMsg("Verifying your payment…");
-            const resp = await fetch("/api/verify-and-email", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ reference: ref }),
-            });
-            const json = await resp.json();
-            if (!resp.ok || !json?.ok) {
-              setClaimMsg(
-                json?.error ||
-                  "Verification failed. Please paste your reference."
-              );
-              return;
-            }
-            setClaimMsg(
-              `Verified in ${json.mode} mode. We emailed a link to ${json.email}.`
-            );
-          } catch (e) {
-            setClaimMsg("Network error. Please try again.");
-          } finally {
-            setClaimBusy(false);
-          }
-        })();
-      } else if (claimFlag === "1") {
-        setClaimMode(true);
-        setClaimMsg("Enter your Paystack reference to receive your link.");
-      }
+      setClaimMode(true);
+      setClaimMsg("Enter your email to receive your download link.");
     }
   }, [autoClaimTried]);
 
@@ -115,27 +81,26 @@ function App() {
   const handleClaim = async (e) => {
     e.preventDefault();
     setClaimMsg("");
-    if (!refInput.trim()) {
-      setClaimMsg("Enter your Paystack reference");
+    const emailToSend = claimEmail.trim();
+    if (!emailToSend || !emailToSend.includes("@")) {
+      setClaimMsg("Enter a valid email address");
       return;
     }
     try {
       setClaimBusy(true);
-      const resp = await fetch("/api/verify-and-email", {
+      const resp = await fetch("/api/claim-by-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reference: refInput.trim() }),
+        body: JSON.stringify({ email: emailToSend }),
       });
       const json = await resp.json();
       if (!resp.ok || !json?.ok) {
         setClaimMsg(
-          json?.error || "Verification failed. Check your reference."
+          json?.error || "We couldn't find a recent payment for this email."
         );
         return;
       }
-      setClaimMsg(
-        `Verified in ${json.mode} mode. We emailed a link to ${json.email}.`
-      );
+      setClaimMsg(`We emailed a link to ${json.email}.`);
     } catch (err) {
       setClaimMsg("Network error. Try again.");
     } finally {
@@ -488,29 +453,31 @@ function App() {
                 {claimMode && (
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 max-w-lg space-y-3 border border-white/10">
                     <p className="text-white/90 text-sm font-semibold">
-                      Already paid? Claim your download
+                      Already paid? Get your download by email
                     </p>
                     <form onSubmit={handleClaim} className="flex gap-2">
                       <input
-                        type="text"
-                        value={refInput}
-                        onChange={(e) => setRefInput(e.target.value)}
-                        placeholder="Enter Paystack reference"
+                        type="email"
+                        value={claimEmail}
+                        onChange={(e) => setClaimEmail(e.target.value)}
+                        placeholder="Enter your email"
                         className="flex-1 rounded-lg px-3 py-2 text-sm text-[#1E1E1E]"
+                        required
                       />
                       <button
                         type="submit"
                         disabled={claimBusy}
                         className="px-4 py-2 bg-[#CE805C] text-white rounded-lg disabled:opacity-60"
                       >
-                        {claimBusy ? "Verifying..." : "Verify"}
+                        {claimBusy ? "Sending..." : "Send link"}
                       </button>
                     </form>
                     {claimMsg && (
                       <p className="text-white/90 text-sm">{claimMsg}</p>
                     )}
                     <p className="text-white/70 text-xs">
-                      Tip: You’ll find the reference on your Paystack receipt.
+                      We’ll match your email to a recent successful payment and
+                      send your link.
                     </p>
                   </div>
                 )}
