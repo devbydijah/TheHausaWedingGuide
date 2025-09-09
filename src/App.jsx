@@ -11,9 +11,17 @@ function App() {
   const [email, setEmail] = useState("");
   const [downloadStatus, setDownloadStatus] = useState(null); // 'valid', 'expired', 'downloading', null
 
-  // Paystack storefront URL - Live store for Hausa Wedding Guide
-  const PAYSTACK_STOREFRONT_URL =
+  // Paystack storefront URLs (live and optional test). Use ?test=1 to open the test URL.
+  const PROD_STOREFRONT_URL =
+    import.meta.env.VITE_PAYSTACK_STOREFRONT_URL ||
     "https://paystack.shop/hausaroom-wedding-guide";
+  const TEST_STOREFRONT_URL =
+    import.meta.env.VITE_PAYSTACK_STOREFRONT_TEST_URL || PROD_STOREFRONT_URL;
+  const urlParamsForStore = new URLSearchParams(window.location.search);
+  const USE_TEST_STOREFRONT = urlParamsForStore.has("test");
+  const STOREFRONT_URL = USE_TEST_STOREFRONT
+    ? TEST_STOREFRONT_URL
+    : PROD_STOREFRONT_URL;
 
   // Check for download token in URL
   useEffect(() => {
@@ -134,8 +142,8 @@ function App() {
   };
 
   const handleBuyNow = () => {
-    // Redirect to Paystack storefront
-    window.open(PAYSTACK_STOREFRONT_URL, "_blank");
+    // Redirect to Paystack storefront (test URL when ?test=1)
+    window.open(STOREFRONT_URL, "_blank");
   };
 
   const faqs = [
@@ -369,6 +377,11 @@ function App() {
                   <span className="w-2 h-2 bg-[#CE805C] rounded-full mr-2 animate-pulse"></span>
                   Welcome to Your Wedding Guide
                 </div>
+                {USE_TEST_STOREFRONT && (
+                  <div className="px-4 py-2 bg-yellow-500/20 border border-yellow-400/40 text-yellow-200 rounded-lg text-sm max-w-lg">
+                    Test mode: Buy button opens Paystack TEST storefront.
+                  </div>
+                )}
                 <h1 className="font-playfair text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
                   Your Complete
                   <br />

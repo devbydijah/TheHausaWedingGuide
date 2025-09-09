@@ -2,19 +2,29 @@
 import crypto from "crypto";
 import { sendDownloadEmail } from "../lib/email.js";
 
-// Environment variables
-const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET_KEY;
+// Environment variables (support both test and live secrets)
+const PAYSTACK_TEST_SECRET = process.env.PAYSTACK_TEST_SECRET_KEY || null;
+const PAYSTACK_LIVE_SECRET = process.env.PAYSTACK_SECRET_KEY || null;
 const PUBLIC_BASE_URL = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : "http://localhost:3000";
 
 // Verify Paystack signature using the raw request body string
+// Tries both TEST and LIVE secrets when available to support a single URL for both modes
 function verifySignature(rawBodyString, signature) {
-  if (!signature || !PAYSTACK_SECRET) return false;
-  const hmac = crypto.createHmac("sha512", PAYSTACK_SECRET);
-  hmac.update(rawBodyString);
-  const digest = hmac.digest("hex");
-  return digest === signature;
+  if (!signature) return { ok: false, mode: null };
+  const candidates = [
+    { key: PAYSTACK_TEST_SECRET, mode: "test" },
+    { key: PAYSTACK_LIVE_SECRET, mode: "live" },
+  ].filter((c) => !!c.key);
+
+  for (const c of candidates) {
+    const hmac = crypto.createHmac("sha512", c.key);
+    hmac.update(rawBodyString);
+    const digest = hmac.digest("hex");
+    if (digest === signature) return { ok: true, mode: c.mode };
+  }
+  return { ok: false, mode: null };
 }
 
 export default async function handler(req, res) {
@@ -39,7 +49,8 @@ export default async function handler(req, res) {
       rawBodyString = JSON.stringify(req.body || {});
     }
 
-    if (!verifySignature(rawBodyString, signature)) {
+    const verification = verifySignature(rawBodyString, signature);
+    if (!verification.ok) {
       console.log("Invalid signature");
       return res.status(401).json({ error: "Invalid signature" });
     }
@@ -51,7 +62,9 @@ export default async function handler(req, res) {
       const email = data.customer.email;
       const reference = data.reference;
 
-      console.log("Processing successful payment for:", email);
+      console.log(
+        `Processing successful payment for: ${email} (mode: ${verification.mode})`
+      );
 
       // Generate a simple temporary token
       const token = crypto.randomBytes(32).toString("hex");
