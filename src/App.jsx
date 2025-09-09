@@ -10,6 +10,10 @@ function App() {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [email, setEmail] = useState("");
   const [downloadStatus, setDownloadStatus] = useState(null); // 'valid', 'expired', 'downloading', null
+  const [claimMode, setClaimMode] = useState(false);
+  const [refInput, setRefInput] = useState("");
+  const [claimBusy, setClaimBusy] = useState(false);
+  const [claimMsg, setClaimMsg] = useState("");
 
   // Paystack storefront URLs (live and optional test). Use ?test=1 to open the test URL.
   const PROD_STOREFRONT_URL =
@@ -29,6 +33,7 @@ function App() {
     const downloadToken = urlParams.get("download");
     const expires = urlParams.get("expires");
     const emailParam = urlParams.get("email");
+    if (urlParams.get("claim") === "1") setClaimMode(true);
 
     if (downloadToken && expires && emailParam) {
       const now = Date.now();
@@ -57,6 +62,37 @@ function App() {
     setTimeout(() => {
       setDownloadStatus("valid");
     }, 2000);
+  };
+
+  const handleClaim = async (e) => {
+    e.preventDefault();
+    setClaimMsg("");
+    if (!refInput.trim()) {
+      setClaimMsg("Enter your Paystack reference");
+      return;
+    }
+    try {
+      setClaimBusy(true);
+      const resp = await fetch("/api/verify-and-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reference: refInput.trim() }),
+      });
+      const json = await resp.json();
+      if (!resp.ok || !json?.ok) {
+        setClaimMsg(
+          json?.error || "Verification failed. Check your reference."
+        );
+        return;
+      }
+      setClaimMsg(
+        `Verified in ${json.mode} mode. We emailed a link to ${json.email}.`
+      );
+    } catch (err) {
+      setClaimMsg("Network error. Try again.");
+    } finally {
+      setClaimBusy(false);
+    }
   };
 
   const toggleFaq = (index) => {
@@ -400,6 +436,36 @@ function App() {
                     store → Receive download link in your email
                   </p>
                 </div>
+
+                {claimMode && (
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 max-w-lg space-y-3 border border-white/10">
+                    <p className="text-white/90 text-sm font-semibold">
+                      Already paid? Claim your download
+                    </p>
+                    <form onSubmit={handleClaim} className="flex gap-2">
+                      <input
+                        type="text"
+                        value={refInput}
+                        onChange={(e) => setRefInput(e.target.value)}
+                        placeholder="Enter Paystack reference"
+                        className="flex-1 rounded-lg px-3 py-2 text-sm text-[#1E1E1E]"
+                      />
+                      <button
+                        type="submit"
+                        disabled={claimBusy}
+                        className="px-4 py-2 bg-[#CE805C] text-white rounded-lg disabled:opacity-60"
+                      >
+                        {claimBusy ? "Verifying..." : "Verify"}
+                      </button>
+                    </form>
+                    {claimMsg && (
+                      <p className="text-white/90 text-sm">{claimMsg}</p>
+                    )}
+                    <p className="text-white/70 text-xs">
+                      Tip: You’ll find the reference on your Paystack receipt.
+                    </p>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-4 max-w-md">
                   <div className="text-center">
