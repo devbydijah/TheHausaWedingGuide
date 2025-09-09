@@ -8,6 +8,8 @@ const PAYSTACK_LIVE_SECRET = process.env.PAYSTACK_SECRET_KEY || null;
 const PUBLIC_BASE_URL = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : "http://localhost:3000";
+const WEBHOOK_TEST_BYPASS =
+  (process.env.PAYSTACK_WEBHOOK_TEST_BYPASS || "").toLowerCase() === "true";
 
 // Verify Paystack signature using the raw request body string
 // Tries both TEST and LIVE secrets when available to support a single URL for both modes
@@ -51,19 +53,28 @@ export default async function handler(req, res) {
 
     const verification = verifySignature(rawBodyString, signature);
     if (!verification.ok) {
-      console.log("Invalid signature");
-      return res.status(401).json({ error: "Invalid signature" });
+      if (WEBHOOK_TEST_BYPASS) {
+        console.warn(
+          "Paystack signature invalid, but PAYSTACK_WEBHOOK_TEST_BYPASS=true — continuing in TEST mode"
+        );
+      } else {
+        console.log("Invalid signature");
+        return res.status(401).json({ error: "Invalid signature" });
+      }
     }
 
-    const { event, data } = req.body;
+    const { event, data } = req.body || {};
+    console.log("Webhook event received:", event, "status:", data?.status);
 
     // Only process successful payments
-    if (event === "charge.success" && data.status === "success") {
-      const email = data.customer.email;
-      const reference = data.reference;
+    if (event === "charge.success" && data?.status === "success") {
+      const email = data?.customer?.email;
+      const reference = data?.reference;
 
       console.log(
-        `Processing successful payment for: ${email} (mode: ${verification.mode})`
+        `Processing successful payment for: ${email} (mode: ${
+          verification.mode || (WEBHOOK_TEST_BYPASS ? "test-bypass" : "unknown")
+        })`
       );
 
       // Generate a simple temporary token
