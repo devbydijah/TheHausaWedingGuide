@@ -580,6 +580,35 @@ function App() {
                     </div>
                   </div>
 
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex items-center text-white/80 text-xs bg-white/10 rounded-full px-3 py-1">
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        className="mr-1"
+                      >
+                        <path
+                          d="M12 8v5l3 3"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="9"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        />
+                      </svg>
+                      Expires in {timeLeft}
+                    </span>
+                    <span className="text-white/70 text-xs">PDF • ~3 MB</span>
+                  </div>
+
                   <button
                     onClick={handleDownload}
                     disabled={downloadStatus === "downloading"}
