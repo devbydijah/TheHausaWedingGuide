@@ -14,6 +14,7 @@ function App() {
   const [refInput, setRefInput] = useState("");
   const [claimBusy, setClaimBusy] = useState(false);
   const [claimMsg, setClaimMsg] = useState("");
+  const [autoClaimTried, setAutoClaimTried] = useState(false);
 
   // Paystack storefront URLs (live and optional test). Use ?test=1 to open the test URL.
   const PROD_STOREFRONT_URL =
@@ -47,6 +48,53 @@ function App() {
       }
     }
   }, []);
+
+  // Auto-claim: if redirected from Paystack with a reference, verify without manual input
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
+    const ref =
+      params.get("reference") || params.get("trxref") || params.get("ref");
+    const claimFlag = params.get("claim");
+    if (!autoClaimTried && (ref || claimFlag === "1")) {
+      setAutoClaimTried(true);
+      // If we have a reference, auto submit; otherwise, show claim UI
+      if (ref) {
+        setClaimMode(true);
+        setRefInput(ref);
+        // Fire and forget; messages show in UI
+        (async () => {
+          try {
+            setClaimBusy(true);
+            setClaimMsg("Verifying your payment…");
+            const resp = await fetch("/api/verify-and-email", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ reference: ref }),
+            });
+            const json = await resp.json();
+            if (!resp.ok || !json?.ok) {
+              setClaimMsg(
+                json?.error ||
+                  "Verification failed. Please paste your reference."
+              );
+              return;
+            }
+            setClaimMsg(
+              `Verified in ${json.mode} mode. We emailed a link to ${json.email}.`
+            );
+          } catch (e) {
+            setClaimMsg("Network error. Please try again.");
+          } finally {
+            setClaimBusy(false);
+          }
+        })();
+      } else if (claimFlag === "1") {
+        setClaimMode(true);
+        setClaimMsg("Enter your Paystack reference to receive your link.");
+      }
+    }
+  }, [autoClaimTried]);
 
   const handleDownload = () => {
     setDownloadStatus("downloading");

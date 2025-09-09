@@ -75,7 +75,6 @@ export default async function handler(req, res) {
 
     // Only process successful payments
     if (event === "charge.success" && data?.status === "success") {
-      const email = data?.customer?.email;
       const reference = data?.reference;
 
       console.log(
@@ -115,19 +114,27 @@ export default async function handler(req, res) {
           return res.status(400).json({ error: "Verification failed" });
         }
 
+        // Prefer the email returned by Paystack verify API to avoid spoofing
+        const verifiedEmail =
+          verifyJson?.data?.customer?.email || data?.customer?.email;
+        if (!verifiedEmail) {
+          console.error("No customer email available after verification");
+          return res.status(400).json({ error: "No customer email available" });
+        }
+
         // Generate a simple temporary token
         const token = crypto.randomBytes(32).toString("hex");
         const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
         // Create download URL with token
         const downloadLink = `${PUBLIC_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
-          email
+          verifiedEmail
         )}`;
 
         // Send email with download link using Resend
-        await sendDownloadEmail(email, downloadLink);
+        await sendDownloadEmail(verifiedEmail, downloadLink);
 
-        console.log("Download email sent successfully to:", email);
+        console.log("Download email sent successfully to:", verifiedEmail);
       } catch (e) {
         console.error("Error verifying/sending email:", e);
         return res.status(500).json({ error: "Verification/email failed" });
