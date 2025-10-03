@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const { rateLimit } = require("../lib/rateLimit");
 const { maskEmail, logger } = require("../lib/logger");
+const { tokenDB } = require("../lib/database.cjs");
 
 module.exports = rateLimit(async (req, res) => {
   const { token, expires, email, sig } = req.query;
@@ -30,7 +31,11 @@ module.exports = rateLimit(async (req, res) => {
     return res.status(401).json({ error: "Invalid signature" });
   }
 
-  // TODO: (Future) Increment download counter in database here, check limit
+  // Check token validity and decrement download count
+  if (!tokenDB.validateAndDecrement(token)) {
+    logger.warn("Token validation failed for email:", email);
+    return res.status(401).json({ error: "Invalid or expired token" });
+  }
 
   // Stream the PDF file to the client
   const filePath = path.join(
@@ -41,6 +46,8 @@ module.exports = rateLimit(async (req, res) => {
   if (!fs.existsSync(filePath)) {
     return res.status(500).json({ error: "Guide not found on server" });
   }
+
+  logger.infoWithEmail("PDF download successful for:", email);
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader(
     "Content-Disposition",

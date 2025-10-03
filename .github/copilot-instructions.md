@@ -72,6 +72,7 @@ VERCEL_URL; // auto-populated by Vercel
 - `rateLimit.js` - In-memory rate limiting per IP (token bucket)
 - `logger.js` - PII-safe logging with email masking
 - `email.js` - Email service with masked logging
+- `database.cjs` - SQLite database operations for token persistence
 
 ### Database Schema (`sql/complete_setup.sql`)
 
@@ -83,6 +84,19 @@ CREATE TABLE public.sales (
     downloads INTEGER DEFAULT 0,      -- download count tracking (not implemented)
     max_downloads INTEGER DEFAULT 3,  -- download limit (not implemented)
     created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### SQLite Database (`downloads.db`)
+
+```sql
+CREATE TABLE tokens (
+    email TEXT NOT NULL,
+    token TEXT PRIMARY KEY,
+    expires_at INTEGER NOT NULL,
+    downloads_remaining INTEGER NOT NULL DEFAULT 3,
+    created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000),
+    last_download_at INTEGER
 );
 ```
 
@@ -108,7 +122,8 @@ vercel dev       # Local Vercel serverless environment testing
    - Events: `charge.success`
    - Raw body access required for signature verification
 
-3. **PDF Upload**: Place `Hausa_Wedding_Guide.pdf` in `/public/` directory
+3. **Database Setup**: SQLite database (`downloads.db`) is auto-created on first run
+4. **PDF Upload**: Place `Hausa_Wedding_Guide.pdf` in `/public/` directory
 
 ## Testing Flow
 
@@ -176,8 +191,10 @@ src/           # React application
 - Email claim flow bypasses payment for support scenarios
 - Supabase integration partially implemented but may be deprecated
 - PDF served with `noopen` header to prevent browser auto-opening
-- Database tracking for downloads is not currently implemented
-- `validate-token.js` is empty - token validation happens client-side only
+- **NEW:** SQLite database (`downloads.db`) auto-creates on first run
+- **NEW:** Download limits enforced (3 downloads per token)
+- Database tracking for downloads is now fully implemented
+- `validate-token.js` returns database-backed status (`valid`|`expired`|`invalid`|`limit_reached`)
 - **NEW:** HMAC signatures required for all download URLs (`sig` parameter)
 - **NEW:** Rate limiting applied to download endpoints (60 requests/minute per IP)
 - **NEW:** All logging masks email addresses for PII compliance

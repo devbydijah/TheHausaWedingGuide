@@ -1,5 +1,6 @@
 // File: api/validate-token.js
 const crypto = require("crypto");
+const { tokenDB } = require("../lib/database.cjs");
 
 module.exports = async (req, res) => {
   const { token, expires, email, sig } = req.query;
@@ -26,8 +27,7 @@ module.exports = async (req, res) => {
     return res.status(200).json({ status: "invalid" });
   }
 
-  // (Future) Here you could check download count against a limit
-  // e.g., if (downloads >= maxDownloads) return { status: 'limit_reached' }
-
-  return res.status(200).json({ status: "valid" });
+  // Check token status in database
+  const status = tokenDB.getTokenStatus(token);
+  return res.status(200).json({ status });
 };

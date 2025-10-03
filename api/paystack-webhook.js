@@ -1,6 +1,7 @@
 // Simple Paystack webhook that sends download links via email using Resend
 import crypto from "crypto";
 import { sendDownloadEmail } from "../lib/email.js";
+import { tokenDB } from "../lib/database.cjs";
 
 // Environment variables (support both test and live secrets)
 const PAYSTACK_TEST_SECRET = process.env.PAYSTACK_TEST_SECRET_KEY || null;
@@ -132,6 +133,15 @@ export default async function handler(req, res) {
         const hmac = crypto.createHmac("sha256", SECRET);
         hmac.update(`${token}|${verifiedEmail}|${expires}`);
         const sig = hmac.digest("hex");
+
+        // Store token in database
+        const stored = tokenDB.storeToken(verifiedEmail, token, expires, 3); // 3 downloads allowed
+        if (!stored) {
+          console.error("Failed to store token in database");
+          return res
+            .status(500)
+            .json({ error: "Failed to create download token" });
+        }
 
         // Create download URL with token and signature
         const downloadLink = `${PUBLIC_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
