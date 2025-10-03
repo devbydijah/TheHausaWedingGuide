@@ -1,8 +1,9 @@
 // File: api/validate-token.js
 const crypto = require("crypto");
 const { tokenDB } = require("../lib/database.cjs");
+const { rateLimit } = require("../lib/rateLimit.js");
 
-module.exports = async (req, res) => {
+module.exports = rateLimit(async (req, res) => {
   const { token, expires, email, sig } = req.query;
   if (!token || !expires || !email || !sig) {
     return res
@@ -30,4 +31,4 @@ module.exports = async (req, res) => {
   // Check token status in database
   const status = tokenDB.getTokenStatus(token);
   return res.status(200).json({ status });
-};
+});

@@ -1,72 +1,55 @@
-# Clean Supabase Setup Guide
+# Database Setup Guide
 
-## Step 1: Run SQL Setup in Supabase
+This guide covers setting up the SQLite database for the Hausa Wedding Guide application.
 
-1. Go to your Supabase project dashboard
-2. Navigate to SQL Editor
-3. Copy and paste the contents of `/sql/setup.sql`
-4. Click "Run" to execute the setup
+## Overview
 
-This will create:
+The application uses SQLite with better-sqlite3 for persistent storage of download tokens. The database auto-creates on first run and requires no manual setup.
 
-- ✅ `sales` table with proper structure
-- ✅ Row Level Security policies
-- ✅ Storage bucket and policies
-- ✅ Performance indexes
+## Database Schema
 
-## Step 2: Upload PDF to Storage
+The `downloads.db` file contains a `tokens` table:
 
-1. Go to Supabase Storage
-2. Navigate to the `private` bucket
-3. Upload your `Hausa_Wedding_Guide.pdf` file
-4. Make sure it's in the root of the bucket
-
-## Step 3: Verify Environment Variables
-
-Make sure these are set in your Vercel project:
-
-```
-SUPABASE_URL=https://govkdzssysvyivpgskrw.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-SUPABASE_STORAGE_BUCKET=private
-RESEND_API_KEY=re_your_resend_key
-PAYSTACK_SECRET=sk_test_your_paystack_key
-PUBLIC_BASE_URL=https://your-vercel-domain.vercel.app
+```sql
+CREATE TABLE tokens (
+    email TEXT NOT NULL,
+    token TEXT PRIMARY KEY,
+    expires_at INTEGER NOT NULL,
+    downloads_remaining INTEGER NOT NULL DEFAULT 3,
+    created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000),
+    last_download_at INTEGER
+);
 ```
 
-## Step 4: Test the Setup
+## Automatic Setup
 
-After completing steps 1-3, visit:
-`https://your-vercel-domain.vercel.app/api/test-setup`
+The database and tables are created automatically when the application starts. No manual intervention is required.
 
-This will verify:
+## Environment Variables
 
-- ✅ Database connection
-- ✅ Sales table exists
-- ✅ Storage bucket access
-- ✅ Email configuration
+No additional environment variables are needed for the database. The SQLite file (`downloads.db`) is created in the project root.
 
-## Step 5: Test Complete Flow
+## Backup
 
-1. Visit your main site
-2. Enter an email address
-3. Click "Get Instant Access"
-4. Complete Paystack payment with test card
-5. You should receive both:
-   - Payment confirmation from Paystack
-   - Download instructions via email from your system
+To backup the database:
+
+```bash
+cp downloads.db downloads.backup.db
+```
+
+## Migration (if needed)
+
+If you need to modify the schema, update the database initialization code in `lib/database.cjs`.
+
+## Troubleshooting
+
+- **Permission issues**: Ensure the application has write permissions to create `downloads.db`
+- **Corruption**: Delete `downloads.db` and restart the app (tokens will be lost)
+- **Performance**: SQLite is suitable for this low-traffic application
 
 ---
 
-## What's Changed
-
-- ❌ Removed Supabase Edge Functions (simpler setup)
-- ✅ Direct Resend API integration
-- ✅ Clean, single SQL setup file
-- ✅ Proper error handling and logging
-- ✅ Test endpoint to verify setup
-
-## Files Created/Updated
+**Note**: This replaces the previous Supabase setup. The application now uses local SQLite for simplicity and reliability.
 
 - `/sql/setup.sql` - Complete database setup
 - `/api/email.js` - Clean Resend email integration

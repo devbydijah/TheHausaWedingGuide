@@ -17,8 +17,10 @@ FROM_EMAIL=noreply@yourdomain.com
 Set your Paystack webhook URL to:
 
 ```
-https://hausaroom.ng/wc-api/Tbz_WC_Paystack_Webhook/
+https://yourdomain.vercel.app/api/paystack-webhook
 ```
+
+**Important:** Ensure your Vercel deployment is configured to pass raw request bodies for webhook signature verification.
 
 ### 3. Storefront URL ✅ CONFIGURED
 
