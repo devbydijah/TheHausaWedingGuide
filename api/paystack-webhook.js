@@ -1,6 +1,10 @@
 // Simple Paystack webhook that sends download links via email using Resend
 import crypto from "crypto";
-import { sendDownloadEmail } from "../lib/email.js";
+import {
+  sendDownloadEmail,
+  sendWebAppAccessEmail,
+  sendBundleEmail,
+} from "../lib/email.js";
 import { tokenDB } from "../lib/database.cjs";
 
 // Environment variables (support both test and live secrets)
@@ -123,35 +127,119 @@ export default async function handler(req, res) {
           return res.status(400).json({ error: "No customer email available" });
         }
 
-        // Generate a simple temporary token
-        const token = crypto.randomBytes(32).toString("hex");
-        const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+        // ============================================
+        // PRODUCT DETECTION
+        // ============================================
+        // Check metadata for product_type, fallback to checking product name
+        const metadata = verifyJson?.data?.metadata || data?.metadata || {};
+        const productName = (
+          verifyJson?.data?.plan?.name ||
+          verifyJson?.data?.product_name ||
+          data?.plan?.name ||
+          data?.product_name ||
+          ""
+        ).toLowerCase();
 
-        // Create HMAC signature for token verification
-        const SECRET =
-          process.env.DOWNLOAD_TOKEN_SECRET || process.env.PAYSTACK_SECRET_KEY;
-        const hmac = crypto.createHmac("sha256", SECRET);
-        hmac.update(`${token}|${verifiedEmail}|${expires}`);
-        const sig = hmac.digest("hex");
+        let productType = (metadata.product_type || "").toLowerCase();
 
-        // Store token in database
-        const stored = tokenDB.storeToken(verifiedEmail, token, expires, 3); // 3 downloads allowed
-        if (!stored) {
-          console.error("Failed to store token in database");
-          return res
-            .status(500)
-            .json({ error: "Failed to create download token" });
+        // Fallback: detect from product name if metadata not set
+        if (!productType) {
+          if (
+            productName.includes("bundle") ||
+            productName.includes("complete")
+          ) {
+            productType = "bundle";
+          } else if (
+            productName.includes("webapp") ||
+            productName.includes("web app") ||
+            productName.includes("interactive")
+          ) {
+            productType = "webapp";
+          } else {
+            productType = "pdf"; // Default to PDF for backward compatibility
+          }
         }
 
-        // Create download URL with token and signature
-        const downloadLink = `${PUBLIC_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
-          verifiedEmail
-        )}&sig=${sig}`;
+        console.log(
+          `Product type detected: ${productType} (from metadata: ${metadata.product_type || "none"}, product name: '${productName}')`
+        );
 
-        // Send email with download link using Resend
-        await sendDownloadEmail(verifiedEmail, downloadLink);
+        // ============================================
+        // HANDLE DIFFERENT PRODUCT TYPES
+        // ============================================
 
-        console.log("Download email sent successfully to:", verifiedEmail);
+        if (productType === "webapp") {
+          // Web App Only - send login credentials
+          await sendWebAppAccessEmail(verifiedEmail);
+          console.log(
+            "Web app access email sent successfully to:",
+            verifiedEmail
+          );
+        } else if (productType === "bundle") {
+          // Bundle - send both PDF download + web app access
+          // Generate download token for PDF
+          const token = crypto.randomBytes(32).toString("hex");
+          const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+
+          // Create HMAC signature for token verification
+          const SECRET =
+            process.env.DOWNLOAD_TOKEN_SECRET ||
+            process.env.PAYSTACK_SECRET_KEY;
+          const hmac = crypto.createHmac("sha256", SECRET);
+          hmac.update(`${token}|${verifiedEmail}|${expires}`);
+          const sig = hmac.digest("hex");
+
+          // Store token in database
+          const stored = tokenDB.storeToken(verifiedEmail, token, expires, 3);
+          if (!stored) {
+            console.error("Failed to store token in database");
+            return res
+              .status(500)
+              .json({ error: "Failed to create download token" });
+          }
+
+          // Create download URL
+          const downloadLink = `${PUBLIC_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
+            verifiedEmail
+          )}&sig=${sig}`;
+
+          // Send bundle email with both PDF + web app access
+          await sendBundleEmail(verifiedEmail, downloadLink);
+          console.log("Bundle email sent successfully to:", verifiedEmail);
+        } else {
+          // PDF Only (default) - send download link
+          const token = crypto.randomBytes(32).toString("hex");
+          const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+
+          // Create HMAC signature for token verification
+          const SECRET =
+            process.env.DOWNLOAD_TOKEN_SECRET ||
+            process.env.PAYSTACK_SECRET_KEY;
+          const hmac = crypto.createHmac("sha256", SECRET);
+          hmac.update(`${token}|${verifiedEmail}|${expires}`);
+          const sig = hmac.digest("hex");
+
+          // Store token in database
+          const stored = tokenDB.storeToken(verifiedEmail, token, expires, 3);
+          if (!stored) {
+            console.error("Failed to store token in database");
+            return res
+              .status(500)
+              .json({ error: "Failed to create download token" });
+          }
+
+          // Create download URL
+          const downloadLink = `${PUBLIC_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
+            verifiedEmail
+          )}&sig=${sig}`;
+
+          // Send PDF download email
+          await sendDownloadEmail(verifiedEmail, downloadLink);
+          console.log(
+            "PDF download email sent successfully to:",
+            verifiedEmail
+          );
+        }
       } catch (e) {
         console.error("Error verifying/sending email:", e);
         return res.status(500).json({ error: "Verification/email failed" });
