@@ -174,6 +174,38 @@ export default function InteractiveGuide({ auth }) {
     });
   };
 
+  // Vendor Tracker handlers
+  const addVendor = (vendor) => {
+    updateData((prev) => ({
+      ...prev,
+      vendorList: [
+        ...prev.vendorList,
+        {
+          ...vendor,
+          id: Date.now().toString(), // Simple unique ID
+          addedDate: Date.now(),
+        },
+      ],
+    }));
+  };
+
+  const updateVendor = (id, updatedFields) => {
+    updateData((prev) => ({
+      ...prev,
+      vendorList: prev.vendorList.map((vendor) =>
+        vendor.id === id ? { ...vendor, ...updatedFields } : vendor
+      ),
+    }));
+  };
+
+  const deleteVendor = (id) => {
+    if (!confirm("Are you sure you want to delete this vendor?")) return;
+    updateData((prev) => ({
+      ...prev,
+      vendorList: prev.vendorList.filter((vendor) => vendor.id !== id),
+    }));
+  };
+
   const completed = data.checklists.reduce(
     (acc, s) => acc + s.items.filter((i) => i.done).length,
     0
@@ -249,7 +281,14 @@ export default function InteractiveGuide({ auth }) {
             updateCategoryField={updateCategoryField}
           />
         )}
-        {activeSection === "vendors" && <VendorSection data={data} />}
+        {activeSection === "vendors" && (
+          <VendorSection
+            data={data}
+            addVendor={addVendor}
+            updateVendor={updateVendor}
+            deleteVendor={deleteVendor}
+          />
+        )}
         {activeSection === "timeline" && <TimelineSection data={data} />}
         {activeSection === "legacy" && (
           <LegacySection
@@ -629,13 +668,377 @@ function BudgetSection({ data, updateTotalBudget, updateCategoryField }) {
   );
 }
 
-function VendorSection({ data }) {
+// Vendor Tracker Section Component
+function VendorSection({ data, addVendor, updateVendor, deleteVendor }) {
+  const [showModal, setShowModal] = useState(false);
+  const [editingVendor, setEditingVendor] = useState(null);
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
+
+  const categories = [
+    { value: "venue", label: "Venue & Location" },
+    { value: "catering", label: "Catering & Food" },
+    { value: "attire", label: "Traditional Attire & Fabrics" },
+    { value: "photography", label: "Photography & Videography" },
+    { value: "decor", label: "Decorations & Event Design" },
+    { value: "makeup", label: "Makeup & Beauty" },
+    { value: "kayan-lefe", label: "Kayan Lefe (Traditional Gifts)" },
+    { value: "entertainment", label: "Live Performers & Entertainment" },
+    { value: "henna", label: "Henna Artist" },
+    { value: "transportation", label: "Transportation & Logistics" },
+    { value: "misc", label: "Miscellaneous" },
+  ];
+
+  const statuses = [
+    { value: "researching", label: "Researching", color: "bg-gray-100 text-gray-700" },
+    { value: "contacted", label: "Contacted", color: "bg-blue-100 text-blue-700" },
+    { value: "quoted", label: "Quoted", color: "bg-yellow-100 text-yellow-700" },
+    { value: "booked", label: "Booked", color: "bg-green-100 text-green-700" },
+    { value: "declined", label: "Declined", color: "bg-red-100 text-red-700" },
+  ];
+
+  // Filter vendors
+  const filteredVendors = data.vendorList.filter((vendor) => {
+    const categoryMatch = filterCategory === "all" || vendor.category === filterCategory;
+    const statusMatch = filterStatus === "all" || vendor.status === filterStatus;
+    return categoryMatch && statusMatch;
+  });
+
+  const openAddModal = () => {
+    setEditingVendor(null);
+    setShowModal(true);
+  };
+
+  const openEditModal = (vendor) => {
+    setEditingVendor(vendor);
+    setShowModal(true);
+  };
+
+  const getStatusColor = (status) => {
+    return statuses.find((s) => s.value === status)?.color || "bg-gray-100 text-gray-700";
+  };
+
+  const getCategoryLabel = (categoryValue) => {
+    return categories.find((c) => c.value === categoryValue)?.label || categoryValue;
+  };
+
   return (
-    <div className="bg-white rounded-xl border p-6">
-      <h2 className="text-xl font-semibold mb-4">Vendor Tracker</h2>
-      <p className="text-gray-600">
-        Coming soon! Track all your wedding vendors here.
-      </p>
+    <div className="space-y-6">
+      {/* Header with Add Button */}
+      <div className="bg-white rounded-xl border p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-900">Vendor Tracker</h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Organize and track all your wedding vendors in one place
+            </p>
+          </div>
+          <button
+            onClick={openAddModal}
+            className="px-4 py-2 bg-[#CE805C] hover:bg-[#b86a4a] text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+          >
+            <span className="text-xl">+</span>
+            Add Vendor
+          </button>
+        </div>
+
+        {/* Filter Bar */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Filter by Category
+            </label>
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#CE805C] focus:border-transparent outline-none"
+            >
+              <option value="all">All Categories</option>
+              {categories.map((cat) => (
+                <option key={cat.value} value={cat.value}>
+                  {cat.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Filter by Status
+            </label>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#CE805C] focus:border-transparent outline-none"
+            >
+              <option value="all">All Statuses</option>
+              {statuses.map((status) => (
+                <option key={status.value} value={status.value}>
+                  {status.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {(filterCategory !== "all" || filterStatus !== "all") && (
+          <button
+            onClick={() => {
+              setFilterCategory("all");
+              setFilterStatus("all");
+            }}
+            className="mt-3 text-sm text-[#CE805C] hover:text-[#b86a4a] underline"
+          >
+            Clear Filters
+          </button>
+        )}
+      </div>
+
+      {/* Vendor Grid */}
+      {filteredVendors.length === 0 ? (
+        <div className="bg-white rounded-xl border-2 border-dashed border-gray-300 p-12 text-center">
+          <div className="text-6xl mb-4">💼</div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            {data.vendorList.length === 0
+              ? "No vendors added yet"
+              : "No vendors match your filters"}
+          </h3>
+          <p className="text-gray-600 mb-6">
+            {data.vendorList.length === 0
+              ? "Let's start building your dream team! 🎉"
+              : "Try adjusting your filters to see more vendors."}
+          </p>
+          {data.vendorList.length === 0 && (
+            <button
+              onClick={openAddModal}
+              className="px-6 py-3 bg-[#CE805C] hover:bg-[#b86a4a] text-white rounded-lg font-medium transition-colors inline-flex items-center gap-2"
+            >
+              <span className="text-xl">+</span>
+              Add Your First Vendor
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredVendors.map((vendor) => (
+            <div
+              key={vendor.id}
+              className="bg-white rounded-xl border p-5 hover:shadow-lg transition-shadow"
+            >
+              {/* Vendor Name & Category */}
+              <div className="mb-3">
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                  {vendor.name}
+                </h3>
+                <span className="inline-block px-2 py-1 bg-[#CE805C] bg-opacity-10 text-[#CE805C] text-xs rounded-md font-medium">
+                  {getCategoryLabel(vendor.category)}
+                </span>
+              </div>
+
+              {/* Contact */}
+              <div className="mb-3 text-sm text-gray-700">
+                <span className="font-medium">Contact:</span> {vendor.contact}
+              </div>
+
+              {/* Status Badge */}
+              <div className="mb-4">
+                <span
+                  className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                    vendor.status
+                  )}`}
+                >
+                  {statuses.find((s) => s.value === vendor.status)?.label}
+                </span>
+              </div>
+
+              {/* Notes (if any) */}
+              {vendor.notes && (
+                <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                  {vendor.notes}
+                </p>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 pt-3 border-t">
+                <button
+                  onClick={() => openEditModal(vendor)}
+                  className="flex-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => deleteVendor(vendor.id)}
+                  className="flex-1 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm font-medium transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Vendor Modal */}
+      {showModal && (
+        <VendorModal
+          vendor={editingVendor}
+          categories={categories}
+          statuses={statuses}
+          onSave={(vendorData) => {
+            if (editingVendor) {
+              updateVendor(editingVendor.id, vendorData);
+            } else {
+              addVendor(vendorData);
+            }
+            setShowModal(false);
+          }}
+          onClose={() => setShowModal(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+// Vendor Modal Component
+function VendorModal({ vendor, categories, statuses, onSave, onClose }) {
+  const [formData, setFormData] = useState({
+    name: vendor?.name || "",
+    category: vendor?.category || categories[0].value,
+    contact: vendor?.contact || "",
+    status: vendor?.status || statuses[0].value,
+    notes: vendor?.notes || "",
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.name.trim() || !formData.contact.trim()) {
+      alert("Please fill in vendor name and contact information");
+      return;
+    }
+    onSave(formData);
+  };
+
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-2xl font-semibold text-gray-900">
+              {vendor ? "Edit Vendor" : "Add New Vendor"}
+            </h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 text-2xl"
+            >
+              ×
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Vendor Name */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Vendor Name *
+              </label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => handleChange("name", e.target.value)}
+                placeholder="e.g., Elegant Events Hall"
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#CE805C] focus:border-transparent outline-none"
+                required
+              />
+            </div>
+
+            {/* Category */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category *
+              </label>
+              <select
+                value={formData.category}
+                onChange={(e) => handleChange("category", e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#CE805C] focus:border-transparent outline-none"
+                required
+              >
+                {categories.map((cat) => (
+                  <option key={cat.value} value={cat.value}>
+                    {cat.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Contact (Phone/Email/WhatsApp) *
+              </label>
+              <input
+                type="text"
+                value={formData.contact}
+                onChange={(e) => handleChange("contact", e.target.value)}
+                placeholder="Phone, email, or WhatsApp"
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#CE805C] focus:border-transparent outline-none"
+                required
+              />
+            </div>
+
+            {/* Status */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Status *
+              </label>
+              <select
+                value={formData.status}
+                onChange={(e) => handleChange("status", e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#CE805C] focus:border-transparent outline-none"
+                required
+              >
+                {statuses.map((status) => (
+                  <option key={status.value} value={status.value}>
+                    {status.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Notes */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Notes (Optional)
+              </label>
+              <textarea
+                value={formData.notes}
+                onChange={(e) => handleChange("notes", e.target.value)}
+                placeholder="Additional details, pricing, special requests..."
+                rows="4"
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#CE805C] focus:border-transparent outline-none resize-none"
+              />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="flex-1 px-4 py-2 bg-[#CE805C] hover:bg-[#b86a4a] text-white rounded-lg font-medium transition-colors"
+              >
+                {vendor ? "Save Changes" : "Add Vendor"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }
