@@ -265,6 +265,7 @@ export default function InteractiveGuide({ auth }) {
     { id: "budget", name: "Budget Builder" },
     { id: "vendors", name: "Vendor Tracker" },
     { id: "timeline", name: "Timeline & Tasks" },
+    { id: "blueprint", name: "Final Blueprint" },
     { id: "legacy", name: "Legacy Checklists" },
   ];
 
@@ -346,6 +347,7 @@ export default function InteractiveGuide({ auth }) {
             toggleShowCompleted={toggleShowCompleted}
           />
         )}
+        {activeSection === "blueprint" && <BlueprintSection data={data} />}
         {activeSection === "legacy" && (
           <LegacySection
             data={data}
@@ -1866,6 +1868,581 @@ function TaskModal({
           </form>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Final Wedding Blueprint Section Component
+function BlueprintSection({ data }) {
+  const [showPrintView, setShowPrintView] = useState(false);
+
+  // Calculate statistics
+  const stats = {
+    // Budget stats
+    totalBudget: data.totalBudget,
+    budgetAllocated: Object.values(data.budgetCategories).reduce(
+      (sum, cat) => sum + cat.amount,
+      0
+    ),
+    budgetRemaining:
+      data.totalBudget -
+      Object.values(data.budgetCategories).reduce(
+        (sum, cat) => sum + cat.amount,
+        0
+      ),
+
+    // Vendor stats
+    totalVendors: data.vendorList.length,
+    bookedVendors: data.vendorList.filter((v) => v.status === "booked").length,
+    quotedVendors: data.vendorList.filter((v) => v.status === "quoted").length,
+    pendingVendors: data.vendorList.filter(
+      (v) => v.status === "researching" || v.status === "contacted"
+    ).length,
+
+    // Task stats
+    totalTasks: data.taskList.length,
+    completedTasks: data.taskList.filter((t) => t.status === "completed")
+      .length,
+    inProgressTasks: data.taskList.filter((t) => t.status === "in-progress")
+      .length,
+    overdueTasks: data.taskList.filter((t) => {
+      if (t.status === "completed") return false;
+      if (!t.dueDate) return false;
+      const due = new Date(t.dueDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      due.setHours(0, 0, 0, 0);
+      return due < today;
+    }).length,
+
+    // Wedding date
+    weddingDate: data.weddingDate,
+    daysUntilWedding: data.weddingDate
+      ? Math.ceil(
+          (new Date(data.weddingDate) - new Date()) / (1000 * 60 * 60 * 24)
+        )
+      : null,
+
+    // Priorities
+    topPriorities: data.weddingPriorities.slice(0, 5),
+  };
+
+  // Calculate completion percentages
+  const budgetCompletion =
+    stats.totalBudget > 0
+      ? Math.round((stats.budgetAllocated / stats.totalBudget) * 100)
+      : 0;
+  const vendorCompletion =
+    stats.totalVendors > 0
+      ? Math.round((stats.bookedVendors / stats.totalVendors) * 100)
+      : 0;
+  const taskCompletion =
+    stats.totalTasks > 0
+      ? Math.round((stats.completedTasks / stats.totalTasks) * 100)
+      : 0;
+  const overallCompletion = Math.round(
+    (budgetCompletion + vendorCompletion + taskCompletion) / 3
+  );
+
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  // Export to JSON
+  const exportData = () => {
+    const exportObj = {
+      exportDate: new Date().toISOString(),
+      weddingDate: data.weddingDate,
+      priorities: data.weddingPriorities,
+      budget: {
+        total: data.totalBudget,
+        categories: data.budgetCategories,
+      },
+      vendors: data.vendorList,
+      tasks: data.taskList,
+      niyyah: data.niyyahDua,
+      journal: data.brideJournal,
+    };
+
+    const blob = new Blob([JSON.stringify(exportObj, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `hausa-wedding-plan-${new Date().toISOString().split("T")[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Print view
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header Card */}
+      <div className="bg-gradient-to-br from-[#CE805C] to-[#b86a4a] rounded-xl p-8 text-white">
+        <h2 className="text-3xl font-bold mb-2">Your Wedding Blueprint 📋</h2>
+        <p className="text-white text-opacity-90 mb-6">
+          A comprehensive summary of your entire wedding plan
+        </p>
+
+        {data.weddingDate && (
+          <div className="bg-white bg-opacity-20 rounded-lg p-4 inline-block">
+            <div className="text-sm opacity-90 mb-1">Wedding Date</div>
+            <div className="text-2xl font-bold">
+              {new Date(data.weddingDate).toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </div>
+            {stats.daysUntilWedding !== null && stats.daysUntilWedding > 0 && (
+              <div className="text-sm opacity-90 mt-1">
+                {stats.daysUntilWedding}{" "}
+                {stats.daysUntilWedding === 1 ? "day" : "days"} to go! 🎉
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Overall Progress Card */}
+      <div className="bg-white rounded-xl border p-6">
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">
+          Overall Planning Progress
+        </h3>
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-gray-700">
+              Overall Completion
+            </span>
+            <span className="text-lg font-bold text-[#CE805C]">
+              {overallCompletion}%
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-4">
+            <div
+              className="bg-gradient-to-r from-[#CE805C] to-[#b86a4a] h-4 rounded-full transition-all duration-500"
+              style={{ width: `${overallCompletion}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Budget Progress */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <div className="text-sm text-gray-600 mb-1">Budget Allocated</div>
+            <div className="text-2xl font-bold text-gray-900 mb-2">
+              {budgetCompletion}%
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-blue-500 h-2 rounded-full"
+                style={{ width: `${budgetCompletion}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Vendor Progress */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <div className="text-sm text-gray-600 mb-1">Vendors Booked</div>
+            <div className="text-2xl font-bold text-gray-900 mb-2">
+              {vendorCompletion}%
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-green-500 h-2 rounded-full"
+                style={{ width: `${vendorCompletion}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Task Progress */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <div className="text-sm text-gray-600 mb-1">Tasks Completed</div>
+            <div className="text-2xl font-bold text-gray-900 mb-2">
+              {taskCompletion}%
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-purple-500 h-2 rounded-full"
+                style={{ width: `${taskCompletion}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Vision & Priorities */}
+      {stats.topPriorities.length > 0 && (
+        <div className="bg-white rounded-xl border p-6">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            Your Wedding Vision
+          </h3>
+          <div className="space-y-2">
+            <p className="text-sm text-gray-600 mb-3">Top 5 Priorities:</p>
+            {stats.topPriorities.map((priority, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+              >
+                <span className="flex-shrink-0 w-8 h-8 bg-[#CE805C] text-white rounded-full flex items-center justify-center font-semibold">
+                  {index + 1}
+                </span>
+                <span className="text-gray-900">{priority}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Budget Summary */}
+      <div className="bg-white rounded-xl border p-6">
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">
+          Budget Summary
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-blue-50 rounded-lg p-4">
+            <div className="text-sm text-blue-600 mb-1">Total Budget</div>
+            <div className="text-2xl font-bold text-blue-900">
+              {formatCurrency(stats.totalBudget)}
+            </div>
+          </div>
+          <div className="bg-green-50 rounded-lg p-4">
+            <div className="text-sm text-green-600 mb-1">Allocated</div>
+            <div className="text-2xl font-bold text-green-900">
+              {formatCurrency(stats.budgetAllocated)}
+            </div>
+          </div>
+          <div
+            className={`rounded-lg p-4 ${
+              stats.budgetRemaining < 0 ? "bg-red-50" : "bg-gray-50"
+            }`}
+          >
+            <div
+              className={`text-sm mb-1 ${
+                stats.budgetRemaining < 0 ? "text-red-600" : "text-gray-600"
+              }`}
+            >
+              Remaining
+            </div>
+            <div
+              className={`text-2xl font-bold ${
+                stats.budgetRemaining < 0 ? "text-red-900" : "text-gray-900"
+              }`}
+            >
+              {formatCurrency(stats.budgetRemaining)}
+            </div>
+          </div>
+        </div>
+
+        {stats.budgetRemaining < 0 && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <p className="text-sm text-red-800">
+              ⚠️ <strong>Budget Alert:</strong> You've exceeded your budget by{" "}
+              {formatCurrency(Math.abs(stats.budgetRemaining))}. Consider
+              adjusting your allocations.
+            </p>
+          </div>
+        )}
+
+        {Object.keys(data.budgetCategories).filter(
+          (key) => data.budgetCategories[key].amount > 0
+        ).length > 0 && (
+          <div className="space-y-2">
+            <p className="text-sm text-gray-600 font-medium mb-3">
+              Budget Breakdown:
+            </p>
+            {Object.entries(data.budgetCategories)
+              .filter(([_, cat]) => cat.amount > 0)
+              .map(([key, cat]) => (
+                <div
+                  key={key}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-gray-700 capitalize">
+                      {key}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      ({cat.percentage}%)
+                    </span>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900">
+                    {formatCurrency(cat.amount)}
+                  </span>
+                </div>
+              ))}
+          </div>
+        )}
+      </div>
+
+      {/* Vendor Summary */}
+      <div className="bg-white rounded-xl border p-6">
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">
+          Vendor Status
+        </h3>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="text-center p-4 bg-gray-50 rounded-lg">
+            <div className="text-3xl font-bold text-gray-900">
+              {stats.totalVendors}
+            </div>
+            <div className="text-sm text-gray-600 mt-1">Total Vendors</div>
+          </div>
+          <div className="text-center p-4 bg-green-50 rounded-lg">
+            <div className="text-3xl font-bold text-green-900">
+              {stats.bookedVendors}
+            </div>
+            <div className="text-sm text-green-600 mt-1">Booked ✅</div>
+          </div>
+          <div className="text-center p-4 bg-yellow-50 rounded-lg">
+            <div className="text-3xl font-bold text-yellow-900">
+              {stats.quotedVendors}
+            </div>
+            <div className="text-sm text-yellow-600 mt-1">Quoted</div>
+          </div>
+          <div className="text-center p-4 bg-blue-50 rounded-lg">
+            <div className="text-3xl font-bold text-blue-900">
+              {stats.pendingVendors}
+            </div>
+            <div className="text-sm text-blue-600 mt-1">Pending</div>
+          </div>
+        </div>
+
+        {data.vendorList.filter((v) => v.status === "booked").length > 0 && (
+          <div className="space-y-2">
+            <p className="text-sm text-gray-600 font-medium mb-3">
+              Confirmed Vendors:
+            </p>
+            {data.vendorList
+              .filter((v) => v.status === "booked")
+              .map((vendor) => (
+                <div
+                  key={vendor.id}
+                  className="flex items-center justify-between p-3 bg-green-50 rounded-lg"
+                >
+                  <div>
+                    <div className="font-medium text-gray-900">
+                      {vendor.name}
+                    </div>
+                    <div className="text-xs text-gray-600 capitalize">
+                      {vendor.category.replace("-", " ")}
+                    </div>
+                  </div>
+                  <span className="text-green-600 text-xl">✓</span>
+                </div>
+              ))}
+          </div>
+        )}
+      </div>
+
+      {/* Task Summary */}
+      <div className="bg-white rounded-xl border p-6">
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">
+          Task Overview
+        </h3>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="text-center p-4 bg-gray-50 rounded-lg">
+            <div className="text-3xl font-bold text-gray-900">
+              {stats.totalTasks}
+            </div>
+            <div className="text-sm text-gray-600 mt-1">Total Tasks</div>
+          </div>
+          <div className="text-center p-4 bg-green-50 rounded-lg">
+            <div className="text-3xl font-bold text-green-900">
+              {stats.completedTasks}
+            </div>
+            <div className="text-sm text-green-600 mt-1">Completed ✅</div>
+          </div>
+          <div className="text-center p-4 bg-blue-50 rounded-lg">
+            <div className="text-3xl font-bold text-blue-900">
+              {stats.inProgressTasks}
+            </div>
+            <div className="text-sm text-blue-600 mt-1">In Progress</div>
+          </div>
+          <div className="text-center p-4 bg-red-50 rounded-lg">
+            <div className="text-3xl font-bold text-red-900">
+              {stats.overdueTasks}
+            </div>
+            <div className="text-sm text-red-600 mt-1">Overdue ⚠️</div>
+          </div>
+        </div>
+
+        {stats.overdueTasks > 0 && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <p className="text-sm text-red-800">
+              <strong>Action Required:</strong> You have {stats.overdueTasks}{" "}
+              overdue {stats.overdueTasks === 1 ? "task" : "tasks"}. Review
+              your Timeline & Tasks section.
+            </p>
+          </div>
+        )}
+
+        {data.taskList
+          .filter(
+            (t) => t.status !== "completed" && t.priority === "high"
+          )
+          .slice(0, 5).length > 0 && (
+          <div className="space-y-2">
+            <p className="text-sm text-gray-600 font-medium mb-3">
+              High Priority Tasks:
+            </p>
+            {data.taskList
+              .filter(
+                (t) => t.status !== "completed" && t.priority === "high"
+              )
+              .slice(0, 5)
+              .map((task) => (
+                <div
+                  key={task.id}
+                  className="flex items-center gap-3 p-3 bg-red-50 rounded-lg"
+                >
+                  <span className="text-red-600 text-xl flex-shrink-0">
+                    🔴
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-gray-900">
+                      {task.title}
+                    </div>
+                    {task.dueDate && (
+                      <div className="text-xs text-gray-600">
+                        Due: {new Date(task.dueDate).toLocaleDateString()}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+          </div>
+        )}
+      </div>
+
+      {/* Action Buttons */}
+      <div className="bg-white rounded-xl border p-6">
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">
+          Export & Share
+        </h3>
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={handlePrint}
+            className="px-6 py-3 bg-[#CE805C] hover:bg-[#b86a4a] text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+          >
+            🖨️ Print Blueprint
+          </button>
+          <button
+            onClick={exportData}
+            className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors flex items-center gap-2"
+          >
+            💾 Download Data (JSON)
+          </button>
+        </div>
+        <p className="text-sm text-gray-600 mt-4">
+          Use Print to create a PDF for sharing, or download your data for
+          backup.
+        </p>
+      </div>
+
+      {/* Completion Checklist */}
+      <div className="bg-white rounded-xl border p-6">
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">
+          Pre-Wedding Checklist
+        </h3>
+        <div className="space-y-3">
+          <ChecklistItem
+            done={!!data.weddingDate}
+            text="Wedding date set"
+          />
+          <ChecklistItem
+            done={stats.topPriorities.length >= 3}
+            text="Top priorities defined"
+          />
+          <ChecklistItem
+            done={stats.totalBudget > 0}
+            text="Budget established"
+          />
+          <ChecklistItem
+            done={stats.budgetAllocated > 0}
+            text="Budget allocated to categories"
+          />
+          <ChecklistItem
+            done={stats.totalVendors >= 5}
+            text="At least 5 vendors tracked"
+          />
+          <ChecklistItem
+            done={stats.bookedVendors >= 3}
+            text="Key vendors booked (venue, catering, photography)"
+          />
+          <ChecklistItem
+            done={stats.totalTasks >= 10}
+            text="Task list created"
+          />
+          <ChecklistItem
+            done={taskCompletion >= 50}
+            text="At least 50% of tasks completed"
+          />
+          <ChecklistItem
+            done={stats.overdueTasks === 0}
+            text="No overdue tasks"
+          />
+          <ChecklistItem
+            done={
+              data.niyyahDua && data.niyyahDua.trim().length > 0
+            }
+            text="Personal niyyah/dua written"
+          />
+        </div>
+
+        {stats.totalVendors > 0 &&
+          stats.totalTasks > 0 &&
+          taskCompletion >= 80 &&
+          stats.overdueTasks === 0 && (
+            <div className="mt-6 bg-green-50 border-2 border-green-200 rounded-lg p-6 text-center">
+              <div className="text-4xl mb-3">🎉</div>
+              <h4 className="text-xl font-bold text-green-900 mb-2">
+                Congratulations!
+              </h4>
+              <p className="text-green-800">
+                You're well-prepared for your special day! Keep up the great
+                work! 💍
+              </p>
+            </div>
+          )}
+      </div>
+    </div>
+  );
+}
+
+// Checklist Item Component
+function ChecklistItem({ done, text }) {
+  return (
+    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+      <div
+        className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+          done
+            ? "bg-green-500 border-green-500"
+            : "border-gray-300 bg-white"
+        }`}
+      >
+        {done && <span className="text-white text-sm font-bold">✓</span>}
+      </div>
+      <span
+        className={`text-sm ${
+          done ? "text-gray-900 font-medium" : "text-gray-600"
+        }`}
+      >
+        {text}
+      </span>
     </div>
   );
 }
