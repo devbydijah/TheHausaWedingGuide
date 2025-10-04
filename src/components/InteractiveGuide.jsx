@@ -2284,34 +2284,28 @@ function BlueprintSection({ data }) {
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
             <p className="text-sm text-red-800">
               <strong>Action Required:</strong> You have {stats.overdueTasks}{" "}
-              overdue {stats.overdueTasks === 1 ? "task" : "tasks"}. Review
-              your Timeline & Tasks section.
+              overdue {stats.overdueTasks === 1 ? "task" : "tasks"}. Review your
+              Timeline & Tasks section.
             </p>
           </div>
         )}
 
         {data.taskList
-          .filter(
-            (t) => t.status !== "completed" && t.priority === "high"
-          )
+          .filter((t) => t.status !== "completed" && t.priority === "high")
           .slice(0, 5).length > 0 && (
           <div className="space-y-2">
             <p className="text-sm text-gray-600 font-medium mb-3">
               High Priority Tasks:
             </p>
             {data.taskList
-              .filter(
-                (t) => t.status !== "completed" && t.priority === "high"
-              )
+              .filter((t) => t.status !== "completed" && t.priority === "high")
               .slice(0, 5)
               .map((task) => (
                 <div
                   key={task.id}
                   className="flex items-center gap-3 p-3 bg-red-50 rounded-lg"
                 >
-                  <span className="text-red-600 text-xl flex-shrink-0">
-                    🔴
-                  </span>
+                  <span className="text-red-600 text-xl flex-shrink-0">🔴</span>
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-gray-900">
                       {task.title}
@@ -2359,10 +2353,7 @@ function BlueprintSection({ data }) {
           Pre-Wedding Checklist
         </h3>
         <div className="space-y-3">
-          <ChecklistItem
-            done={!!data.weddingDate}
-            text="Wedding date set"
-          />
+          <ChecklistItem done={!!data.weddingDate} text="Wedding date set" />
           <ChecklistItem
             done={stats.topPriorities.length >= 3}
             text="Top priorities defined"
@@ -2396,9 +2387,7 @@ function BlueprintSection({ data }) {
             text="No overdue tasks"
           />
           <ChecklistItem
-            done={
-              data.niyyahDua && data.niyyahDua.trim().length > 0
-            }
+            done={data.niyyahDua && data.niyyahDua.trim().length > 0}
             text="Personal niyyah/dua written"
           />
         </div>
@@ -2429,9 +2418,7 @@ function ChecklistItem({ done, text }) {
     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
       <div
         className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-          done
-            ? "bg-green-500 border-green-500"
-            : "border-gray-300 bg-white"
+          done ? "bg-green-500 border-green-500" : "border-gray-300 bg-white"
         }`}
       >
         {done && <span className="text-white text-sm font-bold">✓</span>}
