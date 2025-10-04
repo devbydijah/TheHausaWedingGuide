@@ -126,6 +126,54 @@ export default function InteractiveGuide({ auth }) {
     updatePriorities(data.weddingPriorities.filter((_, i) => i !== index));
   };
 
+  // Budget Builder handlers
+  const updateTotalBudget = (newTotal) => {
+    updateData((prev) => {
+      const total = parseFloat(newTotal) || 0;
+      // When total changes, recalculate all amounts based on existing percentages
+      const updatedCategories = {};
+      Object.keys(prev.budgetCategories).forEach((key) => {
+        const cat = prev.budgetCategories[key];
+        updatedCategories[key] = {
+          percentage: cat.percentage,
+          amount: (cat.percentage / 100) * total,
+        };
+      });
+      return {
+        ...prev,
+        totalBudget: total,
+        budgetCategories: updatedCategories,
+      };
+    });
+  };
+
+  const updateCategoryField = (categoryKey, field, value) => {
+    updateData((prev) => {
+      const numValue = parseFloat(value) || 0;
+      const category = { ...prev.budgetCategories[categoryKey] };
+
+      if (field === "percentage") {
+        // User entered percentage, calculate amount
+        category.percentage = Math.max(0, Math.min(100, numValue)); // Clamp 0-100
+        category.amount = (category.percentage / 100) * prev.totalBudget;
+      } else {
+        // User entered amount, calculate percentage
+        category.amount = Math.max(0, numValue);
+        category.percentage = prev.totalBudget
+          ? (category.amount / prev.totalBudget) * 100
+          : 0;
+      }
+
+      return {
+        ...prev,
+        budgetCategories: {
+          ...prev.budgetCategories,
+          [categoryKey]: category,
+        },
+      };
+    });
+  };
+
   const completed = data.checklists.reduce(
     (acc, s) => acc + s.items.filter((i) => i.done).length,
     0
@@ -194,7 +242,13 @@ export default function InteractiveGuide({ auth }) {
             removePriority={removePriority}
           />
         )}
-        {activeSection === "budget" && <BudgetSection data={data} />}
+        {activeSection === "budget" && (
+          <BudgetSection
+            data={data}
+            updateTotalBudget={updateTotalBudget}
+            updateCategoryField={updateCategoryField}
+          />
+        )}
         {activeSection === "vendors" && <VendorSection data={data} />}
         {activeSection === "timeline" && <TimelineSection data={data} />}
         {activeSection === "legacy" && (
@@ -346,14 +400,218 @@ function VisionSection({
   );
 }
 
-// Placeholder sections (we'll build these next)
-function BudgetSection({ data }) {
+// Budget Builder Section Component
+function BudgetSection({ data, updateTotalBudget, updateCategoryField }) {
+  const categories = [
+    { key: "venue", label: "Venue & Location" },
+    { key: "catering", label: "Catering & Food" },
+    { key: "attire", label: "Attire & Accessories" },
+    { key: "photography", label: "Photography & Videography" },
+    { key: "decor", label: "Decorations & Ambiance" },
+    { key: "misc", label: "Miscellaneous" },
+  ];
+
+  // Calculate total percentage allocated
+  const totalPercentage = Object.values(data.budgetCategories).reduce(
+    (sum, cat) => sum + cat.percentage,
+    0
+  );
+
+  const isOverBudget = totalPercentage > 100;
+  const remaining = 100 - totalPercentage;
+
   return (
-    <div className="bg-white rounded-xl border p-6">
-      <h2 className="text-xl font-semibold mb-4">Budget Builder</h2>
-      <p className="text-gray-600">
-        Coming soon! This will include budget tracking and category breakdowns.
-      </p>
+    <div className="space-y-6">
+      {/* Total Budget Input */}
+      <div className="bg-white rounded-xl border p-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900">
+          Total Wedding Budget
+        </h2>
+        <p className="text-sm text-gray-600 mb-4">
+          Enter your total budget. All categories will be calculated based on this amount.
+        </p>
+
+        <div className="flex items-center gap-3">
+          <span className="text-lg font-medium text-gray-700">₦</span>
+          <input
+            type="number"
+            value={data.totalBudget || ""}
+            onChange={(e) => updateTotalBudget(e.target.value)}
+            placeholder="0.00"
+            min="0"
+            step="1000"
+            className="flex-1 text-2xl font-bold border-b-2 border-gray-300 focus:border-[#CE805C] outline-none py-2 transition-colors"
+          />
+        </div>
+
+        {data.totalBudget > 0 && (
+          <p className="mt-3 text-sm text-gray-600">
+            Total budget set: <span className="font-semibold">₦{data.totalBudget.toLocaleString()}</span>
+          </p>
+        )}
+      </div>
+
+      {/* Budget Overview Alert */}
+      {data.totalBudget > 0 && (
+        <div
+          className={`rounded-xl border-2 p-4 ${
+            isOverBudget
+              ? "bg-red-50 border-red-300"
+              : remaining === 0
+              ? "bg-green-50 border-green-300"
+              : "bg-blue-50 border-blue-300"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-semibold text-gray-900">
+                {isOverBudget
+                  ? "⚠️ Over Budget!"
+                  : remaining === 0
+                  ? "✅ Budget Fully Allocated"
+                  : "💡 Budget Status"}
+              </p>
+              <p className="text-sm text-gray-700 mt-1">
+                Total allocated: <span className="font-bold">{totalPercentage.toFixed(1)}%</span>
+                {!isOverBudget && remaining > 0 && (
+                  <span className="ml-2">• Remaining: <span className="font-bold">{remaining.toFixed(1)}%</span></span>
+                )}
+              </p>
+            </div>
+            <div className="text-2xl">
+              {isOverBudget ? "🚨" : remaining === 0 ? "🎯" : "📊"}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Category Breakdown */}
+      <div className="bg-white rounded-xl border p-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900">
+          Budget Categories
+        </h2>
+        <p className="text-sm text-gray-600 mb-6">
+          Allocate your budget by entering either a percentage or an amount for each category.
+        </p>
+
+        <div className="space-y-4">
+          {categories.map(({ key, label }) => {
+            const category = data.budgetCategories[key];
+            return (
+              <div
+                key={key}
+                className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                {/* Category Label */}
+                <div className="flex items-center">
+                  <label className="font-medium text-gray-900">{label}</label>
+                </div>
+
+                {/* Percentage Input */}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    value={category.percentage || ""}
+                    onChange={(e) =>
+                      updateCategoryField(key, "percentage", e.target.value)
+                    }
+                    placeholder="0"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#CE805C] focus:border-transparent outline-none"
+                    disabled={!data.totalBudget}
+                  />
+                  <span className="text-gray-600">%</span>
+                </div>
+
+                {/* Amount Input */}
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-600">₦</span>
+                  <input
+                    type="number"
+                    value={category.amount || ""}
+                    onChange={(e) =>
+                      updateCategoryField(key, "amount", e.target.value)
+                    }
+                    placeholder="0.00"
+                    min="0"
+                    step="1000"
+                    className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#CE805C] focus:border-transparent outline-none"
+                    disabled={!data.totalBudget}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {!data.totalBudget && (
+          <p className="mt-4 text-sm text-gray-500 italic text-center">
+            Enter a total budget above to start allocating funds to categories.
+          </p>
+        )}
+      </div>
+
+      {/* Budget Summary Table */}
+      {data.totalBudget > 0 && (
+        <div className="bg-white rounded-xl border p-6">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">
+            Budget Summary
+          </h3>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left py-2 px-3 font-semibold text-gray-700">
+                    Category
+                  </th>
+                  <th className="text-right py-2 px-3 font-semibold text-gray-700">
+                    Percentage
+                  </th>
+                  <th className="text-right py-2 px-3 font-semibold text-gray-700">
+                    Amount
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {categories.map(({ key, label }) => {
+                  const category = data.budgetCategories[key];
+                  return (
+                    <tr key={key} className="border-b hover:bg-gray-50">
+                      <td className="py-2 px-3">{label}</td>
+                      <td className="text-right py-2 px-3">
+                        {category.percentage.toFixed(1)}%
+                      </td>
+                      <td className="text-right py-2 px-3 font-medium">
+                        ₦{category.amount.toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </td>
+                    </tr>
+                  );
+                })}
+                <tr className="font-bold border-t-2">
+                  <td className="py-3 px-3">Total</td>
+                  <td className={`text-right py-3 px-3 ${isOverBudget ? "text-red-600" : "text-gray-900"}`}>
+                    {totalPercentage.toFixed(1)}%
+                  </td>
+                  <td className="text-right py-3 px-3 text-gray-900">
+                    ₦{Object.values(data.budgetCategories)
+                      .reduce((sum, cat) => sum + cat.amount, 0)
+                      .toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

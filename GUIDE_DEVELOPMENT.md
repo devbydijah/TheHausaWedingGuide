@@ -250,10 +250,10 @@ I'll walk you through each one step-by-step, just like we did with Vision & Valu
 ✅ Navigation and tabs working  
 ✅ Auto-save with feedback  
 ✅ Mobile-responsive  
-⬜ Budget Builder (next!)  
-⬜ Vendor Tracker  
+✅ **Budget Builder complete!** (with two-way calculations and validation)  
+⬜ Vendor Tracker (next!)  
 ⬜ Timeline & Tasks  
 ⬜ Vision Quiz  
 ⬜ Backend integration
 
-**You're doing great! 🚀 You've completed the foundation. Now pick your next feature and let's build it together.**
+**You're doing amazing! 🚀 Two major sections complete. Check `BUDGET_BUILDER_COMPLETE.md` for details on what we just built.**
