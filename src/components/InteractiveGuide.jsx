@@ -78,15 +78,98 @@ export default function InteractiveGuide({ auth }) {
   );
 
   const [data, setData] = useLocalProgress(storageKey, DEFAULT_GUIDE);
-  const [activeSection, setActiveSection] = useState("vision"); // Track active section
+  const [activeSection, setActiveSection] = useState("dashboard"); // Track active section (default to dashboard)
   const [saveStatus, setSaveStatus] = useState(""); // "Saving..." or "Saved"
+  const [darkMode, setDarkMode] = useState(() => {
+    // Load dark mode preference from localStorage
+    const saved = localStorage.getItem("hwg:darkMode");
+    return saved === "true";
+  });
+  const [toasts, setToasts] = useState([]); // Array of toast notifications
 
-  // Wrapper to show save feedback
+  // Toast notification system
+  const showToast = (message, type = "success") => {
+    const id = Date.now();
+    const toast = { id, message, type };
+    setToasts((prev) => [...prev, toast]);
+
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 3000);
+  };
+
+  const removeToast = (id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  // Dark mode toggle
+  const toggleDarkMode = () => {
+    setDarkMode((prev) => {
+      const newValue = !prev;
+      localStorage.setItem("hwg:darkMode", newValue.toString());
+      return newValue;
+    });
+    showToast(darkMode ? "Light mode enabled" : "Dark mode enabled", "info");
+  };
+
+  // Export data to JSON file
+  const exportData = () => {
+    try {
+      const dataStr = JSON.stringify(data, null, 2);
+      const blob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `hausa-wedding-guide-backup-${new Date().toISOString().split("T")[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showToast("Data exported successfully!", "success");
+    } catch (error) {
+      console.error("Export failed:", error);
+      showToast("Failed to export data", "error");
+    }
+  };
+
+  // Import data from JSON file
+  const importData = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const importedData = JSON.parse(event.target.result);
+
+          // Validate the data has expected structure
+          if (typeof importedData === "object" && importedData !== null) {
+            setData(importedData);
+            showToast("Data imported successfully!", "success");
+          } else {
+            showToast("Invalid data format", "error");
+          }
+        } catch (error) {
+          console.error("Import failed:", error);
+          showToast("Failed to import data - invalid JSON", "error");
+        }
+      };
+      reader.readAsText(file);
+    };
+
+    input.click();
+  };
+
+  // Wrapper to show save feedback with toast
   const updateData = (updater) => {
-    setSaveStatus("Saving...");
     setData(updater);
-    setTimeout(() => setSaveStatus("Saved"), 1000);
-    setTimeout(() => setSaveStatus(""), 2000);
+    showToast("Changes saved", "success");
   };
 
   // Legacy checklist toggle (keeping for backward compatibility)
@@ -253,6 +336,46 @@ export default function InteractiveGuide({ auth }) {
     }));
   };
 
+  // Vision Quiz handlers
+  const updateQuizAnswer = (questionId, answer) => {
+    updateData((prev) => ({
+      ...prev,
+      visionQuiz: {
+        ...prev.visionQuiz,
+        answers: {
+          ...prev.visionQuiz.answers,
+          [questionId]: answer,
+        },
+      },
+    }));
+  };
+
+  const submitQuiz = (result) => {
+    updateData((prev) => ({
+      ...prev,
+      visionQuiz: {
+        ...prev.visionQuiz,
+        result,
+      },
+    }));
+  };
+
+  const resetQuiz = () => {
+    if (
+      !confirm(
+        "Are you sure you want to retake the quiz? This will reset your answers."
+      )
+    )
+      return;
+    updateData((prev) => ({
+      ...prev,
+      visionQuiz: {
+        answers: {},
+        result: null,
+      },
+    }));
+  };
+
   const completed = data.checklists.reduce(
     (acc, s) => acc + s.items.filter((i) => i.done).length,
     0
@@ -261,6 +384,8 @@ export default function InteractiveGuide({ auth }) {
   const pct = Math.round((completed / Math.max(1, total)) * 100);
 
   const sections = [
+    { id: "dashboard", name: "📊 Dashboard" },
+    { id: "quiz", name: "💎 Vision Quiz" },
     { id: "vision", name: "Vision & Values" },
     { id: "budget", name: "Budget Builder" },
     { id: "vendors", name: "Vendor Tracker" },
@@ -270,21 +395,98 @@ export default function InteractiveGuide({ auth }) {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`min-h-screen ${darkMode ? "bg-gray-900" : "bg-gray-50"}`}>
+      {/* Toast Notifications */}
+      <div className="fixed top-4 right-4 z-50 space-y-2">
+        {toasts.map((toast) => (
+          <div
+            key={toast.id}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg transform transition-all duration-300 ${
+              toast.type === "success"
+                ? "bg-green-600 text-white"
+                : toast.type === "error"
+                  ? "bg-red-600 text-white"
+                  : "bg-blue-600 text-white"
+            }`}
+          >
+            <span className="text-lg">
+              {toast.type === "success"
+                ? "✓"
+                : toast.type === "error"
+                  ? "✕"
+                  : "ℹ"}
+            </span>
+            <span className="text-sm font-medium">{toast.message}</span>
+            <button
+              onClick={() => removeToast(toast.id)}
+              className="ml-2 hover:opacity-75 transition-opacity"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+      </div>
+
       {/* Header with navigation */}
-      <header className="bg-white border-b sticky top-0 z-10">
+      <header
+        className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-b"} sticky top-0 z-10`}
+      >
         <div className="max-w-5xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-semibold text-gray-900">
+            <h1
+              className={`text-2xl font-semibold ${darkMode ? "text-white" : "text-gray-900"}`}
+            >
               Hausa Wedding Guide
             </h1>
-            <div className="flex items-center gap-4">
-              {saveStatus && (
-                <span className="text-sm text-green-600">{saveStatus}</span>
-              )}
+            <div className="flex items-center gap-2">
+              {/* Dark Mode Toggle */}
+              <button
+                onClick={toggleDarkMode}
+                className={`p-2 rounded-lg transition-colors ${
+                  darkMode
+                    ? "bg-gray-700 text-yellow-400 hover:bg-gray-600"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+                title={
+                  darkMode ? "Switch to light mode" : "Switch to dark mode"
+                }
+              >
+                {darkMode ? "☀️" : "🌙"}
+              </button>
+
+              {/* Export Data */}
+              <button
+                onClick={exportData}
+                className={`p-2 rounded-lg transition-colors ${
+                  darkMode
+                    ? "bg-gray-700 text-blue-400 hover:bg-gray-600"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+                title="Export your data as JSON backup"
+              >
+                📥
+              </button>
+
+              {/* Import Data */}
+              <button
+                onClick={importData}
+                className={`p-2 rounded-lg transition-colors ${
+                  darkMode
+                    ? "bg-gray-700 text-green-400 hover:bg-gray-600"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+                title="Import data from JSON backup"
+              >
+                📤
+              </button>
+
               <a
                 href="/"
-                className="text-sm text-gray-600 hover:text-gray-900 underline"
+                className={`text-sm ${
+                  darkMode
+                    ? "text-gray-400 hover:text-gray-200"
+                    : "text-gray-600 hover:text-gray-900"
+                } underline`}
               >
                 ← Back to Home
               </a>
@@ -300,7 +502,9 @@ export default function InteractiveGuide({ auth }) {
                 className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
                   activeSection === section.id
                     ? "bg-[#CE805C] text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : darkMode
+                      ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
                 {section.name}
@@ -311,7 +515,25 @@ export default function InteractiveGuide({ auth }) {
       </header>
 
       {/* Main content */}
-      <main className="max-w-5xl mx-auto px-4 py-8">
+      <main
+        className={`max-w-5xl mx-auto px-4 py-8 ${darkMode ? "text-gray-100" : ""}`}
+      >
+        {activeSection === "dashboard" && (
+          <DashboardSection
+            data={data}
+            setActiveSection={setActiveSection}
+            darkMode={darkMode}
+          />
+        )}
+        {activeSection === "quiz" && (
+          <VisionQuizSection
+            data={data}
+            updateQuizAnswer={updateQuizAnswer}
+            submitQuiz={submitQuiz}
+            resetQuiz={resetQuiz}
+            setActiveSection={setActiveSection}
+          />
+        )}
         {activeSection === "vision" && (
           <VisionSection
             data={data}
@@ -392,6 +614,1007 @@ export default function InteractiveGuide({ auth }) {
           </div>
         </div>
       </footer>
+    </div>
+  );
+}
+
+// Dashboard/Home Section Component
+function DashboardSection({ data, setActiveSection, darkMode }) {
+  // Calculate wedding countdown
+  const weddingDate = data.weddingDate ? new Date(data.weddingDate) : null;
+  const today = new Date();
+  const daysUntilWedding = weddingDate
+    ? Math.ceil((weddingDate - today) / (1000 * 60 * 60 * 24))
+    : null;
+
+  // Calculate overall statistics
+  const budgetTotal = data.budget?.total || 0;
+  const budgetAllocated = Object.values(data.budget?.categories || {}).reduce(
+    (sum, cat) => sum + (cat.amount || 0),
+    0
+  );
+  const budgetRemaining = budgetTotal - budgetAllocated;
+  const budgetCompletion =
+    budgetTotal > 0 ? (budgetAllocated / budgetTotal) * 100 : 0;
+
+  const totalVendors = data.vendors?.length || 0;
+  const bookedVendors =
+    data.vendors?.filter((v) => v.status === "Booked").length || 0;
+  const vendorCompletion =
+    totalVendors > 0 ? (bookedVendors / totalVendors) * 100 : 0;
+
+  const totalTasks = data.taskList?.length || 0;
+  const completedTasks =
+    data.taskList?.filter((t) => t.status === "Completed").length || 0;
+  const taskCompletion =
+    totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+
+  const overdueTasks =
+    data.taskList?.filter((task) => {
+      if (task.status === "Completed" || !task.dueDate) return false;
+      return new Date(task.dueDate) < today;
+    }).length || 0;
+
+  const overallProgress = Math.round(
+    (budgetCompletion + vendorCompletion + taskCompletion) / 3
+  );
+
+  // Section navigation cards
+  const sectionCards = [
+    {
+      id: "quiz",
+      name: "Vision Quiz",
+      icon: "💎",
+      description: "Discover your wedding style with our quiz",
+      stats: data.visionQuiz?.result
+        ? `${data.visionQuiz.result.title}`
+        : "Not taken",
+      color: "from-purple-600 to-pink-600",
+    },
+    {
+      id: "vision",
+      name: "Vision & Values",
+      icon: "✨",
+      description: "Define your wedding priorities and intentions",
+      stats: `${data.priorities?.filter((p) => p).length || 0} priorities`,
+      color: "from-purple-500 to-pink-500",
+    },
+    {
+      id: "budget",
+      name: "Budget Builder",
+      icon: "💰",
+      description: "Plan and track your wedding expenses",
+      stats:
+        budgetTotal > 0
+          ? `₦${(budgetTotal / 1000000).toFixed(1)}M total`
+          : "Not set",
+      color: "from-green-500 to-emerald-500",
+    },
+    {
+      id: "vendors",
+      name: "Vendor Tracker",
+      icon: "🏪",
+      description: "Manage your wedding service providers",
+      stats: `${bookedVendors}/${totalVendors} booked`,
+      color: "from-blue-500 to-cyan-500",
+    },
+    {
+      id: "timeline",
+      name: "Timeline & Tasks",
+      icon: "📅",
+      description: "Organize tasks and track deadlines",
+      stats: `${completedTasks}/${totalTasks} completed`,
+      color: "from-orange-500 to-red-500",
+    },
+    {
+      id: "blueprint",
+      name: "Final Blueprint",
+      icon: "📋",
+      description: "Review your complete wedding plan",
+      stats: `${overallProgress}% complete`,
+      color: "from-indigo-500 to-purple-500",
+    },
+  ];
+
+  return (
+    <div className="space-y-8">
+      {/* Welcome Header */}
+      <div className="bg-gradient-to-r from-[#CE805C] to-[#b86a4a] rounded-xl p-8 text-white">
+        <h1 className="text-3xl font-bold mb-2">
+          Welcome to Your Hausa Wedding Guide
+        </h1>
+        <p className="text-lg opacity-90">
+          Your personalized planning dashboard for a beautiful and blessed
+          celebration
+        </p>
+      </div>
+
+      {/* Wedding Countdown Card */}
+      {weddingDate && (
+        <div className="bg-white rounded-xl border p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-1">
+                Wedding Countdown
+              </h2>
+              <p className="text-gray-600">
+                {weddingDate.toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="text-5xl font-bold text-[#CE805C]">
+                {daysUntilWedding > 0 ? daysUntilWedding : 0}
+              </div>
+              <div className="text-sm text-gray-600 mt-1">
+                {daysUntilWedding > 0
+                  ? "days to go"
+                  : daysUntilWedding === 0
+                    ? "Today!"
+                    : "days ago"}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Overall Progress */}
+        <div className="bg-white rounded-xl border p-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-gray-900">Overall Progress</h3>
+            <span className="text-2xl">🎯</span>
+          </div>
+          <div className="text-3xl font-bold text-[#CE805C] mb-2">
+            {overallProgress}%
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className="bg-[#CE805C] h-2 rounded-full transition-all duration-500"
+              style={{ width: `${overallProgress}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Budget Status */}
+        <div className="bg-white rounded-xl border p-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-gray-900">Budget Status</h3>
+            <span className="text-2xl">💰</span>
+          </div>
+          <div className="text-2xl font-bold text-gray-900 mb-1">
+            {budgetTotal > 0
+              ? new Intl.NumberFormat("en-NG", {
+                  style: "currency",
+                  currency: "NGN",
+                  minimumFractionDigits: 0,
+                }).format(budgetRemaining)
+              : "Not set"}
+          </div>
+          <p className="text-sm text-gray-600">
+            {budgetTotal > 0
+              ? `${Math.round(budgetCompletion)}% allocated`
+              : "Set your budget"}
+          </p>
+        </div>
+
+        {/* Vendor Progress */}
+        <div className="bg-white rounded-xl border p-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-gray-900">Vendors</h3>
+            <span className="text-2xl">🏪</span>
+          </div>
+          <div className="text-3xl font-bold text-gray-900 mb-1">
+            {bookedVendors}/{totalVendors}
+          </div>
+          <p className="text-sm text-gray-600">
+            {totalVendors > 0
+              ? `${Math.round(vendorCompletion)}% booked`
+              : "No vendors yet"}
+          </p>
+        </div>
+
+        {/* Task Status */}
+        <div className="bg-white rounded-xl border p-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-gray-900">Tasks</h3>
+            <span className="text-2xl">✅</span>
+          </div>
+          <div className="text-3xl font-bold text-gray-900 mb-1">
+            {completedTasks}/{totalTasks}
+          </div>
+          <p className="text-sm text-gray-600">
+            {overdueTasks > 0 ? (
+              <span className="text-red-600 font-medium">
+                {overdueTasks} overdue
+              </span>
+            ) : totalTasks > 0 ? (
+              `${Math.round(taskCompletion)}% complete`
+            ) : (
+              "No tasks yet"
+            )}
+          </p>
+        </div>
+      </div>
+
+      {/* Section Navigation */}
+      <div>
+        <h2 className="text-2xl font-semibold mb-4 text-gray-900">
+          Planning Sections
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {sectionCards.map((section) => (
+            <button
+              key={section.id}
+              onClick={() => setActiveSection(section.id)}
+              className="group bg-white rounded-xl border p-6 text-left hover:shadow-lg transition-all duration-300 hover:scale-105"
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div
+                  className={`text-4xl p-3 rounded-lg bg-gradient-to-br ${section.color} text-white`}
+                >
+                  {section.icon}
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-[#CE805C] transition-colors">
+                {section.name}
+              </h3>
+              <p className="text-sm text-gray-600 mb-3">
+                {section.description}
+              </p>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-gray-500">
+                  {section.stats}
+                </span>
+                <span className="text-[#CE805C] opacity-0 group-hover:opacity-100 transition-opacity">
+                  →
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      {(weddingDate || totalVendors > 0 || totalTasks > 0) && (
+        <div className="bg-white rounded-xl border p-6">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900">
+            Quick Actions
+          </h2>
+          <div className="flex flex-wrap gap-3">
+            {!weddingDate && (
+              <button
+                onClick={() => setActiveSection("timeline")}
+                className="px-4 py-2 bg-[#CE805C] text-white rounded-lg hover:bg-[#b86a4a] transition-colors text-sm font-medium"
+              >
+                📅 Set Wedding Date
+              </button>
+            )}
+            {totalVendors === 0 && (
+              <button
+                onClick={() => setActiveSection("vendors")}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              >
+                🏪 Add First Vendor
+              </button>
+            )}
+            {totalTasks === 0 && (
+              <button
+                onClick={() => setActiveSection("timeline")}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+              >
+                ✅ Create First Task
+              </button>
+            )}
+            {budgetTotal === 0 && (
+              <button
+                onClick={() => setActiveSection("budget")}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+              >
+                💰 Set Budget
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Getting Started Guide (for empty state) */}
+      {!weddingDate &&
+        totalVendors === 0 &&
+        totalTasks === 0 &&
+        budgetTotal === 0 && (
+          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl border border-blue-200 p-8">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-900 flex items-center gap-2">
+              <span>🌟</span> Let's Get Started!
+            </h2>
+            <p className="text-gray-700 mb-6">
+              Welcome to your wedding planning journey! Here are the recommended
+              steps to begin:
+            </p>
+            <ol className="space-y-3 mb-6">
+              <li className="flex items-start gap-3">
+                <span className="flex-shrink-0 w-6 h-6 bg-[#CE805C] text-white rounded-full flex items-center justify-center text-xs font-bold">
+                  1
+                </span>
+                <div>
+                  <strong className="text-gray-900">Define Your Vision</strong>
+                  <p className="text-sm text-gray-600">
+                    Start by setting your top priorities and writing your niyyah
+                    (intention)
+                  </p>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="flex-shrink-0 w-6 h-6 bg-[#CE805C] text-white rounded-full flex items-center justify-center text-xs font-bold">
+                  2
+                </span>
+                <div>
+                  <strong className="text-gray-900">Set Your Budget</strong>
+                  <p className="text-sm text-gray-600">
+                    Establish your total budget and allocate funds to different
+                    categories
+                  </p>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="flex-shrink-0 w-6 h-6 bg-[#CE805C] text-white rounded-full flex items-center justify-center text-xs font-bold">
+                  3
+                </span>
+                <div>
+                  <strong className="text-gray-900">
+                    Choose Your Wedding Date
+                  </strong>
+                  <p className="text-sm text-gray-600">
+                    Pick your special day to start the countdown and plan your
+                    timeline
+                  </p>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="flex-shrink-0 w-6 h-6 bg-[#CE805C] text-white rounded-full flex items-center justify-center text-xs font-bold">
+                  4
+                </span>
+                <div>
+                  <strong className="text-gray-900">
+                    Start Tracking Vendors & Tasks
+                  </strong>
+                  <p className="text-sm text-gray-600">
+                    Add vendors you're considering and create tasks to stay
+                    organized
+                  </p>
+                </div>
+              </li>
+            </ol>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => setActiveSection("quiz")}
+                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-medium shadow-lg"
+              >
+                💎 Take Vision Quiz
+              </button>
+              <button
+                onClick={() => setActiveSection("vision")}
+                className="px-6 py-3 bg-[#CE805C] text-white rounded-lg hover:bg-[#b86a4a] transition-colors font-medium"
+              >
+                Start with Vision & Values →
+              </button>
+            </div>
+          </div>
+        )}
+    </div>
+  );
+}
+
+// Vision Quiz Section Component
+function VisionQuizSection({
+  data,
+  updateQuizAnswer,
+  submitQuiz,
+  resetQuiz,
+  setActiveSection,
+}) {
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [showResults, setShowResults] = useState(false);
+
+  // Quiz questions
+  const questions = [
+    {
+      id: "q1",
+      question: "What best describes your ideal wedding atmosphere?",
+      options: [
+        {
+          value: "traditional",
+          text: "Traditional and cultural - honoring Hausa customs fully",
+          points: { traditional: 3, modern: 0, fusion: 1 },
+        },
+        {
+          value: "modern",
+          text: "Modern and contemporary - minimalist with Western touches",
+          points: { traditional: 0, modern: 3, fusion: 1 },
+        },
+        {
+          value: "fusion",
+          text: "Fusion - blending Hausa traditions with modern elements",
+          points: { traditional: 1, modern: 1, fusion: 3 },
+        },
+        {
+          value: "grand",
+          text: "Grand and luxurious - opulent celebration regardless of style",
+          points: { traditional: 1, modern: 2, fusion: 2 },
+        },
+      ],
+    },
+    {
+      id: "q2",
+      question:
+        "How important is the Kayan Lefe (bridal gifts) tradition to you?",
+      options: [
+        {
+          value: "essential",
+          text: "Essential - a complete traditional Kayan Lefe is a must",
+          points: { traditional: 3, modern: 0, fusion: 1 },
+        },
+        {
+          value: "important",
+          text: "Important but flexible - I'll adapt it to my taste",
+          points: { traditional: 1, modern: 1, fusion: 3 },
+        },
+        {
+          value: "symbolic",
+          text: "Symbolic only - just the key items to honor tradition",
+          points: { traditional: 1, modern: 2, fusion: 2 },
+        },
+        {
+          value: "minimal",
+          text: "Minimal - I prefer practical gifts over traditional items",
+          points: { traditional: 0, modern: 3, fusion: 1 },
+        },
+      ],
+    },
+    {
+      id: "q3",
+      question: "What's your vision for the wedding attire?",
+      options: [
+        {
+          value: "full-traditional",
+          text: "Full traditional Hausa attire for all events",
+          points: { traditional: 3, modern: 0, fusion: 1 },
+        },
+        {
+          value: "mix-match",
+          text: "Traditional for main events, modern for reception",
+          points: { traditional: 1, modern: 1, fusion: 3 },
+        },
+        {
+          value: "modern-elegant",
+          text: "Modern elegant gowns with subtle cultural touches",
+          points: { traditional: 0, modern: 3, fusion: 2 },
+        },
+        {
+          value: "multiple-changes",
+          text: "Multiple outfit changes showcasing different styles",
+          points: { traditional: 1, modern: 2, fusion: 2 },
+        },
+      ],
+    },
+    {
+      id: "q4",
+      question: "How do you want to structure your wedding events?",
+      options: [
+        {
+          value: "all-traditional",
+          text: "All traditional events - Fatiha, Kamu, Walima as customary",
+          points: { traditional: 3, modern: 0, fusion: 1 },
+        },
+        {
+          value: "combined",
+          text: "Combine some events for convenience and cost",
+          points: { traditional: 1, modern: 2, fusion: 3 },
+        },
+        {
+          value: "simplified",
+          text: "Simplified - just the essential religious ceremony and reception",
+          points: { traditional: 0, modern: 3, fusion: 1 },
+        },
+        {
+          value: "extended",
+          text: "Extended celebration with additional modern events (e.g., rehearsal dinner)",
+          points: { traditional: 1, modern: 2, fusion: 2 },
+        },
+      ],
+    },
+    {
+      id: "q5",
+      question: "What's your approach to wedding decor and aesthetics?",
+      options: [
+        {
+          value: "cultural-colors",
+          text: "Rich cultural colors and traditional Hausa patterns",
+          points: { traditional: 3, modern: 0, fusion: 1 },
+        },
+        {
+          value: "elegant-neutral",
+          text: "Elegant neutrals with minimalist modern design",
+          points: { traditional: 0, modern: 3, fusion: 1 },
+        },
+        {
+          value: "cultural-modern",
+          text: "Cultural elements presented in a modern aesthetic",
+          points: { traditional: 1, modern: 1, fusion: 3 },
+        },
+        {
+          value: "luxury-glam",
+          text: "Luxurious and glamorous regardless of cultural style",
+          points: { traditional: 1, modern: 2, fusion: 2 },
+        },
+      ],
+    },
+    {
+      id: "q6",
+      question: "What role will family traditions play in your planning?",
+      options: [
+        {
+          value: "central",
+          text: "Central - family elders guide all major decisions",
+          points: { traditional: 3, modern: 0, fusion: 1 },
+        },
+        {
+          value: "collaborative",
+          text: "Collaborative - I balance family input with personal choices",
+          points: { traditional: 1, modern: 1, fusion: 3 },
+        },
+        {
+          value: "respectful-independent",
+          text: "Respectful but independent - I make final decisions",
+          points: { traditional: 0, modern: 3, fusion: 2 },
+        },
+        {
+          value: "selective",
+          text: "Selective - honor key traditions, skip others",
+          points: { traditional: 1, modern: 2, fusion: 2 },
+        },
+      ],
+    },
+    {
+      id: "q7",
+      question: "How important is it to have traditional Hausa entertainment?",
+      options: [
+        {
+          value: "must-have",
+          text: "Must have - traditional music and cultural performances",
+          points: { traditional: 3, modern: 0, fusion: 1 },
+        },
+        {
+          value: "mix-both",
+          text: "Mix of traditional and contemporary music/entertainment",
+          points: { traditional: 1, modern: 1, fusion: 3 },
+        },
+        {
+          value: "mostly-modern",
+          text: "Mostly modern - DJ, band, contemporary performances",
+          points: { traditional: 0, modern: 3, fusion: 1 },
+        },
+        {
+          value: "unique",
+          text: "Unique fusion - maybe live band playing traditional songs modernly",
+          points: { traditional: 1, modern: 2, fusion: 3 },
+        },
+      ],
+    },
+    {
+      id: "q8",
+      question: "What's your priority for the wedding menu?",
+      options: [
+        {
+          value: "all-hausa",
+          text: "All traditional Hausa cuisine - Tuwo, Miyan Kuka, etc.",
+          points: { traditional: 3, modern: 0, fusion: 1 },
+        },
+        {
+          value: "nigerian-variety",
+          text: "Variety of Nigerian cuisines including Hausa favorites",
+          points: { traditional: 2, modern: 1, fusion: 3 },
+        },
+        {
+          value: "international",
+          text: "International menu with some Nigerian options",
+          points: { traditional: 0, modern: 3, fusion: 1 },
+        },
+        {
+          value: "gourmet-fusion",
+          text: "Gourmet fusion - traditional dishes with modern presentation",
+          points: { traditional: 1, modern: 2, fusion: 3 },
+        },
+      ],
+    },
+  ];
+
+  // Calculate result based on answers
+  const calculateResult = () => {
+    const scores = { traditional: 0, modern: 0, fusion: 0 };
+
+    Object.entries(data.visionQuiz.answers).forEach(
+      ([questionId, answerValue]) => {
+        const question = questions.find((q) => q.id === questionId);
+        const selectedOption = question?.options.find(
+          (opt) => opt.value === answerValue
+        );
+
+        if (selectedOption) {
+          scores.traditional += selectedOption.points.traditional;
+          scores.modern += selectedOption.points.modern;
+          scores.fusion += selectedOption.points.fusion;
+        }
+      }
+    );
+
+    // Determine dominant style
+    const maxScore = Math.max(scores.traditional, scores.modern, scores.fusion);
+    let resultType;
+
+    if (scores.traditional === maxScore) {
+      resultType = "traditional";
+    } else if (scores.modern === maxScore) {
+      resultType = "modern";
+    } else {
+      resultType = "fusion";
+    }
+
+    return {
+      type: resultType,
+      scores,
+      title:
+        resultType === "traditional"
+          ? "The Traditional Hausa Bride"
+          : resultType === "modern"
+            ? "The Modern Minimalist Bride"
+            : "The Fusion Innovator Bride",
+      description:
+        resultType === "traditional"
+          ? "You honor your heritage deeply and want a wedding that celebrates traditional Hausa customs in their full glory. Your celebration will be rich with cultural significance, from the complete Kayan Lefe to authentic ceremonial events."
+          : resultType === "modern"
+            ? "You value contemporary elegance and simplicity. Your wedding will blend essential cultural elements with modern aesthetics, creating a sophisticated celebration that feels fresh and personal."
+            : "You're a bridge between worlds, beautifully blending cherished Hausa traditions with modern sensibilities. Your wedding will honor your heritage while expressing your unique contemporary vision.",
+      recommendations:
+        resultType === "traditional"
+          ? [
+              "✨ Prioritize a complete traditional Kayan Lefe with authentic items",
+              "👗 Invest in high-quality traditional Hausa attire from master tailors",
+              "🎵 Book traditional Hausa musicians and cultural performers",
+              "🍲 Feature authentic Hausa cuisine with all the traditional dishes",
+              "🎨 Use rich cultural colors and traditional patterns in decor",
+              "📅 Follow the complete traditional event sequence (Fatiha, Kamu, Walima)",
+              "👪 Involve family elders in all major planning decisions",
+              "📸 Capture cultural ceremonies and traditional rituals extensively",
+            ]
+          : resultType === "modern"
+            ? [
+                "🎨 Choose elegant neutral color palettes with minimalist design",
+                "👗 Select modern gowns with subtle cultural touches or accessories",
+                "📅 Simplify events - combine where appropriate for efficiency",
+                "🍽️ Offer international menu with select Nigerian favorites",
+                "💐 Contemporary floral arrangements and modern venue styling",
+                "🎵 Hire professional DJ or modern band for entertainment",
+                "📱 Utilize digital tools for invitations and RSVPs",
+                "✨ Focus on quality over quantity - fewer vendors, better service",
+              ]
+            : [
+                "🌟 Create a signature fusion aesthetic blending both worlds",
+                "👗 Mix traditional and modern attire across different events",
+                "🎨 Use traditional patterns in modern color palettes and layouts",
+                "🍲 Offer gourmet fusion - traditional dishes with modern presentation",
+                "🎵 Book live band to perform traditional songs with contemporary arrangements",
+                "📅 Keep key traditional ceremonies but add modern reception elements",
+                "✨ Collaborative planning - balance family input with your vision",
+                "📸 Highlight the beautiful blend of cultures in your photography",
+              ],
+    };
+  };
+
+  const answeredQuestions = Object.keys(data.visionQuiz.answers).length;
+  const allAnswered = answeredQuestions === questions.length;
+  const currentAnswer = data.visionQuiz.answers[questions[currentQuestion]?.id];
+
+  const handleNext = () => {
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
+    } else if (allAnswered) {
+      const result = calculateResult();
+      submitQuiz(result);
+      setShowResults(true);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentQuestion > 0) {
+      setCurrentQuestion(currentQuestion - 1);
+    }
+  };
+
+  const handleFinish = () => {
+    const result = calculateResult();
+    submitQuiz(result);
+    setShowResults(true);
+  };
+
+  // If quiz already completed, show results
+  if (data.visionQuiz.result || showResults) {
+    const result = data.visionQuiz.result || calculateResult();
+
+    return (
+      <div className="space-y-8">
+        {/* Results Header */}
+        <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-8 text-white">
+          <div className="text-center">
+            <div className="text-6xl mb-4">
+              {result.type === "traditional"
+                ? "👑"
+                : result.type === "modern"
+                  ? "✨"
+                  : "💎"}
+            </div>
+            <h1 className="text-3xl font-bold mb-3">{result.title}</h1>
+            <p className="text-lg opacity-90 max-w-2xl mx-auto">
+              {result.description}
+            </p>
+          </div>
+        </div>
+
+        {/* Score Breakdown */}
+        <div className="bg-white rounded-xl border p-6">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900">
+            Your Style Profile
+          </h2>
+          <div className="space-y-4">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">
+                  Traditional
+                </span>
+                <span className="text-sm font-bold text-purple-600">
+                  {result.scores.traditional} points
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div
+                  className="bg-purple-600 h-3 rounded-full transition-all duration-500"
+                  style={{
+                    width: `${(result.scores.traditional / 24) * 100}%`,
+                  }}
+                />
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">
+                  Modern
+                </span>
+                <span className="text-sm font-bold text-blue-600">
+                  {result.scores.modern} points
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div
+                  className="bg-blue-600 h-3 rounded-full transition-all duration-500"
+                  style={{ width: `${(result.scores.modern / 24) * 100}%` }}
+                />
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">
+                  Fusion
+                </span>
+                <span className="text-sm font-bold text-pink-600">
+                  {result.scores.fusion} points
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div
+                  className="bg-pink-600 h-3 rounded-full transition-all duration-500"
+                  style={{ width: `${(result.scores.fusion / 24) * 100}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Personalized Recommendations */}
+        <div className="bg-white rounded-xl border p-6">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900">
+            Personalized Recommendations
+          </h2>
+          <p className="text-gray-600 mb-4">
+            Based on your style, here are tailored suggestions for your wedding
+            planning:
+          </p>
+          <ul className="space-y-3">
+            {result.recommendations.map((rec, index) => (
+              <li key={index} className="flex items-start gap-3">
+                <span className="text-lg mt-0.5">{rec.split(" ")[0]}</span>
+                <span className="text-gray-700">
+                  {rec.substring(rec.indexOf(" ") + 1)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Next Steps */}
+        <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl border border-blue-200 p-6">
+          <h2 className="text-xl font-semibold mb-3 text-gray-900">
+            Next Steps
+          </h2>
+          <p className="text-gray-700 mb-4">
+            Now that you know your wedding style, use this insight to guide your
+            planning decisions. Your style profile will help you make choices
+            that feel authentic to you.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => setActiveSection("vision")}
+              className="px-6 py-3 bg-[#CE805C] text-white rounded-lg hover:bg-[#b86a4a] transition-colors font-medium"
+            >
+              Define Your Priorities →
+            </button>
+            <button
+              onClick={() => setActiveSection("budget")}
+              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+            >
+              Build Your Budget →
+            </button>
+            <button
+              onClick={resetQuiz}
+              className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+            >
+              Retake Quiz
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Quiz interface
+  const question = questions[currentQuestion];
+  const progress = ((currentQuestion + 1) / questions.length) * 100;
+
+  return (
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-8 text-white">
+        <h1 className="text-3xl font-bold mb-2">
+          Discover Your Wedding Vision
+        </h1>
+        <p className="text-lg opacity-90">
+          Answer 8 questions to reveal your unique bridal style and get
+          personalized recommendations
+        </p>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="bg-white rounded-xl border p-6">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-medium text-gray-700">
+            Question {currentQuestion + 1} of {questions.length}
+          </span>
+          <span className="text-sm font-medium text-purple-600">
+            {Math.round(progress)}% Complete
+          </span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-3">
+          <div
+            className="bg-gradient-to-r from-purple-600 to-pink-600 h-3 rounded-full transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Question Card */}
+      <div className="bg-white rounded-xl border p-8">
+        <h2 className="text-2xl font-semibold mb-6 text-gray-900">
+          {question.question}
+        </h2>
+        <div className="space-y-3">
+          {question.options.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => updateQuizAnswer(question.id, option.value)}
+              className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                currentAnswer === option.value
+                  ? "border-purple-600 bg-purple-50"
+                  : "border-gray-200 hover:border-purple-300 hover:bg-gray-50"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                    currentAnswer === option.value
+                      ? "border-purple-600 bg-purple-600"
+                      : "border-gray-300"
+                  }`}
+                >
+                  {currentAnswer === option.value && (
+                    <div className="w-2 h-2 bg-white rounded-full" />
+                  )}
+                </div>
+                <span
+                  className={`${
+                    currentAnswer === option.value
+                      ? "text-purple-900 font-medium"
+                      : "text-gray-700"
+                  }`}
+                >
+                  {option.text}
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={handlePrevious}
+          disabled={currentQuestion === 0}
+          className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          ← Previous
+        </button>
+
+        <div className="flex gap-3">
+          {answeredQuestions === questions.length &&
+          currentQuestion === questions.length - 1 ? (
+            <button
+              onClick={handleFinish}
+              className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-medium shadow-lg"
+            >
+              See My Results ✨
+            </button>
+          ) : (
+            <button
+              onClick={handleNext}
+              disabled={!currentAnswer}
+              className="px-6 py-3 bg-[#CE805C] text-white rounded-lg hover:bg-[#b86a4a] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {currentQuestion === questions.length - 1 ? "Finish" : "Next →"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Summary Progress */}
+      <div className="bg-gray-50 rounded-xl border p-6">
+        <h3 className="text-sm font-semibold text-gray-700 mb-3">
+          Quiz Progress
+        </h3>
+        <div className="flex flex-wrap gap-2">
+          {questions.map((q, index) => (
+            <div
+              key={q.id}
+              className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-medium ${
+                data.visionQuiz.answers[q.id]
+                  ? "bg-purple-600 text-white"
+                  : index === currentQuestion
+                    ? "bg-purple-200 text-purple-900 border-2 border-purple-600"
+                    : "bg-gray-200 text-gray-500"
+              }`}
+            >
+              {index + 1}
+            </div>
+          ))}
+        </div>
+        <p className="text-sm text-gray-600 mt-3">
+          {answeredQuestions} of {questions.length} questions answered
+          {answeredQuestions === questions.length && " - Ready to see results!"}
+        </p>
+      </div>
     </div>
   );
 }

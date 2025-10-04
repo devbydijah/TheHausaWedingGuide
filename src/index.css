@@ -162,6 +162,50 @@ a:focus {
     background: white !important;
     color: black !important;
   }
+
+  /* Hide non-printable elements */
+  header nav,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Improve print layout */
+  .print-section {
+    page-break-inside: avoid;
+    margin-bottom: 20px;
+  }
+
+  /* Ensure cards print nicely */
+  .bg-white,
+  .bg-gray-50,
+  .bg-gray-100 {
+    background: white !important;
+    border: 1px solid #e5e5e5 !important;
+  }
+
+  /* Preserve important colors */
+  .text-green-600,
+  .bg-green-600 {
+    color: #059669 !important;
+    background-color: #059669 !important;
+  }
+
+  /* Print links with URLs */
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+}
+
+/* Dark mode styles */
+.dark-mode {
+  --text-primary: #ffffff;
+  --text-secondary: #e5e5e5;
+  --bg-primary: #111827;
+  --bg-secondary: #1f2937;
+  --border-color: #374151;
 }
 
 /* Dark mode preparation (for future enhancement) */
