@@ -690,17 +690,31 @@ function VendorSection({ data, addVendor, updateVendor, deleteVendor }) {
   ];
 
   const statuses = [
-    { value: "researching", label: "Researching", color: "bg-gray-100 text-gray-700" },
-    { value: "contacted", label: "Contacted", color: "bg-blue-100 text-blue-700" },
-    { value: "quoted", label: "Quoted", color: "bg-yellow-100 text-yellow-700" },
+    {
+      value: "researching",
+      label: "Researching",
+      color: "bg-gray-100 text-gray-700",
+    },
+    {
+      value: "contacted",
+      label: "Contacted",
+      color: "bg-blue-100 text-blue-700",
+    },
+    {
+      value: "quoted",
+      label: "Quoted",
+      color: "bg-yellow-100 text-yellow-700",
+    },
     { value: "booked", label: "Booked", color: "bg-green-100 text-green-700" },
     { value: "declined", label: "Declined", color: "bg-red-100 text-red-700" },
   ];
 
   // Filter vendors
   const filteredVendors = data.vendorList.filter((vendor) => {
-    const categoryMatch = filterCategory === "all" || vendor.category === filterCategory;
-    const statusMatch = filterStatus === "all" || vendor.status === filterStatus;
+    const categoryMatch =
+      filterCategory === "all" || vendor.category === filterCategory;
+    const statusMatch =
+      filterStatus === "all" || vendor.status === filterStatus;
     return categoryMatch && statusMatch;
   });
 
@@ -715,11 +729,16 @@ function VendorSection({ data, addVendor, updateVendor, deleteVendor }) {
   };
 
   const getStatusColor = (status) => {
-    return statuses.find((s) => s.value === status)?.color || "bg-gray-100 text-gray-700";
+    return (
+      statuses.find((s) => s.value === status)?.color ||
+      "bg-gray-100 text-gray-700"
+    );
   };
 
   const getCategoryLabel = (categoryValue) => {
-    return categories.find((c) => c.value === categoryValue)?.label || categoryValue;
+    return (
+      categories.find((c) => c.value === categoryValue)?.label || categoryValue
+    );
   };
 
   return (
@@ -728,7 +747,9 @@ function VendorSection({ data, addVendor, updateVendor, deleteVendor }) {
       <div className="bg-white rounded-xl border p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900">Vendor Tracker</h2>
+            <h2 className="text-2xl font-semibold text-gray-900">
+              Vendor Tracker
+            </h2>
             <p className="text-sm text-gray-600 mt-1">
               Organize and track all your wedding vendors in one place
             </p>
