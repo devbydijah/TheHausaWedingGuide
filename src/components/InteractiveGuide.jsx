@@ -28,8 +28,9 @@ const DEFAULT_GUIDE = {
   vendorList: [], // Array of { name, category, contact, status, notes }
 
   // Section 4: Timeline & Task Manager
-  taskList: [], // Array of { task, dueDate, category, completed }
-  milestones: [], // Key dates (e.g., engagement, nikah)
+  weddingDate: "", // ISO date string (YYYY-MM-DD)
+  taskList: [], // Array of { id, title, category, dueDate, status, priority, notes, createdAt }
+  showCompletedTasks: true, // Toggle for showing/hiding completed tasks
 
   // Section 5: Final Blueprint
   finalChecklist: [], // Master checklist items
@@ -206,6 +207,52 @@ export default function InteractiveGuide({ auth }) {
     }));
   };
 
+  // Timeline & Task Manager handlers
+  const setWeddingDate = (date) => {
+    updateData((prev) => ({
+      ...prev,
+      weddingDate: date,
+    }));
+  };
+
+  const addTask = (task) => {
+    updateData((prev) => ({
+      ...prev,
+      taskList: [
+        ...prev.taskList,
+        {
+          ...task,
+          id: Date.now().toString(),
+          createdAt: Date.now(),
+        },
+      ],
+    }));
+  };
+
+  const updateTask = (id, updatedFields) => {
+    updateData((prev) => ({
+      ...prev,
+      taskList: prev.taskList.map((task) =>
+        task.id === id ? { ...task, ...updatedFields } : task
+      ),
+    }));
+  };
+
+  const deleteTask = (id) => {
+    if (!confirm("Are you sure you want to delete this task?")) return;
+    updateData((prev) => ({
+      ...prev,
+      taskList: prev.taskList.filter((task) => task.id !== id),
+    }));
+  };
+
+  const toggleShowCompleted = () => {
+    updateData((prev) => ({
+      ...prev,
+      showCompletedTasks: !prev.showCompletedTasks,
+    }));
+  };
+
   const completed = data.checklists.reduce(
     (acc, s) => acc + s.items.filter((i) => i.done).length,
     0
@@ -289,7 +336,16 @@ export default function InteractiveGuide({ auth }) {
             deleteVendor={deleteVendor}
           />
         )}
-        {activeSection === "timeline" && <TimelineSection data={data} />}
+        {activeSection === "timeline" && (
+          <TimelineSection
+            data={data}
+            setWeddingDate={setWeddingDate}
+            addTask={addTask}
+            updateTask={updateTask}
+            deleteTask={deleteTask}
+            toggleShowCompleted={toggleShowCompleted}
+          />
+        )}
         {activeSection === "legacy" && (
           <LegacySection
             data={data}
@@ -1064,13 +1120,752 @@ function VendorModal({ vendor, categories, statuses, onSave, onClose }) {
   );
 }
 
-function TimelineSection({ data }) {
+// Timeline & Task Manager Section Component
+function TimelineSection({
+  data,
+  setWeddingDate,
+  addTask,
+  updateTask,
+  deleteTask,
+  toggleShowCompleted,
+}) {
+  const [showModal, setShowModal] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterPriority, setFilterPriority] = useState("all");
+  const [sortBy, setSortBy] = useState("dueDate"); // dueDate | priority | category
+
+  const categories = [
+    { value: "legal", label: "Legal & Documentation" },
+    { value: "venue", label: "Venue & Location" },
+    { value: "catering", label: "Catering & Food" },
+    { value: "attire", label: "Attire & Beauty" },
+    { value: "photography", label: "Photography & Videography" },
+    { value: "decor", label: "Decorations" },
+    { value: "entertainment", label: "Entertainment" },
+    { value: "transportation", label: "Transportation" },
+    { value: "kayan-lefe", label: "Kayan Lefe" },
+    { value: "misc", label: "Miscellaneous" },
+  ];
+
+  const statuses = [
+    { value: "pending", label: "Pending", color: "bg-gray-100 text-gray-700" },
+    {
+      value: "in-progress",
+      label: "In Progress",
+      color: "bg-blue-100 text-blue-700",
+    },
+    {
+      value: "completed",
+      label: "Completed",
+      color: "bg-green-100 text-green-700",
+    },
+  ];
+
+  const priorities = [
+    { value: "high", label: "High", color: "text-red-600", icon: "🔴" },
+    { value: "medium", label: "Medium", color: "text-yellow-600", icon: "🟡" },
+    { value: "low", label: "Low", color: "text-gray-600", icon: "⚪" },
+  ];
+
+  // Default wedding tasks template (optional quick-add)
+  const defaultTasks = [
+    {
+      title: "Book Fatiha date",
+      category: "legal",
+      priority: "high",
+      notes: "Confirm with families and Islamic center",
+    },
+    {
+      title: "Order Kayan Lefe",
+      category: "kayan-lefe",
+      priority: "high",
+      notes: "Traditional gift items for bride",
+    },
+    {
+      title: "Schedule henna ceremony (Kunshi)",
+      category: "attire",
+      priority: "medium",
+      notes: "Book henna artist and venue",
+    },
+    {
+      title: "Book wedding venue",
+      category: "venue",
+      priority: "high",
+      notes: "Contact at least 3 venues for quotes",
+    },
+    {
+      title: "Hire photographer/videographer",
+      category: "photography",
+      priority: "high",
+      notes: "Review portfolios and packages",
+    },
+    {
+      title: "Choose catering menu",
+      category: "catering",
+      priority: "medium",
+      notes: "Include traditional Hausa dishes",
+    },
+    {
+      title: "Order wedding attire",
+      category: "attire",
+      priority: "high",
+      notes: "Bride and groom traditional outfits",
+    },
+    {
+      title: "Arrange transportation",
+      category: "transportation",
+      priority: "medium",
+      notes: "For bridal party and guests",
+    },
+    {
+      title: "Book entertainment (drummers/DJ)",
+      category: "entertainment",
+      priority: "low",
+      notes: "Traditional drummers or modern DJ",
+    },
+    {
+      title: "Plan venue decorations",
+      category: "decor",
+      priority: "medium",
+      notes: "Theme, colors, and floral arrangements",
+    },
+  ];
+
+  // Calculate countdown
+  const getCountdown = () => {
+    if (!data.weddingDate) return null;
+    const wedding = new Date(data.weddingDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    wedding.setHours(0, 0, 0, 0);
+    const diffTime = wedding - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const countdown = getCountdown();
+
+  // Check if task is overdue
+  const isOverdue = (task) => {
+    if (task.status === "completed") return false;
+    if (!task.dueDate) return false;
+    const due = new Date(task.dueDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    due.setHours(0, 0, 0, 0);
+    return due < today;
+  };
+
+  // Filter and sort tasks
+  const filteredTasks = data.taskList
+    .filter((task) => {
+      const categoryMatch =
+        filterCategory === "all" || task.category === filterCategory;
+      const statusMatch =
+        filterStatus === "all" || task.status === filterStatus;
+      const priorityMatch =
+        filterPriority === "all" || task.priority === filterPriority;
+
+      // Hide completed if toggle is off
+      if (!data.showCompletedTasks && task.status === "completed") return false;
+
+      return categoryMatch && statusMatch && priorityMatch;
+    })
+    .sort((a, b) => {
+      if (sortBy === "dueDate") {
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return new Date(a.dueDate) - new Date(b.dueDate);
+      } else if (sortBy === "priority") {
+        const priorityOrder = { high: 0, medium: 1, low: 2 };
+        return priorityOrder[a.priority] - priorityOrder[b.priority];
+      } else if (sortBy === "category") {
+        return a.category.localeCompare(b.category);
+      }
+      return 0;
+    });
+
+  const openAddModal = () => {
+    setEditingTask(null);
+    setShowModal(true);
+  };
+
+  const openEditModal = (task) => {
+    setEditingTask(task);
+    setShowModal(true);
+  };
+
+  const getCategoryLabel = (value) => {
+    return categories.find((c) => c.value === value)?.label || value;
+  };
+
+  const getStatusColor = (value) => {
+    return statuses.find((s) => s.value === value)?.color || "";
+  };
+
+  const getPriorityInfo = (value) => {
+    return (
+      priorities.find((p) => p.value === value) || {
+        icon: "⚪",
+        color: "text-gray-600",
+      }
+    );
+  };
+
+  const toggleTaskStatus = (task) => {
+    const newStatus =
+      task.status === "completed"
+        ? "pending"
+        : task.status === "pending"
+          ? "in-progress"
+          : "completed";
+    updateTask(task.id, { status: newStatus });
+  };
+
+  const addDefaultTasks = () => {
+    if (
+      !confirm(
+        "Add 10 common wedding tasks? You can delete or modify any you don't need."
+      )
+    )
+      return;
+
+    defaultTasks.forEach((task) => {
+      addTask({
+        ...task,
+        status: "pending",
+        dueDate: "", // User will set dates later
+      });
+    });
+  };
+
+  // Task counts
+  const totalTasks = data.taskList.length;
+  const completedTasks = data.taskList.filter(
+    (t) => t.status === "completed"
+  ).length;
+  const overdueTasks = data.taskList.filter((t) => isOverdue(t)).length;
+  const progressPercent =
+    totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
   return (
-    <div className="bg-white rounded-xl border p-6">
-      <h2 className="text-xl font-semibold mb-4">Timeline & Tasks</h2>
-      <p className="text-gray-600">
-        Coming soon! Manage your wedding timeline and tasks.
-      </p>
+    <div className="space-y-6">
+      {/* Wedding Date & Countdown Card */}
+      <div className="bg-white rounded-xl border p-6">
+        <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+          Wedding Timeline & Tasks
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Wedding Date Picker */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Wedding Date *
+            </label>
+            <input
+              type="date"
+              value={data.weddingDate}
+              onChange={(e) => setWeddingDate(e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#CE805C] focus:border-transparent outline-none"
+            />
+          </div>
+
+          {/* Countdown Display */}
+          <div className="flex items-center justify-center bg-gradient-to-br from-[#CE805C] to-[#b86a4a] rounded-lg p-6 text-white">
+            {countdown !== null ? (
+              <div className="text-center">
+                <div className="text-4xl font-bold mb-1">
+                  {countdown > 0 ? countdown : 0}
+                </div>
+                <div className="text-sm opacity-90">
+                  {countdown > 0
+                    ? countdown === 1
+                      ? "day until wedding! 🎉"
+                      : "days until wedding! 🎉"
+                    : countdown === 0
+                      ? "Wedding day is today! 💍"
+                      : "Wedding has passed"}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center opacity-75">
+                <div className="text-2xl mb-1">📅</div>
+                <div className="text-sm">Set your wedding date above</div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Progress Summary */}
+        {totalTasks > 0 && (
+          <div className="mt-6 pt-6 border-t">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-gray-700">
+                Overall Progress
+              </span>
+              <span className="text-sm font-semibold text-[#CE805C]">
+                {completedTasks} / {totalTasks} tasks ({progressPercent}%)
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div
+                className="bg-[#CE805C] h-3 rounded-full transition-all duration-300"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+            {overdueTasks > 0 && (
+              <p className="mt-2 text-sm text-red-600 font-medium">
+                ⚠️ {overdueTasks} overdue{" "}
+                {overdueTasks === 1 ? "task" : "tasks"}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Action Bar */}
+      <div className="bg-white rounded-xl border p-6">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={openAddModal}
+              className="px-4 py-2 bg-[#CE805C] hover:bg-[#b86a4a] text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+            >
+              <span className="text-xl">+</span>
+              Add Task
+            </button>
+            {totalTasks === 0 && (
+              <button
+                onClick={addDefaultTasks}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors text-sm"
+              >
+                + Add Common Tasks
+              </button>
+            )}
+          </div>
+
+          {/* Show/Hide Completed Toggle */}
+          {completedTasks > 0 && (
+            <button
+              onClick={toggleShowCompleted}
+              className="text-sm text-gray-600 hover:text-gray-900 underline"
+            >
+              {data.showCompletedTasks ? "Hide" : "Show"} Completed (
+              {completedTasks})
+            </button>
+          )}
+        </div>
+
+        {/* Filters */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              Filter by Category
+            </label>
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#CE805C] focus:border-transparent outline-none"
+            >
+              <option value="all">All Categories</option>
+              {categories.map((cat) => (
+                <option key={cat.value} value={cat.value}>
+                  {cat.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              Filter by Status
+            </label>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#CE805C] focus:border-transparent outline-none"
+            >
+              <option value="all">All Statuses</option>
+              {statuses.map((status) => (
+                <option key={status.value} value={status.value}>
+                  {status.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              Filter by Priority
+            </label>
+            <select
+              value={filterPriority}
+              onChange={(e) => setFilterPriority(e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#CE805C] focus:border-transparent outline-none"
+            >
+              <option value="all">All Priorities</option>
+              {priorities.map((priority) => (
+                <option key={priority.value} value={priority.value}>
+                  {priority.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              Sort by
+            </label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#CE805C] focus:border-transparent outline-none"
+            >
+              <option value="dueDate">Due Date</option>
+              <option value="priority">Priority</option>
+              <option value="category">Category</option>
+            </select>
+          </div>
+        </div>
+
+        {(filterCategory !== "all" ||
+          filterStatus !== "all" ||
+          filterPriority !== "all") && (
+          <button
+            onClick={() => {
+              setFilterCategory("all");
+              setFilterStatus("all");
+              setFilterPriority("all");
+            }}
+            className="mt-3 text-sm text-[#CE805C] hover:text-[#b86a4a] underline"
+          >
+            Clear All Filters
+          </button>
+        )}
+      </div>
+
+      {/* Task List */}
+      {filteredTasks.length === 0 ? (
+        <div className="bg-white rounded-xl border-2 border-dashed border-gray-300 p-12 text-center">
+          <div className="text-6xl mb-4">✅</div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            {totalTasks === 0 ? "No tasks yet" : "No tasks match your filters"}
+          </h3>
+          <p className="text-gray-600 mb-6">
+            {totalTasks === 0
+              ? "Start planning your wedding by adding tasks!"
+              : "Try adjusting your filters to see more tasks."}
+          </p>
+          {totalTasks === 0 && (
+            <div className="flex items-center justify-center gap-3">
+              <button
+                onClick={openAddModal}
+                className="px-6 py-3 bg-[#CE805C] hover:bg-[#b86a4a] text-white rounded-lg font-medium transition-colors"
+              >
+                + Add Your First Task
+              </button>
+              <button
+                onClick={addDefaultTasks}
+                className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
+              >
+                + Add Common Tasks
+              </button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filteredTasks.map((task) => (
+            <div
+              key={task.id}
+              className={`bg-white rounded-xl border p-5 hover:shadow-md transition-shadow ${
+                task.status === "completed" ? "opacity-60" : ""
+              } ${isOverdue(task) ? "border-l-4 border-l-red-500" : ""}`}
+            >
+              <div className="flex items-start gap-4">
+                {/* Checkbox */}
+                <button
+                  onClick={() => toggleTaskStatus(task)}
+                  className={`mt-1 flex-shrink-0 w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${
+                    task.status === "completed"
+                      ? "bg-green-500 border-green-500"
+                      : task.status === "in-progress"
+                        ? "bg-blue-100 border-blue-500"
+                        : "border-gray-300 hover:border-[#CE805C]"
+                  }`}
+                >
+                  {task.status === "completed" && (
+                    <span className="text-white text-sm">✓</span>
+                  )}
+                  {task.status === "in-progress" && (
+                    <span className="text-blue-600 text-xs">●</span>
+                  )}
+                </button>
+
+                {/* Task Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <h3
+                      className={`text-base font-semibold text-gray-900 ${
+                        task.status === "completed" ? "line-through" : ""
+                      }`}
+                    >
+                      {task.title}
+                    </h3>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className={getPriorityInfo(task.priority).icon}>
+                        {" "}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    {/* Category Badge */}
+                    <span className="inline-block px-2 py-1 bg-[#CE805C] bg-opacity-10 text-[#CE805C] text-xs rounded-md font-medium">
+                      {getCategoryLabel(task.category)}
+                    </span>
+
+                    {/* Status Badge */}
+                    <span
+                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                        task.status
+                      )}`}
+                    >
+                      {statuses.find((s) => s.value === task.status)?.label}
+                    </span>
+
+                    {/* Due Date */}
+                    {task.dueDate && (
+                      <span
+                        className={`text-xs ${
+                          isOverdue(task)
+                            ? "text-red-600 font-semibold"
+                            : "text-gray-600"
+                        }`}
+                      >
+                        📅 Due: {new Date(task.dueDate).toLocaleDateString()}
+                        {isOverdue(task) && " (OVERDUE)"}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Notes */}
+                  {task.notes && (
+                    <p className="text-sm text-gray-600 mb-3">{task.notes}</p>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => openEditModal(task)}
+                      className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-medium transition-colors"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => deleteTask(task.id)}
+                      className="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-medium transition-colors"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Task Modal */}
+      {showModal && (
+        <TaskModal
+          task={editingTask}
+          categories={categories}
+          statuses={statuses}
+          priorities={priorities}
+          onSave={(taskData) => {
+            if (editingTask) {
+              updateTask(editingTask.id, taskData);
+            } else {
+              addTask(taskData);
+            }
+            setShowModal(false);
+          }}
+          onClose={() => setShowModal(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+// Task Modal Component
+function TaskModal({
+  task,
+  categories,
+  statuses,
+  priorities,
+  onSave,
+  onClose,
+}) {
+  const [formData, setFormData] = useState({
+    title: task?.title || "",
+    category: task?.category || categories[0].value,
+    dueDate: task?.dueDate || "",
+    status: task?.status || statuses[0].value,
+    priority: task?.priority || "medium",
+    notes: task?.notes || "",
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.title.trim()) {
+      alert("Please enter a task title");
+      return;
+    }
+    onSave(formData);
+  };
+
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-2xl font-semibold text-gray-900">
+              {task ? "Edit Task" : "Add New Task"}
+            </h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 text-2xl"
+            >
+              ×
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Task Title */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Task Title *
+              </label>
+              <input
+                type="text"
+                value={formData.title}
+                onChange={(e) => handleChange("title", e.target.value)}
+                placeholder="e.g., Book wedding venue"
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#CE805C] focus:border-transparent outline-none"
+                required
+              />
+            </div>
+
+            {/* Category */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category *
+              </label>
+              <select
+                value={formData.category}
+                onChange={(e) => handleChange("category", e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#CE805C] focus:border-transparent outline-none"
+                required
+              >
+                {categories.map((cat) => (
+                  <option key={cat.value} value={cat.value}>
+                    {cat.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Due Date */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Due Date (Optional)
+              </label>
+              <input
+                type="date"
+                value={formData.dueDate}
+                onChange={(e) => handleChange("dueDate", e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#CE805C] focus:border-transparent outline-none"
+              />
+            </div>
+
+            {/* Priority */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Priority *
+              </label>
+              <select
+                value={formData.priority}
+                onChange={(e) => handleChange("priority", e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#CE805C] focus:border-transparent outline-none"
+                required
+              >
+                {priorities.map((priority) => (
+                  <option key={priority.value} value={priority.value}>
+                    {priority.icon} {priority.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Status */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Status *
+              </label>
+              <select
+                value={formData.status}
+                onChange={(e) => handleChange("status", e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#CE805C] focus:border-transparent outline-none"
+                required
+              >
+                {statuses.map((status) => (
+                  <option key={status.value} value={status.value}>
+                    {status.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Notes */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Notes (Optional)
+              </label>
+              <textarea
+                value={formData.notes}
+                onChange={(e) => handleChange("notes", e.target.value)}
+                placeholder="Add any additional details..."
+                rows="4"
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#CE805C] focus:border-transparent outline-none resize-none"
+              />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="flex-1 px-4 py-2 bg-[#CE805C] hover:bg-[#b86a4a] text-white rounded-lg font-medium transition-colors"
+              >
+                {task ? "Save Changes" : "Add Task"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }
