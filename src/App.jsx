@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import GuideForm from "./components/GuideForm";
+import InteractiveGuide from "./components/InteractiveGuide";
 
 function App() {
   const [openFaq, setOpenFaq] = useState(null);
@@ -18,6 +20,11 @@ function App() {
   const [autoClaimTried, setAutoClaimTried] = useState(false);
   const [claimEmail, setClaimEmail] = useState("");
   const claimInputRef = useRef(null);
+
+  // Guide state
+  const params = new URLSearchParams(window.location.search);
+  const showGuide = params.get("guide") === "1";
+  const [auth, setAuth] = useState(null);
 
   // Paystack storefront URLs (live and optional test). Use ?test=1 to open the test URL.
   const PROD_STOREFRONT_URL =
@@ -385,6 +392,15 @@ function App() {
     return <LoadingSkeleton />;
   }
 
+  // Show interactive guide if guide=1 parameter is present
+  if (showGuide) {
+    return auth ? (
+      <InteractiveGuide auth={auth} />
+    ) : (
+      <GuideForm onValidated={setAuth} />
+    );
+  }
+
   return (
     <div className="min-h-screen">
       {/* Floating Navigation */}
@@ -557,6 +573,18 @@ function App() {
                     <div className="text-sm text-white/80">Traditions</div>
                   </div>
                 </div>
+
+                {/* Dev-only: quick link to open the Interactive Guide during testing */}
+                {import.meta.env.DEV && (
+                  <div className="mt-4">
+                    <a
+                      href="/?guide=1&email=test@example.com&token=sample123"
+                      className="inline-flex items-center rounded-lg border border-white/20 px-3 py-2 text-sm font-medium text-white hover:bg-white/5"
+                    >
+                      Open Interactive Guide (dev)
+                    </a>
+                  </div>
+                )}
               </div>
 
               {/* Conditional Purchase/Download Section */}
@@ -921,7 +949,7 @@ function App() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                    d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H9a2 2 0 01-2-2V5z"
                   />
                 </svg>
               </div>
@@ -1247,6 +1275,17 @@ function App() {
             />
           </div>
         </div>
+      )}
+
+      {/* Dev-only floating Guide button for quick access during testing */}
+      {import.meta.env.DEV && (
+        <a
+          href="/?guide=1&email=test@example.com&token=sample123"
+          className="fixed bottom-6 right-6 z-50 rounded-full bg-black text-white px-4 py-3 shadow-lg"
+          title="Open Interactive Guide (dev)"
+        >
+          Guide
+        </a>
       )}
     </div>
   );

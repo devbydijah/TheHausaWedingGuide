@@ -17,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@supabase/supabase-js": "^2.58.0",
     "@tailwindcss/vite": "^4.1.11",
     "better-sqlite3": "^12.4.1",
     "react": "^19.1.1",
