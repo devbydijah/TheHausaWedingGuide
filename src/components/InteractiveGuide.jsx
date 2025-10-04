@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { useLocalProgress } from "../hooks/useLocalProgress";
+import { useMemo, useState, useEffect } from "react";
+import { useSyncToCloud } from "../hooks/useSyncToCloud";
 
 // Expanded data model matching the full plan
 const DEFAULT_GUIDE = {
@@ -72,12 +72,15 @@ const DEFAULT_GUIDE = {
 };
 
 export default function InteractiveGuide({ auth }) {
-  const storageKey = useMemo(
-    () => `hwg:progress:${auth.email}:${auth.token}`,
-    [auth.email, auth.token]
-  );
+  // Cloud sync hook - replaces localStorage-only approach
+  const {
+    data,
+    updateData: setData,
+    syncStatus,
+    lastSynced,
+    isCloudEnabled,
+  } = useSyncToCloud(auth, DEFAULT_GUIDE);
 
-  const [data, setData] = useLocalProgress(storageKey, DEFAULT_GUIDE);
   const [activeSection, setActiveSection] = useState("dashboard"); // Track active section (default to dashboard)
   const [saveStatus, setSaveStatus] = useState(""); // "Saving..." or "Saved"
   const [darkMode, setDarkMode] = useState(() => {
@@ -102,6 +105,15 @@ export default function InteractiveGuide({ auth }) {
   const removeToast = (id) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
+
+  // Watch sync status and show toast only when sync completes
+  useEffect(() => {
+    if (syncStatus === "success" && lastSynced) {
+      showToast("Changes saved", "success");
+    } else if (syncStatus === "error") {
+      showToast("Failed to sync - saved locally", "error");
+    }
+  }, [syncStatus, lastSynced]);
 
   // Dark mode toggle
   const toggleDarkMode = () => {
@@ -166,10 +178,10 @@ export default function InteractiveGuide({ auth }) {
     input.click();
   };
 
-  // Wrapper to show save feedback with toast
+  // Wrapper to update data (debounced save happens in useSyncToCloud)
   const updateData = (updater) => {
     setData(updater);
-    showToast("Changes saved", "success");
+    // Toast will show when syncStatus changes to 'success'
   };
 
   // Legacy checklist toggle (keeping for backward compatibility)
@@ -433,11 +445,52 @@ export default function InteractiveGuide({ auth }) {
       >
         <div className="max-w-5xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
-            <h1
-              className={`text-2xl font-semibold ${darkMode ? "text-white" : "text-gray-900"}`}
-            >
-              Hausa Wedding Guide
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1
+                className={`text-2xl font-semibold ${darkMode ? "text-white" : "text-gray-900"}`}
+              >
+                Hausa Wedding Guide
+              </h1>
+              {/* Sync Status Indicator */}
+              {isCloudEnabled && (
+                <span
+                  className={`text-xs px-2 py-1 rounded-full ${
+                    syncStatus === "syncing"
+                      ? darkMode
+                        ? "bg-blue-900/50 text-blue-300"
+                        : "bg-blue-100 text-blue-600"
+                      : syncStatus === "success"
+                        ? darkMode
+                          ? "bg-green-900/50 text-green-300"
+                          : "bg-green-100 text-green-600"
+                        : syncStatus === "error"
+                          ? darkMode
+                            ? "bg-red-900/50 text-red-300"
+                            : "bg-red-100 text-red-600"
+                          : darkMode
+                            ? "bg-gray-700 text-gray-400"
+                            : "bg-gray-100 text-gray-500"
+                  }`}
+                  title={
+                    syncStatus === "syncing"
+                      ? "Saving changes..."
+                      : syncStatus === "success"
+                        ? `Last saved: ${lastSynced ? new Date(lastSynced).toLocaleTimeString() : "just now"}`
+                        : syncStatus === "error"
+                          ? "Sync error - data saved locally"
+                          : "Cloud sync ready"
+                  }
+                >
+                  {syncStatus === "syncing"
+                    ? "●"
+                    : syncStatus === "success"
+                      ? "☁"
+                      : syncStatus === "error"
+                        ? "⚠"
+                        : "○"}
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-2">
               {/* Dark Mode Toggle */}
               <button

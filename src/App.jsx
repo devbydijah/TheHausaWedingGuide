@@ -175,6 +175,12 @@ function App() {
 
   // Simulate page loading
   useEffect(() => {
+    // Skip loading screen for guide access
+    if (showGuide) {
+      setIsPageLoading(false);
+      return;
+    }
+
     // Simulate loading progress
     const progressInterval = setInterval(() => {
       setLoadingProgress((prev) => {
@@ -395,11 +401,16 @@ function App() {
 
   // Show interactive guide if guide=1 parameter is present
   if (showGuide) {
-    return (
-      <LoginGate onAuthenticated={() => setAuth(true)}>
-        <InteractiveGuide auth={auth} />
-      </LoginGate>
-    );
+    if (!auth) {
+      return (
+        <LoginGate
+          onAuthenticated={(userEmail) => {
+            setAuth(userEmail);
+          }}
+        />
+      );
+    }
+    return <InteractiveGuide auth={auth} />;
   }
 
   return (
