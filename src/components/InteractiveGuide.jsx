@@ -428,7 +428,8 @@ function BudgetSection({ data, updateTotalBudget, updateCategoryField }) {
           Total Wedding Budget
         </h2>
         <p className="text-sm text-gray-600 mb-4">
-          Enter your total budget. All categories will be calculated based on this amount.
+          Enter your total budget. All categories will be calculated based on
+          this amount.
         </p>
 
         <div className="flex items-center gap-3">
@@ -446,7 +447,10 @@ function BudgetSection({ data, updateTotalBudget, updateCategoryField }) {
 
         {data.totalBudget > 0 && (
           <p className="mt-3 text-sm text-gray-600">
-            Total budget set: <span className="font-semibold">₦{data.totalBudget.toLocaleString()}</span>
+            Total budget set:{" "}
+            <span className="font-semibold">
+              ₦{data.totalBudget.toLocaleString()}
+            </span>
           </p>
         )}
       </div>
@@ -458,8 +462,8 @@ function BudgetSection({ data, updateTotalBudget, updateCategoryField }) {
             isOverBudget
               ? "bg-red-50 border-red-300"
               : remaining === 0
-              ? "bg-green-50 border-green-300"
-              : "bg-blue-50 border-blue-300"
+                ? "bg-green-50 border-green-300"
+                : "bg-blue-50 border-blue-300"
           }`}
         >
           <div className="flex items-center justify-between">
@@ -468,13 +472,17 @@ function BudgetSection({ data, updateTotalBudget, updateCategoryField }) {
                 {isOverBudget
                   ? "⚠️ Over Budget!"
                   : remaining === 0
-                  ? "✅ Budget Fully Allocated"
-                  : "💡 Budget Status"}
+                    ? "✅ Budget Fully Allocated"
+                    : "💡 Budget Status"}
               </p>
               <p className="text-sm text-gray-700 mt-1">
-                Total allocated: <span className="font-bold">{totalPercentage.toFixed(1)}%</span>
+                Total allocated:{" "}
+                <span className="font-bold">{totalPercentage.toFixed(1)}%</span>
                 {!isOverBudget && remaining > 0 && (
-                  <span className="ml-2">• Remaining: <span className="font-bold">{remaining.toFixed(1)}%</span></span>
+                  <span className="ml-2">
+                    • Remaining:{" "}
+                    <span className="font-bold">{remaining.toFixed(1)}%</span>
+                  </span>
                 )}
               </p>
             </div>
@@ -491,7 +499,8 @@ function BudgetSection({ data, updateTotalBudget, updateCategoryField }) {
           Budget Categories
         </h2>
         <p className="text-sm text-gray-600 mb-6">
-          Allocate your budget by entering either a percentage or an amount for each category.
+          Allocate your budget by entering either a percentage or an amount for
+          each category.
         </p>
 
         <div className="space-y-4">
@@ -585,7 +594,8 @@ function BudgetSection({ data, updateTotalBudget, updateCategoryField }) {
                         {category.percentage.toFixed(1)}%
                       </td>
                       <td className="text-right py-2 px-3 font-medium">
-                        ₦{category.amount.toLocaleString(undefined, {
+                        ₦
+                        {category.amount.toLocaleString(undefined, {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
                         })}
@@ -595,11 +605,14 @@ function BudgetSection({ data, updateTotalBudget, updateCategoryField }) {
                 })}
                 <tr className="font-bold border-t-2">
                   <td className="py-3 px-3">Total</td>
-                  <td className={`text-right py-3 px-3 ${isOverBudget ? "text-red-600" : "text-gray-900"}`}>
+                  <td
+                    className={`text-right py-3 px-3 ${isOverBudget ? "text-red-600" : "text-gray-900"}`}
+                  >
                     {totalPercentage.toFixed(1)}%
                   </td>
                   <td className="text-right py-3 px-3 text-gray-900">
-                    ₦{Object.values(data.budgetCategories)
+                    ₦
+                    {Object.values(data.budgetCategories)
                       .reduce((sum, cat) => sum + cat.amount, 0)
                       .toLocaleString(undefined, {
                         minimumFractionDigits: 2,

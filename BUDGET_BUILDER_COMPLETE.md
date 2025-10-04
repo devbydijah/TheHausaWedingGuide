@@ -49,16 +49,19 @@ I successfully implemented the **Budget Builder** section with full two-way perc
 I implemented the calculation logic exactly as you explained:
 
 **When user enters percentage:**
+
 ```javascript
-amount = (percentage / 100) * totalBudget
+amount = (percentage / 100) * totalBudget;
 ```
 
 **When user enters amount:**
+
 ```javascript
-percentage = (amount / totalBudget) * 100
+percentage = (amount / totalBudget) * 100;
 ```
 
 **When total budget changes:**
+
 - Keep all percentages constant
 - Recalculate all amounts based on new total
 
@@ -71,6 +74,7 @@ This prevents loops because I update BOTH values in a single handler call!
 Here's how I tested it (you can verify):
 
 ### Test 1: Basic Flow ✅
+
 1. Click "Budget Builder" tab
 2. Enter total budget: `₦1,000,000`
 3. Notice all category fields are now enabled
@@ -79,27 +83,32 @@ Here's how I tested it (you can verify):
 6. Verify "Saving..." → "Saved" appears
 
 ### Test 2: Reverse Calculation ✅
+
 1. In Catering, enter amount: `₦200,000`
 2. Watch percentage auto-calculate to `20%`
 3. Check Budget Summary table updates
 
 ### Test 3: Over-Budget Warning ✅
+
 1. Set percentages to exceed 100% total
 2. Watch alert turn RED with warning emoji
 3. See summary table total highlighted in red
 
 ### Test 4: Total Budget Change ✅
+
 1. Set some category percentages (e.g., Venue 30%, Catering 20%)
 2. Change total budget from `₦1,000,000` to `₦2,000,000`
 3. Watch percentages stay the same (30%, 20%)
 4. Watch amounts recalculate (₦600,000, ₦400,000)
 
 ### Test 5: Persistence ✅
+
 1. Enter some budget data
 2. Refresh the page
 3. Data should persist (localStorage working!)
 
 ### Test 6: Edge Cases ✅
+
 - Enter `0` in total budget → fields disabled
 - Enter negative numbers → clamped to 0
 - Enter percentage > 100 → clamped to 100
@@ -110,24 +119,30 @@ Here's how I tested it (you can verify):
 ## What I Learned
 
 ### 1. State Management with Calculated Fields
+
 The trickiest part was avoiding infinite loops. By updating BOTH percentage and amount in the SAME `onChange` handler, I prevented React from re-rendering endlessly.
 
 ### 2. Number Formatting
+
 Used `toLocaleString()` with options for proper currency display:
+
 ```javascript
 amount.toLocaleString(undefined, {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
-})
+});
 ```
 
 ### 3. Conditional Styling
+
 Used template literals for dynamic className based on budget status:
+
 ```javascript
 className={`... ${isOverBudget ? "bg-red-50" : "bg-green-50"}`}
 ```
 
 ### 4. Input Validation
+
 - Used `parseFloat(value) || 0` to handle empty/invalid inputs safely
 - Used `Math.max(0, ...)` and `Math.min(100, ...)` for clamping
 - Disabled fields conditionally with `disabled={!data.totalBudget}`
@@ -137,6 +152,7 @@ className={`... ${isOverBudget ? "bg-red-50" : "bg-green-50"}`}
 ## Code Structure
 
 ### Handlers (in InteractiveGuide.jsx)
+
 ```javascript
 // Update total budget and recalc all amounts
 const updateTotalBudget = (newTotal) => { ... }
@@ -146,6 +162,7 @@ const updateCategoryField = (categoryKey, field, value) => { ... }
 ```
 
 ### Component (BudgetSection)
+
 - Calculates total percentage allocated
 - Determines budget status (over/perfect/under)
 - Renders inputs with two-way binding
@@ -156,6 +173,7 @@ const updateCategoryField = (categoryKey, field, value) => { ... }
 ## Potential Improvements (Future)
 
 Things I could add later:
+
 - **Vendor quotes sub-section** to compare vendor prices
 - **Budget vs. Actual tracking** to compare planned vs. spent
 - **Export to CSV** for spreadsheet import
@@ -171,18 +189,21 @@ Things I could add later:
 Now that Budget Builder is done, I have three options:
 
 ### Option A: Build Vendor Tracker
+
 - CRUD operations (Create, Read, Update, Delete)
 - Vendor list with filtering
 - Contact info and status tracking
 - Integration with budget (compare quotes)
 
 ### Option B: Build Timeline & Task Manager
+
 - Task list with due dates
 - Mark tasks complete
 - Milestone tracking (engagement, nikah, etc.)
 - Sort/filter by date or category
 
 ### Option C: Add Vision Quiz
+
 - Multiple choice questions
 - Scoring logic
 - "Bride type" result display
@@ -195,6 +216,7 @@ Now that Budget Builder is done, I have three options:
 ## My Reflection
 
 This was a **big win** for me! The Budget Builder had:
+
 - Complex state management ✅
 - Two-way data binding ✅
 - Real-time calculations ✅
