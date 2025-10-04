@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import GuideForm from "./components/GuideForm";
 import InteractiveGuide from "./components/InteractiveGuide";
+import LoginGate from "./components/LoginGate";
 
 function App() {
   const [openFaq, setOpenFaq] = useState(null);
@@ -394,10 +395,10 @@ function App() {
 
   // Show interactive guide if guide=1 parameter is present
   if (showGuide) {
-    return auth ? (
-      <InteractiveGuide auth={auth} />
-    ) : (
-      <GuideForm onValidated={setAuth} />
+    return (
+      <LoginGate onAuthenticated={() => setAuth(true)}>
+        <InteractiveGuide auth={auth} />
+      </LoginGate>
     );
   }
 
