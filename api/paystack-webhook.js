@@ -83,9 +83,10 @@ export default async function handler(req, res) {
     // Only process successful payments
     if (event === "charge.success" && data?.status === "success") {
       const reference = data?.reference;
+      const email = data?.customer?.email || "unknown";
 
       console.log(
-        `Processing successful payment for: ${email} (mode: ${
+        `Processing successful payment for: ${email.replace(/(.{2}).*(@.*)/, '$1***$2')} (mode: ${
           verification.mode || (WEBHOOK_TEST_BYPASS ? "test-bypass" : "unknown")
         })`
       );
