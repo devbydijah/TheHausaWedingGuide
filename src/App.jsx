@@ -25,7 +25,9 @@ function App() {
       <div className="min-h-screen bg-gradient-to-b from-[#990200] to-[#531946] flex items-center justify-center p-8">
         <div className="max-w-4xl mx-auto text-white">
           <div className="text-center mb-12">
-            <div className="text-6xl mb-6" role="img" aria-label="Celebration">🎉</div>
+            <div className="text-6xl mb-6" role="img" aria-label="Celebration">
+              🎉
+            </div>
             <h1 className="text-4xl md:text-6xl font-playfair font-bold mb-6">
               Thank You for Your Purchase!
             </h1>
@@ -40,40 +42,65 @@ function App() {
             </h2>
             <ul className="space-y-3 text-lg font-inter">
               <li className="flex items-start">
-                <span className="text-2xl mr-3" role="img" aria-label="Book">📖</span>
+                <span className="text-2xl mr-3" role="img" aria-label="Book">
+                  📖
+                </span>
                 <span>
                   Complete guide to traditional Hausa wedding ceremonies
                 </span>
               </li>
               <li className="flex items-start">
-                <span className="text-2xl mr-3" role="img" aria-label="Dress">👗</span>
+                <span className="text-2xl mr-3" role="img" aria-label="Dress">
+                  👗
+                </span>
                 <span>Attire recommendations for bride, groom, and guests</span>
               </li>
               <li className="flex items-start">
-                <span className="text-2xl mr-3" role="img" aria-label="Celebration">🎊</span>
+                <span
+                  className="text-2xl mr-3"
+                  role="img"
+                  aria-label="Celebration"
+                >
+                  🎊
+                </span>
                 <span>
                   Kamu (Traditional pre-wedding celebrations) planning
                 </span>
               </li>
               <li className="flex items-start">
-                <span className="text-2xl mr-3" role="img" aria-label="Ring">💍</span>
+                <span className="text-2xl mr-3" role="img" aria-label="Ring">
+                  💍
+                </span>
                 <span>Ceremony customs, traditions, and protocols</span>
               </li>
               <li className="flex items-start">
-                <span className="text-2xl mr-3" role="img" aria-label="Food">🍽️</span>
+                <span className="text-2xl mr-3" role="img" aria-label="Food">
+                  🍽️
+                </span>
                 <span>
                   Menu planning with authentic Hausa cuisine suggestions
                 </span>
               </li>
               <li className="flex items-start">
-                <span className="text-2xl mr-3" role="img" aria-label="Checklist">📋</span>
+                <span
+                  className="text-2xl mr-3"
+                  role="img"
+                  aria-label="Checklist"
+                >
+                  📋
+                </span>
                 <span>Checklists, timelines, and planning templates</span>
               </li>
             </ul>
           </div>
 
           <div className="bg-[#CE805C]/20 border-2 border-[#CE805C] rounded-2xl p-6 mb-8">
-            <h3 className="text-xl font-playfair font-bold mb-3"><span role="img" aria-label="Email">📧</span> Check Your Email</h3>
+            <h3 className="text-xl font-playfair font-bold mb-3">
+              <span role="img" aria-label="Email">
+                📧
+              </span>{" "}
+              Check Your Email
+            </h3>
             <p className="text-lg font-inter mb-2">
               We've sent you a secure download link. Click it to download your
               PDF guide.
@@ -86,9 +113,11 @@ function App() {
 
           <div className="bg-white/5 rounded-xl p-6 text-center">
             <p className="text-sm font-inter opacity-75">
-              <span role="img" aria-label="Light bulb">💡</span> <strong>Pro Tip:</strong> Save the PDF to your device for
-              offline access. You can also print it for easy reference during
-              planning.
+              <span role="img" aria-label="Light bulb">
+                💡
+              </span>{" "}
+              <strong>Pro Tip:</strong> Save the PDF to your device for offline
+              access. You can also print it for easy reference during planning.
             </p>
           </div>
         </div>
@@ -115,7 +144,9 @@ function App() {
 
         <div className="grid md:grid-cols-3 gap-6 mb-12">
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 hover:bg-white/15 transition-all">
-            <div className="text-4xl mb-4" role="img" aria-label="Book">📖</div>
+            <div className="text-4xl mb-4" role="img" aria-label="Book">
+              📖
+            </div>
             <h3 className="text-xl font-playfair font-bold text-white mb-2">
               Comprehensive Coverage
             </h3>
@@ -126,7 +157,9 @@ function App() {
           </div>
 
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 hover:bg-white/15 transition-all">
-            <div className="text-4xl mb-4" role="img" aria-label="Checkmark">✅</div>
+            <div className="text-4xl mb-4" role="img" aria-label="Checkmark">
+              ✅
+            </div>
             <h3 className="text-xl font-playfair font-bold text-white mb-2">
               Ready-to-Use Checklists
             </h3>
@@ -137,7 +170,9 @@ function App() {
           </div>
 
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 hover:bg-white/15 transition-all">
-            <div className="text-4xl mb-4" role="img" aria-label="Party popper">🎊</div>
+            <div className="text-4xl mb-4" role="img" aria-label="Party popper">
+              🎊
+            </div>
             <h3 className="text-xl font-playfair font-bold text-white mb-2">
               Cultural Authenticity
             </h3>
@@ -154,27 +189,39 @@ function App() {
           </h2>
           <div className="grid md:grid-cols-2 gap-4 text-white font-inter">
             <div className="flex items-start space-x-3">
-              <span className="text-xl" role="img" aria-label="Dress">👗</span>
+              <span className="text-xl" role="img" aria-label="Dress">
+                👗
+              </span>
               <span>Traditional attire and dress codes</span>
             </div>
             <div className="flex items-start space-x-3">
-              <span className="text-xl" role="img" aria-label="Money bag">💰</span>
+              <span className="text-xl" role="img" aria-label="Money bag">
+                💰
+              </span>
               <span>Budget planning and cost estimates</span>
             </div>
             <div className="flex items-start space-x-3">
-              <span className="text-xl" role="img" aria-label="Music">🎵</span>
+              <span className="text-xl" role="img" aria-label="Music">
+                🎵
+              </span>
               <span>Music, entertainment, and celebrations</span>
             </div>
             <div className="flex items-start space-x-3">
-              <span className="text-xl" role="img" aria-label="Food">🍽️</span>
+              <span className="text-xl" role="img" aria-label="Food">
+                🍽️
+              </span>
               <span>Authentic Hausa cuisine menu planning</span>
             </div>
             <div className="flex items-start space-x-3">
-              <span className="text-xl" role="img" aria-label="Scroll">📜</span>
+              <span className="text-xl" role="img" aria-label="Scroll">
+                📜
+              </span>
               <span>Ceremonial protocols and etiquette</span>
             </div>
             <div className="flex items-start space-x-3">
-              <span className="text-xl" role="img" aria-label="Gift">🎁</span>
+              <span className="text-xl" role="img" aria-label="Gift">
+                🎁
+              </span>
               <span>Gift-giving customs and traditions</span>
             </div>
           </div>
@@ -182,8 +229,12 @@ function App() {
 
         <div className="text-center">
           <div className="mb-6">
-            <span className="text-5xl font-playfair font-bold text-white">₦100</span>
-            <span className="text-xl font-inter text-white/80 ml-2">one-time payment</span>
+            <span className="text-5xl font-playfair font-bold text-white">
+              ₦100
+            </span>
+            <span className="text-xl font-inter text-white/80 ml-2">
+              one-time payment
+            </span>
           </div>
           <button
             onClick={handlePurchase}
