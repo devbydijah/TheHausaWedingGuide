@@ -1,6 +1,6 @@
 /**
  * Constants and Default Data Models
- * 
+ *
  * Centralized storage for default state, quiz questions, and other constants
  */
 
@@ -104,7 +104,8 @@ export const VISION_QUIZ_QUESTIONS = [
   },
   {
     id: "q2",
-    question: "How important is the Kayan Lefe (bridal gifts) tradition to you?",
+    question:
+      "How important is the Kayan Lefe (bridal gifts) tradition to you?",
     options: [
       {
         value: "essential",

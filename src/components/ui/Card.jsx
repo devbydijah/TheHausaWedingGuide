@@ -1,8 +1,8 @@
 /**
  * Card Component
- * 
+ *
  * Reusable container with shadow and hover effects
- * 
+ *
  * @param {Object} props
  * @param {string} props.title - Optional card title
  * @param {string} props.subtitle - Optional subtitle
@@ -15,7 +15,7 @@ export default function Card({
   subtitle,
   children,
   hoverable = false,
-  className = '',
+  className = "",
   ...props
 }) {
   return (
@@ -25,7 +25,7 @@ export default function Card({
         rounded-xl shadow-md 
         p-6
         transition-all duration-300
-        ${hoverable ? 'hover:shadow-xl hover:scale-105 cursor-pointer' : ''}
+        ${hoverable ? "hover:shadow-xl hover:scale-105 cursor-pointer" : ""}
         ${className}
       `}
       {...props}
@@ -44,7 +44,7 @@ export default function Card({
           )}
         </div>
       )}
-      
+
       <div className="font-inter text-gray-700 dark:text-gray-300">
         {children}
       </div>

@@ -1,19 +1,28 @@
 /**
  * BudgetBuilder Component
- * 
+ *
  * Plan and track wedding budget by category with percentage/amount sync
- * 
+ *
  * TODO Sprint 2 Day 3: Extract CategorySlider and budget calculator logic
  */
-export default function BudgetBuilder({ data, updateTotalBudget, updateCategoryField, setActiveSection }) {
+export default function BudgetBuilder({
+  data,
+  updateTotalBudget,
+  updateCategoryField,
+  setActiveSection,
+}) {
   return (
     <div className="space-y-6">
       <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-8 text-white text-center">
         <div className="text-6xl mb-4">💰</div>
-        <h1 className="font-playfair text-3xl font-bold mb-3">Budget Builder</h1>
-        <p className="font-inter text-lg opacity-90">Plan and track your wedding expenses</p>
+        <h1 className="font-playfair text-3xl font-bold mb-3">
+          Budget Builder
+        </h1>
+        <p className="font-inter text-lg opacity-90">
+          Plan and track your wedding expenses
+        </p>
       </div>
-      
+
       <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6 text-center">
         <p className="font-inter text-gray-600 dark:text-gray-400 mb-4">
           Budget Builder component - Full implementation pending Sprint 2 Day 3

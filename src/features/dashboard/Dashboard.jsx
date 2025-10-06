@@ -1,9 +1,9 @@
-import { Card, Button } from '../../components/ui';
-import QuickStats from './QuickStats';
+import { Card, Button } from "../../components/ui";
+import QuickStats from "./QuickStats";
 
 /**
  * Dashboard Component
- * 
+ *
  * Main landing page showing overview of wedding planning progress
  */
 export default function Dashboard({ data, setActiveSection }) {
@@ -71,16 +71,28 @@ export default function Dashboard({ data, setActiveSection }) {
       name: "Final Blueprint",
       icon: "📋",
       description: "Review your complete wedding plan",
-      stats: `${Math.round((
-        (Object.values(data.budgetCategories || {}).reduce((sum, cat) => sum + (cat.amount || 0), 0) / (budgetTotal || 1)) * 100 +
-        ((data.vendorList?.filter((v) => v.status === "Booked").length || 0) / (totalVendors || 1)) * 100 +
-        ((data.taskList?.filter((t) => t.status === "Completed").length || 0) / (totalTasks || 1)) * 100
-      ) / 3)}% complete`,
+      stats: `${Math.round(
+        ((Object.values(data.budgetCategories || {}).reduce(
+          (sum, cat) => sum + (cat.amount || 0),
+          0
+        ) /
+          (budgetTotal || 1)) *
+          100 +
+          ((data.vendorList?.filter((v) => v.status === "Booked").length || 0) /
+            (totalVendors || 1)) *
+            100 +
+          ((data.taskList?.filter((t) => t.status === "Completed").length ||
+            0) /
+            (totalTasks || 1)) *
+            100) /
+          3
+      )}% complete`,
       color: "from-indigo-500 to-purple-500",
     },
   ];
 
-  const isEmptyState = !weddingDate && totalVendors === 0 && totalTasks === 0 && budgetTotal === 0;
+  const isEmptyState =
+    !weddingDate && totalVendors === 0 && totalTasks === 0 && budgetTotal === 0;
 
   return (
     <div className="space-y-8">
@@ -90,7 +102,8 @@ export default function Dashboard({ data, setActiveSection }) {
           Welcome to Your Hausa Wedding Guide
         </h1>
         <p className="font-inter text-lg opacity-90">
-          Your personalized planning dashboard for a beautiful and blessed celebration
+          Your personalized planning dashboard for a beautiful and blessed
+          celebration
         </p>
       </div>
 
@@ -219,7 +232,8 @@ export default function Dashboard({ data, setActiveSection }) {
             <span>🌟</span> Let's Get Started!
           </h2>
           <p className="font-inter text-gray-700 dark:text-gray-300 mb-6">
-            Welcome to your wedding planning journey! Here are the recommended steps to begin:
+            Welcome to your wedding planning journey! Here are the recommended
+            steps to begin:
           </p>
           <ol className="space-y-3 mb-6">
             <li className="flex items-start gap-3">
@@ -227,9 +241,12 @@ export default function Dashboard({ data, setActiveSection }) {
                 1
               </span>
               <div>
-                <strong className="font-inter text-gray-900 dark:text-white">Define Your Vision</strong>
+                <strong className="font-inter text-gray-900 dark:text-white">
+                  Define Your Vision
+                </strong>
                 <p className="font-inter text-sm text-gray-600 dark:text-gray-400">
-                  Start by setting your top priorities and writing your niyyah (intention)
+                  Start by setting your top priorities and writing your niyyah
+                  (intention)
                 </p>
               </div>
             </li>
@@ -238,9 +255,12 @@ export default function Dashboard({ data, setActiveSection }) {
                 2
               </span>
               <div>
-                <strong className="font-inter text-gray-900 dark:text-white">Set Your Budget</strong>
+                <strong className="font-inter text-gray-900 dark:text-white">
+                  Set Your Budget
+                </strong>
                 <p className="font-inter text-sm text-gray-600 dark:text-gray-400">
-                  Establish your total budget and allocate funds to different categories
+                  Establish your total budget and allocate funds to different
+                  categories
                 </p>
               </div>
             </li>
@@ -249,9 +269,12 @@ export default function Dashboard({ data, setActiveSection }) {
                 3
               </span>
               <div>
-                <strong className="font-inter text-gray-900 dark:text-white">Choose Your Wedding Date</strong>
+                <strong className="font-inter text-gray-900 dark:text-white">
+                  Choose Your Wedding Date
+                </strong>
                 <p className="font-inter text-sm text-gray-600 dark:text-gray-400">
-                  Pick your special day to start the countdown and plan your timeline
+                  Pick your special day to start the countdown and plan your
+                  timeline
                 </p>
               </div>
             </li>
@@ -260,18 +283,18 @@ export default function Dashboard({ data, setActiveSection }) {
                 4
               </span>
               <div>
-                <strong className="font-inter text-gray-900 dark:text-white">Start Tracking Vendors & Tasks</strong>
+                <strong className="font-inter text-gray-900 dark:text-white">
+                  Start Tracking Vendors & Tasks
+                </strong>
                 <p className="font-inter text-sm text-gray-600 dark:text-gray-400">
-                  Add vendors you're considering and create tasks to stay organized
+                  Add vendors you're considering and create tasks to stay
+                  organized
                 </p>
               </div>
             </li>
           </ol>
           <div className="flex flex-wrap gap-3">
-            <Button
-              onClick={() => setActiveSection("quiz")}
-              variant="primary"
-            >
+            <Button onClick={() => setActiveSection("quiz")} variant="primary">
               💎 Take Vision Quiz
             </Button>
             <Button
