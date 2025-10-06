@@ -26,9 +26,9 @@ function App() {
         <div className="max-w-4xl mx-auto text-white">
           {/* Logo Header */}
           <div className="text-center mb-8">
-            <img 
-              src="/assets/logowhite.jpg" 
-              alt="Hausa Wedding Guide Logo" 
+            <img
+              src="/assets/logowhite.jpg"
+              alt="Hausa Wedding Guide Logo"
               className="h-16 md:h-20 mx-auto mb-4 rounded-lg shadow-lg"
             />
           </div>
@@ -140,9 +140,9 @@ function App() {
       <div className="max-w-6xl mx-auto">
         {/* Logo Header */}
         <div className="text-center mb-8">
-          <img 
-            src="/assets/logowhite.jpg" 
-            alt="Hausa Wedding Guide Logo" 
+          <img
+            src="/assets/logowhite.jpg"
+            alt="Hausa Wedding Guide Logo"
             className="h-20 md:h-24 mx-auto mb-4 rounded-lg shadow-2xl"
           />
         </div>
@@ -164,23 +164,23 @@ function App() {
         {/* Hero Images Grid */}
         <div className="grid md:grid-cols-3 gap-4 mb-12">
           <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
-            <img 
-              src="/assets/couple1.png" 
-              alt="Traditional Hausa wedding couple" 
+            <img
+              src="/assets/couple1.png"
+              alt="Traditional Hausa wedding couple"
               className="w-full h-64 object-cover"
             />
           </div>
           <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
-            <img 
-              src="/assets/bride1.png" 
-              alt="Hausa bride in traditional attire" 
+            <img
+              src="/assets/bride1.png"
+              alt="Hausa bride in traditional attire"
               className="w-full h-64 object-cover"
             />
           </div>
           <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
-            <img 
-              src="/assets/eventdecor.png" 
-              alt="Traditional Hausa wedding decoration" 
+            <img
+              src="/assets/eventdecor.png"
+              alt="Traditional Hausa wedding decoration"
               className="w-full h-64 object-cover"
             />
           </div>
@@ -274,50 +274,57 @@ function App() {
         {/* PDF Preview Section */}
         <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-12">
           <h2 className="text-2xl font-playfair font-bold text-white mb-6 text-center">
-            <span role="img" aria-label="Eyes">👀</span> Preview What's Inside
+            <span role="img" aria-label="Eyes">
+              👀
+            </span>{" "}
+            Preview What's Inside
           </h2>
           <p className="text-center text-white/90 font-inter mb-8">
-            Take a sneak peek at the comprehensive guide that will help you plan your perfect Hausa wedding
+            Take a sneak peek at the comprehensive guide that will help you plan
+            your perfect Hausa wedding
           </p>
           <div className="grid md:grid-cols-5 gap-4">
             <div className="rounded-lg overflow-hidden shadow-xl transform hover:scale-105 transition-transform duration-300 border-2 border-[#CE805C]/30">
-              <img 
-                src="/assets/samplepage1.png" 
-                alt="PDF preview page 1" 
+              <img
+                src="/assets/samplepage1.png"
+                alt="PDF preview page 1"
                 className="w-full h-auto"
               />
             </div>
             <div className="rounded-lg overflow-hidden shadow-xl transform hover:scale-105 transition-transform duration-300 border-2 border-[#CE805C]/30">
-              <img 
-                src="/assets/samplepage2.png" 
-                alt="PDF preview page 2" 
+              <img
+                src="/assets/samplepage2.png"
+                alt="PDF preview page 2"
                 className="w-full h-auto"
               />
             </div>
             <div className="rounded-lg overflow-hidden shadow-xl transform hover:scale-105 transition-transform duration-300 border-2 border-[#CE805C]/30">
-              <img 
-                src="/assets/samplepage3.png" 
-                alt="PDF preview page 3" 
+              <img
+                src="/assets/samplepage3.png"
+                alt="PDF preview page 3"
                 className="w-full h-auto"
               />
             </div>
             <div className="rounded-lg overflow-hidden shadow-xl transform hover:scale-105 transition-transform duration-300 border-2 border-[#CE805C]/30">
-              <img 
-                src="/assets/samplepage4.png" 
-                alt="PDF preview page 4" 
+              <img
+                src="/assets/samplepage4.png"
+                alt="PDF preview page 4"
                 className="w-full h-auto"
               />
             </div>
             <div className="rounded-lg overflow-hidden shadow-xl transform hover:scale-105 transition-transform duration-300 border-2 border-[#CE805C]/30">
-              <img 
-                src="/assets/samplepage5.png" 
-                alt="PDF preview page 5" 
+              <img
+                src="/assets/samplepage5.png"
+                alt="PDF preview page 5"
                 className="w-full h-auto"
               />
             </div>
           </div>
           <p className="text-center text-white/70 font-inter mt-6 text-sm">
-            <span role="img" aria-label="Sparkles">✨</span> Beautiful, professionally designed pages with actionable guidance
+            <span role="img" aria-label="Sparkles">
+              ✨
+            </span>{" "}
+            Beautiful, professionally designed pages with actionable guidance
           </p>
         </div>
 
