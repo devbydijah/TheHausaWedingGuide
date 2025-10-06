@@ -1,28 +1,174 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './index.css';
+import LoginGate from './components/LoginGate';
+import InteractiveGuide from './components/InteractiveGuide';
 
 function App() {
+  const [showGuide, setShowGuide] = useState(false);
+  const [showClaim, setShowClaim] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const claimParam = params.get('claim');
+    const guideParam = params.get('guide');
+    
+    if (claimParam === '1') {
+      setShowClaim(true);
+    } else if (guideParam === '1') {
+      setShowGuide(true);
+    }
+  }, []);
+
   const handlePurchase = () => {
-    // Redirect to Paystack storefront
     window.location.href = "https://paystack.shop/hausaroom-wedding-guide-GLQSt";
   };
 
+  const handleAccessGuide = () => {
+    setShowGuide(true);
+  };
+
+  // Show the interactive guide if authenticated
+  if (showGuide) {
+    return (
+      <LoginGate>
+        <InteractiveGuide />
+      </LoginGate>
+    );
+  }
+
+  // Show claim/success page after purchase
+  if (showClaim) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#531946] to-[#990200] flex items-center justify-center p-8">
+        <div className="max-w-4xl mx-auto text-white">
+          <div className="text-center mb-12">
+            <div className="text-6xl mb-6">🎉</div>
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              Thank You for Your Purchase!
+            </h1>
+            <p className="text-xl mb-8">
+              Your Interactive Wedding Guide is ready to use.
+            </p>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-8">
+            <h2 className="text-2xl font-bold mb-4">What's Included:</h2>
+            <ul className="space-y-3 text-lg">
+              <li className="flex items-start">
+                <span className="text-2xl mr-3">✨</span>
+                <span>Vision & Values Quiz to discover your wedding style</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-2xl mr-3">💰</span>
+                <span>Smart Budget Builder with real-time calculations</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-2xl mr-3">📋</span>
+                <span>Vendor Tracker to organize all your contacts</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-2xl mr-3">📅</span>
+                <span>Timeline & Task Manager with priority sorting</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-2xl mr-3">☁️</span>
+                <span>Cloud sync across all your devices</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-2xl mr-3">💾</span>
+                <span>Automatic progress saving</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="bg-[#CE805C]/20 border-2 border-[#CE805C] rounded-2xl p-6 mb-8">
+            <h3 className="text-xl font-bold mb-3">📧 Check Your Email</h3>
+            <p className="text-lg mb-2">
+              We've sent you an email with your login credentials and access instructions.
+            </p>
+            <p className="text-sm opacity-90">
+              If you don't see it, check your spam folder.
+            </p>
+          </div>
+
+          <div className="text-center">
+            <button
+              onClick={handleAccessGuide}
+              className="bg-[#CE805C] hover:bg-[#740015] text-white px-12 py-4 rounded-xl text-xl font-semibold transition-colors shadow-lg"
+            >
+              Access Your Interactive Guide
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Default landing page for new visitors
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#531946] to-[#990200] flex items-center justify-center p-8">
-      <div className="max-w-4xl mx-auto text-center text-white">
-        <h1 className="text-4xl md:text-6xl font-bold mb-8">
-          Interactive Wedding Guide
-        </h1>
-        <p className="text-xl mb-8">
-          Experience our interactive web application for comprehensive wedding planning.
-        </p>
-        <p className="text-3xl font-bold mb-4">₦100</p>
-        <button 
-          onClick={handlePurchase}
-          className="bg-[#CE805C] hover:bg-[#740015] text-white px-8 py-4 rounded-xl text-lg font-semibold transition-colors"
-        >
-          Buy Interactive Guide - ₦100
-        </button>
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center text-white mb-12">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-[#CE805C] bg-clip-text text-transparent">
+            Interactive Wedding Guide
+          </h1>
+          <p className="text-2xl mb-4">
+            Your Complete Digital Wedding Planning Assistant
+          </p>
+          <p className="text-xl opacity-90">
+            Plan your perfect Hausa wedding with our comprehensive interactive tools
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8 mb-12">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-all">
+            <div className="text-4xl mb-4">✨</div>
+            <h3 className="text-2xl font-bold text-white mb-3">Discover Your Style</h3>
+            <p className="text-white/90">
+              Take our Vision & Values Quiz to uncover your unique wedding aesthetic and preferences
+            </p>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-all">
+            <div className="text-4xl mb-4">💰</div>
+            <h3 className="text-2xl font-bold text-white mb-3">Smart Budgeting</h3>
+            <p className="text-white/90">
+              Build and manage your wedding budget with real-time calculations and expense tracking
+            </p>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-all">
+            <div className="text-4xl mb-4">📋</div>
+            <h3 className="text-2xl font-bold text-white mb-3">Vendor Management</h3>
+            <p className="text-white/90">
+              Keep track of all your vendors, contracts, and communications in one organized place
+            </p>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-all">
+            <div className="text-4xl mb-4">☁️</div>
+            <h3 className="text-2xl font-bold text-white mb-3">Cloud Sync</h3>
+            <p className="text-white/90">
+              Access your wedding plans from any device - your data automatically syncs everywhere
+            </p>
+          </div>
+        </div>
+
+        <div className="text-center">
+          <div className="mb-6">
+            <span className="text-5xl font-bold text-white">₦100</span>
+            <span className="text-xl text-white/80 ml-2">one-time payment</span>
+          </div>
+          <button
+            onClick={handlePurchase}
+            className="bg-[#CE805C] hover:bg-[#740015] text-white px-12 py-5 rounded-xl text-2xl font-semibold transition-all shadow-2xl hover:scale-105"
+          >
+            Get Started - ₦100
+          </button>
+          <p className="text-white/70 mt-4 text-sm">
+            Lifetime access • Cloud sync included • No monthly fees
+          </p>
+        </div>
       </div>
     </div>
   );
