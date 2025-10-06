@@ -1,6 +1,7 @@
 # Paystack Storefront Setup Guide
 
 ## Overview
+
 You're using **Paystack Storefront** (https://paystack.shop/hausa-room), which is a pre-built shop page where customers can browse and purchase your products.
 
 ## Storefront Configuration
@@ -10,6 +11,7 @@ Your storefront URL: **https://paystack.shop/hausa-room**
 You need to add **TWO** products to your Paystack Storefront:
 
 ### Product 1: Hausa Wedding Guide PDF
+
 - **Name**: `Hausa Wedding Guide PDF`
 - **Price**: ₦100
 - **Product Type/SKU**: Include "pdf" in the product name or description
@@ -17,8 +19,9 @@ You need to add **TWO** products to your Paystack Storefront:
 - **Description**: "Comprehensive PDF guide for authentic Hausa wedding planning"
 
 ### Product 2: Interactive Wedding Guide
+
 - **Name**: `Interactive Wedding Guide`
-- **Price**: ₦100  
+- **Price**: ₦100
 - **Product Type/SKU**: Include "interactive" or "webapp" in the product name or description
 - **Redirect URL (after payment)**: `https://the-hausa-weding-guide-interactive.vercel.app/?claim=1`
 - **Description**: "Interactive web application for comprehensive wedding planning"
@@ -55,7 +58,7 @@ You need to add **TWO** products to your Paystack Storefront:
 
 The webhook automatically detects which product was purchased by checking the product name:
 
-1. **Product Name Check**: 
+1. **Product Name Check**:
    - Contains "PDF" → Routes to PDF guide
    - Contains "Interactive" or "webapp" → Routes to Interactive guide
 2. **Fallback**: Defaults to PDF for backward compatibility
@@ -71,7 +74,6 @@ Both landing pages have "Buy Now" buttons that redirect to your Paystack Storefr
 
 - **PDF Guide Site**: https://the-hausa-weding-guide.vercel.app
   - Button → `https://paystack.shop/hausa-room`
-  
 - **Interactive Guide Site**: https://the-hausa-weding-guide-interactive.vercel.app
   - Button → `https://paystack.shop/hausa-room`
 

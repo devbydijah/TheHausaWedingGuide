@@ -17,7 +17,7 @@ function App() {
           Your comprehensive PDF guide for authentic Hausa wedding planning.
         </p>
         <p className="text-3xl font-bold mb-4">₦100</p>
-        <button 
+        <button
           onClick={handlePurchase}
           className="bg-[#CE805C] hover:bg-[#740015] text-white px-8 py-4 rounded-xl text-lg font-semibold transition-colors"
         >
