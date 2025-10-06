@@ -86,7 +86,7 @@ export default async function handler(req, res) {
       const email = data?.customer?.email || "unknown";
 
       console.log(
-        `Processing successful payment for: ${email.replace(/(.{2}).*(@.*)/, '$1***$2')} (mode: ${
+        `Processing successful payment for: ${email.replace(/(.{2}).*(@.*)/, "$1***$2")} (mode: ${
           verification.mode || (WEBHOOK_TEST_BYPASS ? "test-bypass" : "unknown")
         })`
       );
