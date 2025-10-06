@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import './index.css';
-import LoginGate from './components/LoginGate';
-import InteractiveGuide from './components/InteractiveGuide';
+import React, { useState, useEffect } from "react";
+import "./index.css";
+import LoginGate from "./components/LoginGate";
+import InteractiveGuide from "./components/InteractiveGuide";
 
 function App() {
   const [showGuide, setShowGuide] = useState(false);
@@ -9,18 +9,19 @@ function App() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const claimParam = params.get('claim');
-    const guideParam = params.get('guide');
-    
-    if (claimParam === '1') {
+    const claimParam = params.get("claim");
+    const guideParam = params.get("guide");
+
+    if (claimParam === "1") {
       setShowClaim(true);
-    } else if (guideParam === '1') {
+    } else if (guideParam === "1") {
       setShowGuide(true);
     }
   }, []);
 
   const handlePurchase = () => {
-    window.location.href = "https://paystack.shop/hausaroom-wedding-guide-GLQSt";
+    window.location.href =
+      "https://paystack.shop/hausaroom-wedding-guide-GLQSt";
   };
 
   const handleAccessGuide = () => {
@@ -41,26 +42,34 @@ function App() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#990200] to-[#531946] flex items-center justify-center p-8">
         {/* Skip to main content link for accessibility */}
-        <a 
-          href="#main-content" 
+        <a
+          href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:text-[#990200] focus:px-4 focus:py-2 focus:rounded-lg focus:font-semibold"
         >
           Skip to main content
         </a>
-        
+
         <main id="main-content" className="max-w-4xl mx-auto text-white">
           {/* Logo Header */}
           <header className="text-center mb-8">
-            <img 
-              src="/assets/logowhite.jpg" 
-              alt="Hausa Wedding Guide Logo" 
+            <img
+              src="/assets/logowhite.jpg"
+              alt="Hausa Wedding Guide Logo"
               className="h-16 md:h-20 mx-auto mb-4 rounded-lg shadow-lg"
             />
           </header>
 
-          <section className="text-center mb-12" aria-labelledby="success-heading">
-            <div className="text-6xl mb-6" role="img" aria-label="Celebration">🎉</div>
-            <h1 id="success-heading" className="font-playfair text-4xl md:text-6xl font-bold mb-6">
+          <section
+            className="text-center mb-12"
+            aria-labelledby="success-heading"
+          >
+            <div className="text-6xl mb-6" role="img" aria-label="Celebration">
+              🎉
+            </div>
+            <h1
+              id="success-heading"
+              className="font-playfair text-4xl md:text-6xl font-bold mb-6"
+            >
               Thank You for Your Purchase!
             </h1>
             <p className="font-inter text-xl mb-8">
@@ -68,8 +77,16 @@ function App() {
             </p>
           </section>
 
-          <section className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-8" aria-labelledby="included-features">
-            <h2 id="included-features" className="font-playfair text-2xl font-bold mb-4">What's Included:</h2>
+          <section
+            className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-8"
+            aria-labelledby="included-features"
+          >
+            <h2
+              id="included-features"
+              className="font-playfair text-2xl font-bold mb-4"
+            >
+              What's Included:
+            </h2>
             <ul className="space-y-3 text-lg font-inter">
               <li className="flex items-start">
                 <span className="text-2xl mr-3">✨</span>
@@ -98,10 +115,22 @@ function App() {
             </ul>
           </section>
 
-          <section className="bg-[#CE805C]/20 border-2 border-[#CE805C] rounded-2xl p-6 mb-8" aria-labelledby="email-notice">
-            <h3 id="email-notice" className="font-playfair text-xl font-bold mb-3"><span role="img" aria-label="Email">📧</span> Check Your Email</h3>
+          <section
+            className="bg-[#CE805C]/20 border-2 border-[#CE805C] rounded-2xl p-6 mb-8"
+            aria-labelledby="email-notice"
+          >
+            <h3
+              id="email-notice"
+              className="font-playfair text-xl font-bold mb-3"
+            >
+              <span role="img" aria-label="Email">
+                📧
+              </span>{" "}
+              Check Your Email
+            </h3>
             <p className="font-inter text-lg mb-2">
-              We've sent you an email with your login credentials and access instructions.
+              We've sent you an email with your login credentials and access
+              instructions.
             </p>
             <p className="font-inter text-sm opacity-90">
               If you don't see it, check your spam folder.
@@ -126,55 +155,66 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#990200] to-[#531946] flex items-center justify-center p-8">
       {/* Skip to main content link for accessibility */}
-      <a 
-        href="#main-content" 
+      <a
+        href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:text-[#990200] focus:px-4 focus:py-2 focus:rounded-lg focus:font-semibold"
       >
         Skip to main content
       </a>
-      
+
       <main id="main-content" className="max-w-6xl mx-auto">
         {/* Logo Header */}
         <header className="text-center mb-8">
-          <img 
-            src="/assets/logowhite.jpg" 
-            alt="Hausa Wedding Guide Logo" 
+          <img
+            src="/assets/logowhite.jpg"
+            alt="Hausa Wedding Guide Logo"
             className="h-20 md:h-24 mx-auto mb-4 rounded-lg shadow-2xl"
           />
         </header>
 
-        <section className="text-center text-white mb-12" aria-labelledby="hero-heading">
-          <h1 id="hero-heading" className="font-playfair text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-[#CE805C] bg-clip-text text-transparent">
+        <section
+          className="text-center text-white mb-12"
+          aria-labelledby="hero-heading"
+        >
+          <h1
+            id="hero-heading"
+            className="font-playfair text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-[#CE805C] bg-clip-text text-transparent"
+          >
             Interactive Wedding Guide
           </h1>
           <p className="font-inter text-2xl mb-4">
             Your Complete Digital Wedding Planning Assistant
           </p>
           <p className="font-inter text-xl opacity-90">
-            Plan your perfect Hausa wedding with our comprehensive interactive tools
+            Plan your perfect Hausa wedding with our comprehensive interactive
+            tools
           </p>
         </section>
 
         {/* Hero Images Grid */}
-        <div className="grid md:grid-cols-3 gap-4 mb-12" role="img" aria-label="Traditional Hausa wedding photography gallery">
+        <div
+          className="grid md:grid-cols-3 gap-4 mb-12"
+          role="img"
+          aria-label="Traditional Hausa wedding photography gallery"
+        >
           <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
-            <img 
-              src="/assets/couple2.png" 
-              alt="Traditional Hausa wedding couple celebrating" 
+            <img
+              src="/assets/couple2.png"
+              alt="Traditional Hausa wedding couple celebrating"
               className="w-full h-64 object-cover"
             />
           </div>
           <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
-            <img 
-              src="/assets/bride2.png" 
-              alt="Hausa bride in traditional wedding attire" 
+            <img
+              src="/assets/bride2.png"
+              alt="Hausa bride in traditional wedding attire"
               className="w-full h-64 object-cover"
             />
           </div>
           <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
-            <img 
-              src="/assets/bride3.png" 
-              alt="Beautiful Hausa bride portrait" 
+            <img
+              src="/assets/bride3.png"
+              alt="Beautiful Hausa bride portrait"
               className="w-full h-64 object-cover"
             />
           </div>
@@ -182,42 +222,66 @@ function App() {
 
         <div className="grid md:grid-cols-2 gap-8 mb-12">
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-all">
-            <div className="text-4xl mb-4" role="img" aria-label="Sparkles">✨</div>
-            <h3 className="font-playfair text-2xl font-bold text-white mb-3">Discover Your Style</h3>
+            <div className="text-4xl mb-4" role="img" aria-label="Sparkles">
+              ✨
+            </div>
+            <h3 className="font-playfair text-2xl font-bold text-white mb-3">
+              Discover Your Style
+            </h3>
             <p className="font-inter text-white/90">
-              Take our Vision & Values Quiz to uncover your unique wedding aesthetic and preferences
+              Take our Vision & Values Quiz to uncover your unique wedding
+              aesthetic and preferences
             </p>
           </div>
 
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-all">
-            <div className="text-4xl mb-4" role="img" aria-label="Money bag">💰</div>
-            <h3 className="font-playfair text-2xl font-bold text-white mb-3">Smart Budgeting</h3>
+            <div className="text-4xl mb-4" role="img" aria-label="Money bag">
+              💰
+            </div>
+            <h3 className="font-playfair text-2xl font-bold text-white mb-3">
+              Smart Budgeting
+            </h3>
             <p className="font-inter text-white/90">
-              Build and manage your wedding budget with real-time calculations and expense tracking
+              Build and manage your wedding budget with real-time calculations
+              and expense tracking
             </p>
           </div>
 
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-all">
-            <div className="text-4xl mb-4" role="img" aria-label="Clipboard">📋</div>
-            <h3 className="font-playfair text-2xl font-bold text-white mb-3">Vendor Management</h3>
+            <div className="text-4xl mb-4" role="img" aria-label="Clipboard">
+              📋
+            </div>
+            <h3 className="font-playfair text-2xl font-bold text-white mb-3">
+              Vendor Management
+            </h3>
             <p className="font-inter text-white/90">
-              Keep track of all your vendors, contracts, and communications in one organized place
+              Keep track of all your vendors, contracts, and communications in
+              one organized place
             </p>
           </div>
 
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-all">
-            <div className="text-4xl mb-4" role="img" aria-label="Cloud">☁️</div>
-            <h3 className="font-playfair text-2xl font-bold text-white mb-3">Cloud Sync</h3>
+            <div className="text-4xl mb-4" role="img" aria-label="Cloud">
+              ☁️
+            </div>
+            <h3 className="font-playfair text-2xl font-bold text-white mb-3">
+              Cloud Sync
+            </h3>
             <p className="font-inter text-white/90">
-              Access your wedding plans from any device - your data automatically syncs everywhere
+              Access your wedding plans from any device - your data
+              automatically syncs everywhere
             </p>
           </div>
         </div>
 
         <div className="text-center">
           <div className="mb-6">
-            <span className="font-playfair text-5xl font-bold text-white">₦100</span>
-            <span className="font-inter text-xl text-white/80 ml-2">one-time payment</span>
+            <span className="font-playfair text-5xl font-bold text-white">
+              ₦100
+            </span>
+            <span className="font-inter text-xl text-white/80 ml-2">
+              one-time payment
+            </span>
           </div>
           <button
             onClick={handlePurchase}
