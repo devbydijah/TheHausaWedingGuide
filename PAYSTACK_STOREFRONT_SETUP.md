@@ -1,22 +1,28 @@
 # Paystack Storefront Setup Guide
 
-## Product Configuration
+## Overview
 
-You need to create **TWO** payment links/products in your Paystack dashboard:
+You're using **Paystack Storefront** (https://paystack.shop/hausaroom-wedding-guide-GLQSt), which is a pre-built shop page where customers can browse and purchase your products.
+
+## Storefront Configuration
+
+Your storefront URL: **https://paystack.shop/hausaroom-wedding-guide-GLQSt**
+
+You need to add **TWO** products to your Paystack Storefront:
 
 ### Product 1: Hausa Wedding Guide PDF
+
 - **Name**: `Hausa Wedding Guide PDF`
 - **Price**: ₦100
-- **Payment Link Slug**: `hausaweddingguidepdf`
-- **Full URL**: `https://paystack.com/pay/hausaweddingguidepdf`
+- **Product Type/SKU**: Include "pdf" in the product name or description
 - **Redirect URL (after payment)**: `https://the-hausa-weding-guide.vercel.app/?claim=1`
 - **Description**: "Comprehensive PDF guide for authentic Hausa wedding planning"
 
 ### Product 2: Interactive Wedding Guide
+
 - **Name**: `Interactive Wedding Guide`
 - **Price**: ₦100
-- **Payment Link Slug**: `hausaweddingguideinteractive`
-- **Full URL**: `https://paystack.com/pay/hausaweddingguideinteractive`
+- **Product Type/SKU**: Include "interactive" or "webapp" in the product name or description
 - **Redirect URL (after payment)**: `https://the-hausa-weding-guide-interactive.vercel.app/?claim=1`
 - **Description**: "Interactive web application for comprehensive wedding planning"
 
@@ -24,67 +30,79 @@ You need to create **TWO** payment links/products in your Paystack dashboard:
 
 1. **Log into Paystack Dashboard**
    - Go to https://dashboard.paystack.com
-   - Navigate to "Payment Pages" or "Payment Links"
+   - Navigate to "Storefront" or "Commerce" section
 
-2. **Create PDF Guide Payment Link**
-   - Click "Create Payment Link"
+2. **Add PDF Guide Product to Storefront**
+   - Click "Add Product" on your storefront
    - Set name: `Hausa Wedding Guide PDF`
-   - Set amount: ₦100
-   - Set slug: `hausaweddingguidepdf`
+   - Set price: ₦100
    - Set redirect URL: `https://the-hausa-weding-guide.vercel.app/?claim=1`
-   - Save the link
+   - Add description: "Comprehensive PDF guide for authentic Hausa wedding planning"
+   - Save the product
 
-3. **Create Interactive Guide Payment Link**
-   - Click "Create Payment Link"
+3. **Add Interactive Guide Product to Storefront**
+   - Click "Add Product" on your storefront
    - Set name: `Interactive Wedding Guide`
-   - Set amount: ₦100
-   - Set slug: `hausaweddingguideinteractive`
+   - Set price: ₦100
    - Set redirect URL: `https://the-hausa-weding-guide-interactive.vercel.app/?claim=1`
-   - Save the link
+   - Add description: "Interactive web application for comprehensive wedding planning"
+   - Save the product
 
 4. **Configure Webhooks**
    - Go to Settings → Webhooks
-   - Add your webhook URL (Vercel deployment URL + `/api/paystack-webhook`)
-   - Example: `https://your-app.vercel.app/api/paystack-webhook`
+   - Add your webhook URL: `https://the-hausa-weding-guide.vercel.app/api/paystack-webhook`
+   - Select events: `charge.success` (or select all events)
    - Save the webhook
 
 ## Product Detection Logic
 
-The webhook automatically detects which product was purchased by checking:
+The webhook automatically detects which product was purchased by checking the product name:
 
-1. **Payment Link Reference**: Contains "pdf" or "interactive"
-2. **Product Name**: Contains "PDF" or "Interactive"
-3. **Default Fallback**: PDF (for backward compatibility)
+1. **Product Name Check**:
+   - Contains "PDF" → Routes to PDF guide
+   - Contains "Interactive" or "webapp" → Routes to Interactive guide
+2. **Fallback**: Defaults to PDF for backward compatibility
 
 ### Routing After Purchase
 
 - **PDF Guide** buyers → Receive email with download link to PDF guide site
 - **Interactive Guide** buyers → Receive email with access link to interactive guide site
 
-## Deployment URLs
+## Landing Pages
 
-- **PDF Guide Site**: https://the-hausa-weding-guide-6bvl57j7j-devbydijahprojects.vercel.app
-- **Interactive Guide Site**: https://the-hausa-weding-guide-ez4t8wviq-devbydijahprojects.vercel.app
+Both landing pages have "Buy Now" buttons that redirect to your Paystack Storefront:
+
+- **PDF Guide Site**: https://the-hausa-weding-guide.vercel.app
+  - Button → `https://paystack.shop/hausaroom-wedding-guide-GLQSt`
+- **Interactive Guide Site**: https://the-hausa-weding-guide-interactive.vercel.app
+  - Button → `https://paystack.shop/hausaroom-wedding-guide-GLQSt`
+
+Customers browse products on your storefront and select which one they want to purchase.
 
 ## Testing
 
-1. Click the button on each site to ensure Paystack payment link works
-2. Complete a test purchase (use Paystack test card: 4084084084084081)
-3. Verify you receive the correct email with the correct product URL
-4. Confirm the download/access link works
+1. Visit your landing pages and click the "Buy" buttons
+2. Verify you're redirected to `https://paystack.shop/hausaroom-wedding-guide-GLQSt`
+3. Complete a test purchase using Paystack test card: **4084 0840 8408 4081**
+4. Check that you're redirected to the correct claim page after payment
+5. Verify you receive the correct email with the appropriate product URL
+6. Confirm the download/access link works
 
 ## Production Checklist
 
-- [ ] Create both payment links in Paystack
-- [ ] Configure webhook URL in Paystack
-- [ ] Test both purchase flows
+- [ ] Add both products to your Paystack Storefront
+- [ ] Set redirect URLs for each product
+- [ ] Configure webhook URL in Paystack: `https://the-hausa-weding-guide.vercel.app/api/paystack-webhook`
+- [ ] Test both purchase flows end-to-end
 - [ ] Switch to live Paystack keys when ready
 - [ ] Update .env with live keys
-- [ ] Redeploy to production
+- [ ] Redeploy both branches to production
 
 ## Notes
 
-- Both products are now ₦100 each for testing/demo purposes
-- Webhook detects product type from payment link reference
-- Email templates automatically customize based on product type
-- No metadata required - detection works automatically
+- Both products are ₦100 each for testing/demo purposes
+- Webhook detects product type from the **product name** in the purchase data
+- Email templates automatically customize based on detected product type
+- All "Buy Now" buttons on both landing pages redirect to the same storefront
+- Customers choose which product to buy on the storefront page
+- After payment, customers are redirected to product-specific claim pages based on what they purchased

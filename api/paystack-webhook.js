@@ -141,18 +141,28 @@ export default async function handler(req, res) {
           data?.product_name ||
           ""
         ).toLowerCase();
-        const reference = (verifyJson?.data?.reference || data?.reference || "").toLowerCase();
+        const reference = (
+          verifyJson?.data?.reference ||
+          data?.reference ||
+          ""
+        ).toLowerCase();
         const amount = verifyJson?.data?.amount || data?.amount || 0;
 
         let productType = (metadata.product_type || "").toLowerCase();
 
         // Fallback: detect from reference first, then amount, then product name
         if (!productType) {
-          if (reference.includes("webapp") || reference.includes("interactive")) {
+          if (
+            reference.includes("webapp") ||
+            reference.includes("interactive")
+          ) {
             productType = "webapp";
           } else if (reference.includes("pdf")) {
             productType = "pdf";
-          } else if (reference.includes("bundle") || reference.includes("complete")) {
+          } else if (
+            reference.includes("bundle") ||
+            reference.includes("complete")
+          ) {
             productType = "bundle";
           } else if (
             productName.includes("interactive") ||
@@ -171,7 +181,7 @@ export default async function handler(req, res) {
         }
 
         console.log(
-          `Product type detected: ${productType} (reference: '${reference}', amount: ₦${(amount/100).toFixed(2)}, product name: '${productName}')`
+          `Product type detected: ${productType} (reference: '${reference}', amount: ₦${(amount / 100).toFixed(2)}, product name: '${productName}')`
         );
 
         // ============================================
@@ -181,7 +191,7 @@ export default async function handler(req, res) {
         if (productType === "webapp") {
           // Web App Only - redirect to claim page for interactive guide
           const claimUrl = `${WEBAPP_BASE_URL}/?claim=1`;
-          
+
           await sendWebAppAccessEmail(verifiedEmail, claimUrl);
           console.log(
             "Web app access email sent successfully to:",
@@ -214,7 +224,7 @@ export default async function handler(req, res) {
           const downloadLink = `${PDF_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
             verifiedEmail
           )}&sig=${sig}`;
-          
+
           // Create claim URL for webapp
           const claimUrl = `${WEBAPP_BASE_URL}/?claim=1`;
 

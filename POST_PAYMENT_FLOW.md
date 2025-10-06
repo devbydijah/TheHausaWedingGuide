@@ -90,9 +90,9 @@ if (reference.includes("interactive") || productName.includes("Interactive")) {
 
 ## Testing Checklist
 
-- [ ] Create both payment links in Paystack dashboard
-- [ ] Set redirect URLs correctly
-- [ ] Configure webhook URL
+- [ ] Add both products to Paystack storefront
+- [ ] Set redirect URLs correctly for each product
+- [ ] Configure webhook URL: `https://the-hausa-weding-guide.vercel.app/api/paystack-webhook`
 - [ ] Test PDF purchase flow end-to-end
 - [ ] Test Interactive guide purchase flow end-to-end
 - [ ] Verify emails are sent with correct content
