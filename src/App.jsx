@@ -24,6 +24,15 @@ function App() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#990200] to-[#531946] flex items-center justify-center p-8">
         <div className="max-w-4xl mx-auto text-white">
+          {/* Logo Header */}
+          <div className="text-center mb-8">
+            <img 
+              src="/assets/logowhite.jpg" 
+              alt="Hausa Wedding Guide Logo" 
+              className="h-16 md:h-20 mx-auto mb-4 rounded-lg shadow-lg"
+            />
+          </div>
+
           <div className="text-center mb-12">
             <div className="text-6xl mb-6" role="img" aria-label="Celebration">
               🎉
@@ -129,6 +138,16 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#990200] to-[#531946] flex items-center justify-center p-8">
       <div className="max-w-6xl mx-auto">
+        {/* Logo Header */}
+        <div className="text-center mb-8">
+          <img 
+            src="/assets/logowhite.jpg" 
+            alt="Hausa Wedding Guide Logo" 
+            className="h-20 md:h-24 mx-auto mb-4 rounded-lg shadow-2xl"
+          />
+        </div>
+
+        {/* Hero Section with Image */}
         <div className="text-center text-white mb-12">
           <h1 className="text-5xl md:text-7xl font-playfair font-bold mb-6 bg-gradient-to-r from-white to-[#CE805C] bg-clip-text text-transparent">
             Hausa Wedding Guide
@@ -140,6 +159,31 @@ function App() {
             Everything you need to plan a beautiful, traditional Hausa wedding
             ceremony
           </p>
+        </div>
+
+        {/* Hero Images Grid */}
+        <div className="grid md:grid-cols-3 gap-4 mb-12">
+          <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
+            <img 
+              src="/assets/couple1.png" 
+              alt="Traditional Hausa wedding couple" 
+              className="w-full h-64 object-cover"
+            />
+          </div>
+          <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
+            <img 
+              src="/assets/bride1.png" 
+              alt="Hausa bride in traditional attire" 
+              className="w-full h-64 object-cover"
+            />
+          </div>
+          <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
+            <img 
+              src="/assets/eventdecor.png" 
+              alt="Traditional Hausa wedding decoration" 
+              className="w-full h-64 object-cover"
+            />
+          </div>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 mb-12">
@@ -225,6 +269,56 @@ function App() {
               <span>Gift-giving customs and traditions</span>
             </div>
           </div>
+        </div>
+
+        {/* PDF Preview Section */}
+        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-12">
+          <h2 className="text-2xl font-playfair font-bold text-white mb-6 text-center">
+            <span role="img" aria-label="Eyes">👀</span> Preview What's Inside
+          </h2>
+          <p className="text-center text-white/90 font-inter mb-8">
+            Take a sneak peek at the comprehensive guide that will help you plan your perfect Hausa wedding
+          </p>
+          <div className="grid md:grid-cols-5 gap-4">
+            <div className="rounded-lg overflow-hidden shadow-xl transform hover:scale-105 transition-transform duration-300 border-2 border-[#CE805C]/30">
+              <img 
+                src="/assets/samplepage1.png" 
+                alt="PDF preview page 1" 
+                className="w-full h-auto"
+              />
+            </div>
+            <div className="rounded-lg overflow-hidden shadow-xl transform hover:scale-105 transition-transform duration-300 border-2 border-[#CE805C]/30">
+              <img 
+                src="/assets/samplepage2.png" 
+                alt="PDF preview page 2" 
+                className="w-full h-auto"
+              />
+            </div>
+            <div className="rounded-lg overflow-hidden shadow-xl transform hover:scale-105 transition-transform duration-300 border-2 border-[#CE805C]/30">
+              <img 
+                src="/assets/samplepage3.png" 
+                alt="PDF preview page 3" 
+                className="w-full h-auto"
+              />
+            </div>
+            <div className="rounded-lg overflow-hidden shadow-xl transform hover:scale-105 transition-transform duration-300 border-2 border-[#CE805C]/30">
+              <img 
+                src="/assets/samplepage4.png" 
+                alt="PDF preview page 4" 
+                className="w-full h-auto"
+              />
+            </div>
+            <div className="rounded-lg overflow-hidden shadow-xl transform hover:scale-105 transition-transform duration-300 border-2 border-[#CE805C]/30">
+              <img 
+                src="/assets/samplepage5.png" 
+                alt="PDF preview page 5" 
+                className="w-full h-auto"
+              />
+            </div>
+          </div>
+          <p className="text-center text-white/70 font-inter mt-6 text-sm">
+            <span role="img" aria-label="Sparkles">✨</span> Beautiful, professionally designed pages with actionable guidance
+          </p>
         </div>
 
         <div className="text-center">
