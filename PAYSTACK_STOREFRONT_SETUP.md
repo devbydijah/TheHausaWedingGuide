@@ -50,8 +50,8 @@ You need to add **TWO** products to your Paystack Storefront:
 
 4. **Configure Webhooks**
    - Go to Settings → Webhooks
-   - Add your webhook URL (Vercel deployment URL + `/api/paystack-webhook`)
-   - Example: `https://your-app.vercel.app/api/paystack-webhook`
+   - Add your webhook URL: `https://the-hausa-weding-guide.vercel.app/api/paystack-webhook`
+   - Select events: `charge.success` (or select all events)
    - Save the webhook
 
 ## Product Detection Logic
@@ -92,7 +92,7 @@ Customers browse products on your storefront and select which one they want to p
 
 - [ ] Add both products to your Paystack Storefront
 - [ ] Set redirect URLs for each product
-- [ ] Configure webhook URL in Paystack: `https://your-app.vercel.app/api/paystack-webhook`
+- [ ] Configure webhook URL in Paystack: `https://the-hausa-weding-guide.vercel.app/api/paystack-webhook`
 - [ ] Test both purchase flows end-to-end
 - [ ] Switch to live Paystack keys when ready
 - [ ] Update .env with live keys

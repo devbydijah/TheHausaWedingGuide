@@ -4,7 +4,8 @@ import "./index.css";
 function App() {
   const handlePurchase = () => {
     // Redirect to Paystack storefront
-    window.location.href = "https://paystack.shop/hausaroom-wedding-guide-GLQSt";
+    window.location.href =
+      "https://paystack.shop/hausaroom-wedding-guide-GLQSt";
   };
 
   return (
