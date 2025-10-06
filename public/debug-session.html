@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Debug - Clear Session</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50 p-8">
+    <div class="max-w-2xl mx-auto">
+      <div class="bg-white rounded-lg shadow-lg p-8">
+        <h1 class="text-2xl font-bold text-gray-800 mb-4">🔧 Debug Tools</h1>
+
+        <div class="space-y-4">
+          <div class="border-b pb-4">
+            <h2 class="font-semibold text-lg mb-2">Session Info</h2>
+            <div
+              id="sessionInfo"
+              class="bg-gray-100 p-3 rounded font-mono text-sm"
+            ></div>
+          </div>
+
+          <div class="border-b pb-4">
+            <h2 class="font-semibold text-lg mb-2">Actions</h2>
+            <button
+              onclick="clearSession()"
+              class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 mr-2"
+            >
+              Clear Session & Logout
+            </button>
+            <button
+              onclick="checkSession()"
+              class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+              Refresh Info
+            </button>
+          </div>
+
+          <div>
+            <h2 class="font-semibold text-lg mb-2">Quick Links</h2>
+            <div class="space-y-2">
+              <a
+                href="/?guide=1"
+                class="block bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 text-center"
+              >
+                Go to Login Page
+              </a>
+              <a
+                href="/"
+                class="block bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 text-center"
+              >
+                Go to Home Page
+              </a>
+            </div>
+          </div>
+
+          <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
+            <p class="text-sm text-yellow-800">
+              💡 <strong>Tip:</strong> If you can't access the login page, click
+              "Clear Session & Logout" then "Go to Login Page"
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function checkSession() {
+        const session = localStorage.getItem("hwg_auth_session");
+        const hausaSession = localStorage.getItem("hausaGuideSession");
+        const output = document.getElementById("sessionInfo");
+
+        if (session || hausaSession) {
+          let info = '<div class="space-y-2">';
+
+          if (session) {
+            try {
+              const data = JSON.parse(session);
+              const expires = new Date(data.expiresAt);
+              const isValid = Date.now() < data.expiresAt;
+
+              info += `<div class="border-b pb-2">
+                            <strong>hwg_auth_session:</strong><br>
+                            Email: ${data.email}<br>
+                            Status: <span class="${isValid ? "text-green-600" : "text-red-600"}">${isValid ? "Valid" : "Expired"}</span><br>
+                            Expires: ${expires.toLocaleString()}
+                        </div>`;
+            } catch (e) {
+              info += `<div>hwg_auth_session: Invalid JSON</div>`;
+            }
+          }
+
+          if (hausaSession) {
+            try {
+              const data = JSON.parse(hausaSession);
+              const expires = new Date(data.expires);
+              const isValid = Date.now() < data.expires;
+
+              info += `<div class="pt-2">
+                            <strong>hausaGuideSession:</strong><br>
+                            Status: <span class="${isValid ? "text-green-600" : "text-red-600"}">${isValid ? "Valid" : "Expired"}</span><br>
+                            Expires: ${expires.toLocaleString()}
+                        </div>`;
+            } catch (e) {
+              info += `<div>hausaGuideSession: Invalid JSON</div>`;
+            }
+          }
+
+          info += "</div>";
+          output.innerHTML = info;
+        } else {
+          output.innerHTML =
+            '<span class="text-gray-500">No active session found</span>';
+        }
+      }
+
+      function clearSession() {
+        localStorage.removeItem("hwg_auth_session");
+        localStorage.removeItem("hausaGuideSession");
+        localStorage.removeItem("hausaGuideData");
+        alert("✅ All sessions cleared! You can now login fresh.");
+        checkSession();
+      }
+
+      // Check on load
+      checkSession();
+    </script>
+  </body>
+</html>

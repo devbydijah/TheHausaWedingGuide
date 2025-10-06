@@ -1,6 +1,6 @@
 # Hausa Wedding Guide
 
-A comprehensive digital guide for planning authentic Hausa weddings, featuring traditional ceremonies, cultural customs, budget planning tools, and step-by-step guidance.
+A comprehensive digital guide for planning authentic Hausa weddings, featuring traditional ceremonies, cultural customs, budget planning tools, and step-by-step guidance with secure PDF download functionality.
 
 ## 🌟 Features
 
@@ -9,6 +9,9 @@ A comprehensive digital guide for planning authentic Hausa weddings, featuring t
 - **Cultural Guidance**: Authentic cultural practices and ceremony explanations
 - **Planning Timeline**: Step-by-step 2-month planning guide
 - **Prayer Resources**: Traditional prayers and their translations
+- **Secure PDF Download**: Paystack-integrated payment system with token-based downloads
+- **Email Notifications**: Automated download links via Resend
+- **Database Persistence**: SQLite-backed token management with download limits
 
 ## 🚀 Deployment
 
@@ -33,25 +36,57 @@ Run the included `deploy.bat` file for guided deployment.
 
 ## 🛠️ Local Development
 
-1. **Install dependencies:**
+### Prerequisites
+
+- Node.js 18+
+- npm
+- Paystack account (for payment testing)
+- Resend account (for email testing)
+
+### Installation
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/devbydijah/TheHausaWedingGuide.git
+   cd TheHausaWedingGuide
+   ```
+
+2. **Install dependencies:**
 
    ```bash
    npm install
    ```
 
-2. **Start development server:**
+3. **Set up environment variables:**
+   Create a `.env.local` file in the root directory:
+
+   ```env
+   PAYSTACK_TEST_SECRET_KEY=your_test_secret_key
+   PAYSTACK_SECRET_KEY=your_live_secret_key
+   RESEND_API_KEY=your_resend_api_key
+   FROM_EMAIL=noreply@hausaroom.com
+   DOWNLOAD_TOKEN_SECRET=your_secret_for_hmac
+   ```
+
+4. **Add the PDF guide:**
+   Place your `Hausa_Wedding_Guide.pdf` file in the `public/` directory
+
+5. **Start development server:**
 
    ```bash
    npm run dev
    ```
 
-3. **Build for production:**
+   The app will be available at `http://localhost:5173`
+
+6. **Build for production:**
 
    ```bash
    npm run build
    ```
 
-4. **Preview production build:**
+7. **Preview production build:**
    ```bash
    npm run preview
    ```
@@ -60,18 +95,36 @@ Run the included `deploy.bat` file for guided deployment.
 
 ```
 TheHausaWedingGuide/
+├── api/                          # Vercel serverless functions
+│   ├── paystack-webhook.js       # Payment webhook handler
+│   ├── issue-link.js             # Manual link issuance
+│   ├── validate-token.js         # Token validation
+│   └── download.js               # Secure PDF download
+├── lib/                          # Shared utilities
+│   ├── database.cjs              # SQLite database operations
+│   ├── email.js                  # Email service
+│   ├── rateLimit.js              # Rate limiting
+│   └── logger.js                 # PII-safe logging
 ├── public/
-│   ├── Hausa_Wedding_Guide.pdf    # Main guide PDF
-│   ├── logowhite.svg              # Logo
-│   └── assets/                    # Images and sample pages
+│   ├── Hausa_Wedding_Guide.pdf   # Main guide PDF
+│   ├── logowhite.svg             # Logo
+│   ├── debug.html                # Debug/testing page
+│   └── assets/                   # Images and sample pages
 ├── src/
-│   ├── App.jsx                    # Main application component
-│   ├── main.jsx                   # Entry point
-│   └── index.css                  # Global styles
-├── index.html                     # HTML template
-├── vercel.json                    # Vercel configuration
-├── vite.config.js                 # Vite configuration
-└── deploy.bat                     # Windows deployment script
+│   ├── App.jsx                   # Main application component
+│   ├── SuccessPage.jsx           # Post-purchase page
+│   ├── main.jsx                  # Entry point
+│   ├── index.css                 # Global styles
+│   └── components/
+│       └── GuideForm.jsx         # Interactive guide form
+├── sql/                          # Database setup scripts
+├── .github/
+│   └── copilot-instructions.md   # AI coding guidelines
+├── index.html                    # HTML template
+├── vercel.json                   # Vercel configuration
+├── vite.config.js                # Vite configuration
+├── package.json                  # Dependencies and scripts
+└── deploy.bat                    # Windows deployment script
 ```
 
 ## 🎨 Technologies Used
@@ -79,7 +132,29 @@ TheHausaWedingGuide/
 - **React 19.1.1**: Modern React with latest features
 - **Tailwind CSS 4.1.11**: Utility-first CSS framework
 - **Vite**: Fast build tool and development server
+- **SQLite (better-sqlite3)**: Local database for token persistence
+- **Paystack**: Payment processing
+- **Resend**: Email delivery
+- **Vercel**: Serverless deployment platform
 - **Responsive Design**: Mobile-first approach
+
+## 🔧 API Endpoints
+
+### Payment & Downloads
+
+- `POST /api/paystack-webhook` - Handles payment confirmations and issues download tokens
+- `POST /api/issue-link` - Manually issues download links (for support/testing)
+- `GET /api/validate-token` - Validates download tokens and returns status
+- `GET /api/download` - Serves the PDF file with security checks
+
+### Environment Variables Required
+
+- `PAYSTACK_TEST_SECRET_KEY` - Test payment processing
+- `PAYSTACK_SECRET_KEY` - Live payment processing
+- `RESEND_API_KEY` - Email delivery service
+- `FROM_EMAIL` - Sender email address
+- `DOWNLOAD_TOKEN_SECRET` - HMAC signing secret
+- `VERCEL_URL` - Auto-populated by Vercel
 
 ## 📧 Contact
 
@@ -93,120 +168,3 @@ ISC License - Feel free to use and modify for personal projects.
 ---
 
 Made with ❤️ for preserving Hausa wedding traditions
-
-A beautiful, responsive web application showcasing traditional Hausa wedding ceremonies, customs, and celebrations. Built with React and Tailwind CSS.
-
-## 🌟 Features
-
-- **Responsive Design**: Works beautifully on desktop, tablet, and mobile devices
-- **PDF Download**: Direct access to the comprehensive Hausa Wedding Guide PDF
-- **Cultural Content**: Rich information about Hausa wedding traditions and customs
-- **Modern UI**: Clean, elegant design with custom typography and colors
-- **Fast Performance**: Built with Vite for optimal loading speeds
-
-## 🎨 Design
-
-- **Color Scheme**: Warm amber and orange gradients reflecting traditional aesthetics
-- **Typography**: Playfair Display for headings and Inter for body text
-- **Layout**: Mobile-first responsive design with card-based components
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js (version 16 or higher)
-- npm or yarn package manager
-
-### Installation
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/hausa-wedding-guide.git
-   cd hausa-wedding-guide
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-3. Add your PDF guide:
-
-   - Place your `Hausa_Wedding_Guide.pdf` file in the `public/` directory
-
-4. Start the development server:
-
-   ```bash
-   npm run dev
-   ```
-
-5. Open your browser and visit `http://localhost:5173`
-
-## 📝 Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build locally
-
-## 🛠️ Built With
-
-- **React** - Frontend framework
-- **Vite** - Build tool and development server
-- **Tailwind CSS** - Utility-first CSS framework
-- **PostCSS** - CSS processing tool
-
-## 📁 Project Structure
-
-```
-src/
-├── App.jsx          # Main application component
-├── main.jsx         # React entry point
-└── index.css        # Global styles with Tailwind directives
-public/
-├── vite.svg         # Favicon
-└── README_PDF.md    # Instructions for PDF placement
-```
-
-## 🎯 Features Overview
-
-### Landing Page Components
-
-- **Hero Section**: Welcoming introduction with main title
-- **Download Section**: Prominent PDF download button
-- **Feature Cards**: Highlighting key aspects of Hausa wedding traditions
-- **Responsive Grid**: Adaptive layout for different screen sizes
-
-### PDF Integration
-
-The application is designed to serve a downloadable PDF guide. Simply place your `Hausa_Wedding_Guide.pdf` file in the `public/` directory, and it will be accessible via the download button.
-
-## 🌍 Cultural Significance
-
-This project celebrates the rich traditions of Hausa wedding ceremonies, including:
-
-- Traditional ceremonies and rituals
-- Cultural customs passed down through generations
-- Practical planning guidance for modern couples
-- Historical context and significance
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
-## 📞 Contact
-
-For questions or suggestions about this project, please open an issue on GitHub.
-
----
-
-**Note**: This project is designed to preserve and share the beautiful traditions of Hausa wedding ceremonies. We encourage respectful use and contribution to maintain the cultural authenticity of the content.

@@ -1,13 +1,20 @@
 // Simple Paystack webhook that sends download links via email using Resend
 import crypto from "crypto";
-import { sendDownloadEmail } from "../lib/email.js";
+import {
+  sendDownloadEmail,
+  sendWebAppAccessEmail,
+  sendBundleEmail,
+} from "../lib/email.js";
+import { tokenDB } from "../lib/database.cjs";
 
 // Environment variables (support both test and live secrets)
 const PAYSTACK_TEST_SECRET = process.env.PAYSTACK_TEST_SECRET_KEY || null;
 const PAYSTACK_LIVE_SECRET = process.env.PAYSTACK_SECRET_KEY || null;
-const PUBLIC_BASE_URL = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3000";
+
+// Product-specific URLs
+const PDF_BASE_URL = "https://the-hausa-weding-guide.vercel.app";
+const WEBAPP_BASE_URL = "https://the-hausa-weding-guide-interactive.vercel.app";
+
 const WEBHOOK_TEST_BYPASS =
   (process.env.PAYSTACK_WEBHOOK_TEST_BYPASS || "").toLowerCase() === "true";
 
@@ -114,39 +121,140 @@ export default async function handler(req, res) {
           return res.status(400).json({ error: "Verification failed" });
         }
 
-        // Detect product type based on amount or reference
-        const amount = verifyJson?.data?.amount || data?.amount || 0;
-        const reference = verifyJson?.data?.reference || data?.reference || '';
-
-        // Product detection logic:
-        // - PDF Guide: ₦3,000 (300000 kobo)
-        // - Interactive Guide: ₦5,000 (500000 kobo)
-        let productType = 'pdf'; // default
-        let productUrl = 'https://the-hausa-weding-guide-6bvl57j7j-devbydijahprojects.vercel.app'; // PDF guide URL
-
-        if (amount >= 500000) { // ₦5,000 or more = Interactive Guide
-          productType = 'webapp';
-          productUrl = 'https://the-hausa-weding-guide-ez4t8wviq-devbydijahprojects.vercel.app';
-        } else if (amount >= 300000) { // ₦3,000 = PDF Guide
-          productType = 'pdf';
-          productUrl = 'https://the-hausa-weding-guide-6bvl57j7j-devbydijahprojects.vercel.app';
+        // Prefer the email returned by Paystack verify API to avoid spoofing
+        const verifiedEmail =
+          verifyJson?.data?.customer?.email || data?.customer?.email;
+        if (!verifiedEmail) {
+          console.error("No customer email available after verification");
+          return res.status(400).json({ error: "No customer email available" });
         }
 
-        console.log(`Product detected: ${productType} (amount: ₦${amount/100}, reference: ${reference})`);
+        // ============================================
+        // PRODUCT DETECTION
+        // ============================================
+        // Check metadata for product_type, fallback to checking reference/amount
+        const metadata = verifyJson?.data?.metadata || data?.metadata || {};
+        const productName = (
+          verifyJson?.data?.plan?.name ||
+          verifyJson?.data?.product_name ||
+          data?.plan?.name ||
+          data?.product_name ||
+          ""
+        ).toLowerCase();
+        const reference = (verifyJson?.data?.reference || data?.reference || "").toLowerCase();
+        const amount = verifyJson?.data?.amount || data?.amount || 0;
 
-        // Generate a simple temporary token
-        const token = crypto.randomBytes(32).toString("hex");
-        const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+        let productType = (metadata.product_type || "").toLowerCase();
 
-        // Create download URL with token
-        const downloadLink = `${productUrl}?download=${token}&expires=${expires}&email=${encodeURIComponent(
-          verifiedEmail
-        )}`;
+        // Fallback: detect from reference first, then amount, then product name
+        if (!productType) {
+          if (reference.includes("webapp") || reference.includes("interactive")) {
+            productType = "webapp";
+          } else if (reference.includes("pdf")) {
+            productType = "pdf";
+          } else if (reference.includes("bundle") || reference.includes("complete")) {
+            productType = "bundle";
+          } else if (
+            productName.includes("interactive") ||
+            productName.includes("webapp") ||
+            productName.includes("web app")
+          ) {
+            productType = "webapp";
+          } else if (
+            productName.includes("bundle") ||
+            productName.includes("complete")
+          ) {
+            productType = "bundle";
+          } else {
+            productType = "pdf"; // Default to PDF for backward compatibility
+          }
+        }
 
-        // Send email with download link using Resend
-        await sendDownloadEmail(verifiedEmail, downloadLink, productType);
+        console.log(
+          `Product type detected: ${productType} (reference: '${reference}', amount: ₦${(amount/100).toFixed(2)}, product name: '${productName}')`
+        );
 
-        console.log("Download email sent successfully to:", verifiedEmail);
+        // ============================================
+        // HANDLE DIFFERENT PRODUCT TYPES
+        // ============================================
+
+        if (productType === "webapp") {
+          // Web App Only - redirect to claim page for interactive guide
+          const claimUrl = `${WEBAPP_BASE_URL}/?claim=1`;
+          
+          await sendWebAppAccessEmail(verifiedEmail, claimUrl);
+          console.log(
+            "Web app access email sent successfully to:",
+            verifiedEmail
+          );
+        } else if (productType === "bundle") {
+          // Bundle - send both PDF download + web app access
+          // Generate download token for PDF
+          const token = crypto.randomBytes(32).toString("hex");
+          const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+
+          // Create HMAC signature for token verification
+          const SECRET =
+            process.env.DOWNLOAD_TOKEN_SECRET ||
+            process.env.PAYSTACK_SECRET_KEY;
+          const hmac = crypto.createHmac("sha256", SECRET);
+          hmac.update(`${token}|${verifiedEmail}|${expires}`);
+          const sig = hmac.digest("hex");
+
+          // Store token in database
+          const stored = tokenDB.storeToken(verifiedEmail, token, expires, 3);
+          if (!stored) {
+            console.error("Failed to store token in database");
+            return res
+              .status(500)
+              .json({ error: "Failed to create download token" });
+          }
+
+          // Create download URL for PDF
+          const downloadLink = `${PDF_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
+            verifiedEmail
+          )}&sig=${sig}`;
+          
+          // Create claim URL for webapp
+          const claimUrl = `${WEBAPP_BASE_URL}/?claim=1`;
+
+          // Send bundle email with both PDF + web app access
+          await sendBundleEmail(verifiedEmail, downloadLink, claimUrl);
+          console.log("Bundle email sent successfully to:", verifiedEmail);
+        } else {
+          // PDF Only (default) - send download link
+          const token = crypto.randomBytes(32).toString("hex");
+          const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+
+          // Create HMAC signature for token verification
+          const SECRET =
+            process.env.DOWNLOAD_TOKEN_SECRET ||
+            process.env.PAYSTACK_SECRET_KEY;
+          const hmac = crypto.createHmac("sha256", SECRET);
+          hmac.update(`${token}|${verifiedEmail}|${expires}`);
+          const sig = hmac.digest("hex");
+
+          // Store token in database
+          const stored = tokenDB.storeToken(verifiedEmail, token, expires, 3);
+          if (!stored) {
+            console.error("Failed to store token in database");
+            return res
+              .status(500)
+              .json({ error: "Failed to create download token" });
+          }
+
+          // Create download URL
+          const downloadLink = `${PDF_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
+            verifiedEmail
+          )}&sig=${sig}`;
+
+          // Send PDF download email
+          await sendDownloadEmail(verifiedEmail, downloadLink);
+          console.log(
+            "PDF download email sent successfully to:",
+            verifiedEmail
+          );
+        }
       } catch (e) {
         console.error("Error verifying/sending email:", e);
         return res.status(500).json({ error: "Verification/email failed" });

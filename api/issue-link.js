@@ -4,6 +4,7 @@
 
 import crypto from "crypto";
 import { sendDownloadEmail } from "../lib/email.js";
+import { tokenDB } from "../lib/database.cjs";
 
 const PAYSTACK_TEST_SECRET = process.env.PAYSTACK_TEST_SECRET_KEY || null;
 const PAYSTACK_LIVE_SECRET = process.env.PAYSTACK_SECRET_KEY || null;
@@ -65,12 +66,26 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Customer email unavailable" });
     }
 
-    // Generate link
+    // Generate link with HMAC signature
     const token = crypto.randomBytes(32).toString("hex");
     const expires = Date.now() + 24 * 60 * 60 * 1000; // 24h
+
+    // Create HMAC signature for token verification
+    const SECRET =
+      process.env.DOWNLOAD_TOKEN_SECRET || process.env.PAYSTACK_SECRET_KEY;
+    const hmac = crypto.createHmac("sha256", SECRET);
+    hmac.update(`${token}|${targetEmail}|${expires}`);
+    const sig = hmac.digest("hex");
+
+    // Store token in database
+    const stored = tokenDB.storeToken(targetEmail, token, expires, 3); // 3 downloads allowed
+    if (!stored) {
+      return res.status(500).json({ error: "Failed to create download token" });
+    }
+
     const downloadLink = `${PUBLIC_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
       targetEmail
-    )}`;
+    )}&sig=${sig}`;
 
     // Email link
     await sendDownloadEmail(targetEmail, downloadLink);
