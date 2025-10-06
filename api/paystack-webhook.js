@@ -10,9 +10,11 @@ import { tokenDB } from "../lib/database.cjs";
 // Environment variables (support both test and live secrets)
 const PAYSTACK_TEST_SECRET = process.env.PAYSTACK_TEST_SECRET_KEY || null;
 const PAYSTACK_LIVE_SECRET = process.env.PAYSTACK_SECRET_KEY || null;
-const PUBLIC_BASE_URL = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3000";
+
+// Product-specific URLs
+const PDF_BASE_URL = "https://the-hausa-weding-guide.vercel.app";
+const WEBAPP_BASE_URL = "https://the-hausa-weding-guide-interactive.vercel.app";
+
 const WEBHOOK_TEST_BYPASS =
   (process.env.PAYSTACK_WEBHOOK_TEST_BYPASS || "").toLowerCase() === "true";
 
@@ -177,8 +179,10 @@ export default async function handler(req, res) {
         // ============================================
 
         if (productType === "webapp") {
-          // Web App Only - send login credentials
-          await sendWebAppAccessEmail(verifiedEmail);
+          // Web App Only - redirect to claim page for interactive guide
+          const claimUrl = `${WEBAPP_BASE_URL}/?claim=1`;
+          
+          await sendWebAppAccessEmail(verifiedEmail, claimUrl);
           console.log(
             "Web app access email sent successfully to:",
             verifiedEmail
@@ -206,13 +210,16 @@ export default async function handler(req, res) {
               .json({ error: "Failed to create download token" });
           }
 
-          // Create download URL
-          const downloadLink = `${PUBLIC_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
+          // Create download URL for PDF
+          const downloadLink = `${PDF_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
             verifiedEmail
           )}&sig=${sig}`;
+          
+          // Create claim URL for webapp
+          const claimUrl = `${WEBAPP_BASE_URL}/?claim=1`;
 
           // Send bundle email with both PDF + web app access
-          await sendBundleEmail(verifiedEmail, downloadLink);
+          await sendBundleEmail(verifiedEmail, downloadLink, claimUrl);
           console.log("Bundle email sent successfully to:", verifiedEmail);
         } else {
           // PDF Only (default) - send download link
@@ -237,7 +244,7 @@ export default async function handler(req, res) {
           }
 
           // Create download URL
-          const downloadLink = `${PUBLIC_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
+          const downloadLink = `${PDF_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
             verifiedEmail
           )}&sig=${sig}`;
 
