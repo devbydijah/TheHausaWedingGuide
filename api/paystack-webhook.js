@@ -148,23 +148,21 @@ export default async function handler(req, res) {
         if (!productType) {
           if (reference.includes("webapp") || reference.includes("interactive")) {
             productType = "webapp";
+          } else if (reference.includes("pdf")) {
+            productType = "pdf";
           } else if (reference.includes("bundle") || reference.includes("complete")) {
             productType = "bundle";
-          } else if (amount >= 500000) { // ₦5,000+ = webapp
+          } else if (
+            productName.includes("interactive") ||
+            productName.includes("webapp") ||
+            productName.includes("web app")
+          ) {
             productType = "webapp";
-          } else if (amount >= 700000) { // ₦7,000+ = bundle
-            productType = "bundle";
           } else if (
             productName.includes("bundle") ||
             productName.includes("complete")
           ) {
             productType = "bundle";
-          } else if (
-            productName.includes("webapp") ||
-            productName.includes("web app") ||
-            productName.includes("interactive")
-          ) {
-            productType = "webapp";
           } else {
             productType = "pdf"; // Default to PDF for backward compatibility
           }
