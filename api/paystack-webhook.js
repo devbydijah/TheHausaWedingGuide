@@ -114,25 +114,37 @@ export default async function handler(req, res) {
           return res.status(400).json({ error: "Verification failed" });
         }
 
-        // Prefer the email returned by Paystack verify API to avoid spoofing
-        const verifiedEmail =
-          verifyJson?.data?.customer?.email || data?.customer?.email;
-        if (!verifiedEmail) {
-          console.error("No customer email available after verification");
-          return res.status(400).json({ error: "No customer email available" });
+        // Detect product type based on amount or reference
+        const amount = verifyJson?.data?.amount || data?.amount || 0;
+        const reference = verifyJson?.data?.reference || data?.reference || '';
+
+        // Product detection logic:
+        // - PDF Guide: ₦3,000 (300000 kobo)
+        // - Interactive Guide: ₦5,000 (500000 kobo)
+        let productType = 'pdf'; // default
+        let productUrl = 'https://the-hausa-weding-guide-6bvl57j7j-devbydijahprojects.vercel.app'; // PDF guide URL
+
+        if (amount >= 500000) { // ₦5,000 or more = Interactive Guide
+          productType = 'webapp';
+          productUrl = 'https://the-hausa-weding-guide-ez4t8wviq-devbydijahprojects.vercel.app';
+        } else if (amount >= 300000) { // ₦3,000 = PDF Guide
+          productType = 'pdf';
+          productUrl = 'https://the-hausa-weding-guide-6bvl57j7j-devbydijahprojects.vercel.app';
         }
+
+        console.log(`Product detected: ${productType} (amount: ₦${amount/100}, reference: ${reference})`);
 
         // Generate a simple temporary token
         const token = crypto.randomBytes(32).toString("hex");
         const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
         // Create download URL with token
-        const downloadLink = `${PUBLIC_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
+        const downloadLink = `${productUrl}?download=${token}&expires=${expires}&email=${encodeURIComponent(
           verifiedEmail
         )}`;
 
         // Send email with download link using Resend
-        await sendDownloadEmail(verifiedEmail, downloadLink);
+        await sendDownloadEmail(verifiedEmail, downloadLink, productType);
 
         console.log("Download email sent successfully to:", verifiedEmail);
       } catch (e) {
