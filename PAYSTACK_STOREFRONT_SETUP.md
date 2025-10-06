@@ -2,11 +2,11 @@
 
 ## Overview
 
-You're using **Paystack Storefront** (https://paystack.shop/hausa-room), which is a pre-built shop page where customers can browse and purchase your products.
+You're using **Paystack Storefront** (https://paystack.shop/hausaroom-wedding-guide-GLQSt), which is a pre-built shop page where customers can browse and purchase your products.
 
 ## Storefront Configuration
 
-Your storefront URL: **https://paystack.shop/hausa-room**
+Your storefront URL: **https://paystack.shop/hausaroom-wedding-guide-GLQSt**
 
 You need to add **TWO** products to your Paystack Storefront:
 
@@ -73,16 +73,16 @@ The webhook automatically detects which product was purchased by checking the pr
 Both landing pages have "Buy Now" buttons that redirect to your Paystack Storefront:
 
 - **PDF Guide Site**: https://the-hausa-weding-guide.vercel.app
-  - Button → `https://paystack.shop/hausa-room`
+  - Button → `https://paystack.shop/hausaroom-wedding-guide-GLQSt`
 - **Interactive Guide Site**: https://the-hausa-weding-guide-interactive.vercel.app
-  - Button → `https://paystack.shop/hausa-room`
+  - Button → `https://paystack.shop/hausaroom-wedding-guide-GLQSt`
 
 Customers browse products on your storefront and select which one they want to purchase.
 
 ## Testing
 
 1. Visit your landing pages and click the "Buy" buttons
-2. Verify you're redirected to `https://paystack.shop/hausa-room`
+2. Verify you're redirected to `https://paystack.shop/hausaroom-wedding-guide-GLQSt`
 3. Complete a test purchase using Paystack test card: **4084 0840 8408 4081**
 4. Check that you're redirected to the correct claim page after payment
 5. Verify you receive the correct email with the appropriate product URL

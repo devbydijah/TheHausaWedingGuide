@@ -2,7 +2,7 @@
 
 ## What You're Using: STOREFRONT ✅
 
-**Your Storefront URL**: https://paystack.shop/hausa-room
+**Your Storefront URL**: https://paystack.shop/hausaroom-wedding-guide-GLQSt
 
 ## The Difference
 
@@ -10,7 +10,7 @@
 
 - ✅ **One shop page** with multiple products
 - ✅ Customers browse and select which product to buy
-- ✅ Example: https://paystack.shop/hausa-room
+- ✅ Example: https://paystack.shop/hausaroom-wedding-guide-GLQSt
 - ✅ Both your landing pages redirect here
 
 ### Payment Links (What you DON'T need)
@@ -25,17 +25,15 @@
 
 ```
 PDF Guide Landing Page
-  Button clicks → https://paystack.shop/hausa-room
+  Button clicks → https://paystack.shop/hausaroom-wedding-guide-GLQSt
 
-Interactive Guide Landing Page
-  Button clicks → https://paystack.shop/hausa-room
-```
-
-### Customer Journey
+Interactive Guide Landing Page  
+  Button clicks → https://paystack.shop/hausaroom-wedding-guide-GLQSt
+```### Customer Journey
 
 1. Customer visits your landing page (PDF or Interactive)
 2. Clicks "Buy Now" button
-3. Redirected to **https://paystack.shop/hausa-room**
+3. Redirected to **https://paystack.shop/hausaroom-wedding-guide-GLQSt**
 4. Sees both products listed on storefront
 5. Selects which product they want
 6. Completes payment
