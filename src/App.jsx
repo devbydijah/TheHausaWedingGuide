@@ -3,8 +3,8 @@ import "./index.css";
 
 function App() {
   const handlePurchase = () => {
-    // Redirect to Paystack storefront for PDF guide (₦100)
-    window.location.href = "https://paystack.com/pay/hausaweddingguidepdf";
+    // Redirect to Paystack storefront
+    window.location.href = "https://paystack.shop/hausa-room";
   };
 
   return (
