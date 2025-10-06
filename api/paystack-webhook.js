@@ -130,7 +130,7 @@ export default async function handler(req, res) {
         // ============================================
         // PRODUCT DETECTION
         // ============================================
-        // Check metadata for product_type, fallback to checking product name
+        // Check metadata for product_type, fallback to checking reference/amount
         const metadata = verifyJson?.data?.metadata || data?.metadata || {};
         const productName = (
           verifyJson?.data?.plan?.name ||
@@ -139,12 +139,22 @@ export default async function handler(req, res) {
           data?.product_name ||
           ""
         ).toLowerCase();
+        const reference = (verifyJson?.data?.reference || data?.reference || "").toLowerCase();
+        const amount = verifyJson?.data?.amount || data?.amount || 0;
 
         let productType = (metadata.product_type || "").toLowerCase();
 
-        // Fallback: detect from product name if metadata not set
+        // Fallback: detect from reference first, then amount, then product name
         if (!productType) {
-          if (
+          if (reference.includes("webapp") || reference.includes("interactive")) {
+            productType = "webapp";
+          } else if (reference.includes("bundle") || reference.includes("complete")) {
+            productType = "bundle";
+          } else if (amount >= 500000) { // ₦5,000+ = webapp
+            productType = "webapp";
+          } else if (amount >= 700000) { // ₦7,000+ = bundle
+            productType = "bundle";
+          } else if (
             productName.includes("bundle") ||
             productName.includes("complete")
           ) {
@@ -161,7 +171,7 @@ export default async function handler(req, res) {
         }
 
         console.log(
-          `Product type detected: ${productType} (from metadata: ${metadata.product_type || "none"}, product name: '${productName}')`
+          `Product type detected: ${productType} (reference: '${reference}', amount: ₦${(amount/100).toFixed(2)}, product name: '${productName}')`
         );
 
         // ============================================
