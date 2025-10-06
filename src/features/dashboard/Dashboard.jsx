@@ -97,11 +97,11 @@ export default function Dashboard({ data, setActiveSection }) {
   return (
     <div className="space-y-8">
       {/* Welcome Header */}
-      <div className="bg-gradient-to-r from-[#CE805C] to-[#b86a4a] rounded-xl p-8 text-white">
-        <h1 className="font-playfair text-3xl font-bold mb-2">
+      <div className="bg-gradient-to-r from-[#CE805C] to-[#b86a4a] rounded-xl p-6 sm:p-8 text-white">
+        <h1 className="font-playfair text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
           Welcome to Your Hausa Wedding Guide
         </h1>
-        <p className="font-inter text-lg opacity-90">
+        <p className="font-inter text-base sm:text-lg md:text-xl opacity-90">
           Your personalized planning dashboard for a beautiful and blessed
           celebration
         </p>
@@ -110,12 +110,12 @@ export default function Dashboard({ data, setActiveSection }) {
       {/* Wedding Countdown Card */}
       {weddingDate && (
         <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="font-playfair text-2xl font-semibold text-gray-900 dark:text-white mb-1">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-center sm:text-left">
+              <h2 className="font-playfair text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white mb-1">
                 Wedding Countdown
               </h2>
-              <p className="font-inter text-gray-600 dark:text-gray-400">
+              <p className="font-inter text-sm sm:text-base text-gray-600 dark:text-gray-400">
                 {weddingDate.toLocaleDateString("en-US", {
                   weekday: "long",
                   year: "numeric",
@@ -125,10 +125,10 @@ export default function Dashboard({ data, setActiveSection }) {
               </p>
             </div>
             <div className="text-center">
-              <div className="text-5xl font-bold text-[#CE805C]">
+              <div className="text-4xl sm:text-5xl md:text-6xl font-bold text-[#CE805C]">
                 {daysUntilWedding > 0 ? daysUntilWedding : 0}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
                 {daysUntilWedding > 0
                   ? "days to go"
                   : daysUntilWedding === 0
@@ -145,7 +145,7 @@ export default function Dashboard({ data, setActiveSection }) {
 
       {/* Section Navigation */}
       <div>
-        <h2 className="font-playfair text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
+        <h2 className="font-playfair text-xl sm:text-2xl md:text-3xl font-semibold mb-4 text-gray-900 dark:text-white">
           Planning Sections
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
