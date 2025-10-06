@@ -23,30 +23,38 @@ function App() {
   if (showClaim) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#990200] to-[#531946] flex items-center justify-center p-8">
-        <div className="max-w-4xl mx-auto text-white">
+        {/* Skip to main content link for accessibility */}
+        <a 
+          href="#main-content" 
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:text-[#990200] focus:px-4 focus:py-2 focus:rounded-lg focus:font-semibold"
+        >
+          Skip to main content
+        </a>
+        
+        <main id="main-content" className="max-w-4xl mx-auto text-white">
           {/* Logo Header */}
-          <div className="text-center mb-8">
+          <header className="text-center mb-8">
             <img
               src="/assets/logowhite.jpg"
               alt="Hausa Wedding Guide Logo"
               className="h-16 md:h-20 mx-auto mb-4 rounded-lg shadow-lg"
             />
-          </div>
+          </header>
 
-          <div className="text-center mb-12">
+          <section className="text-center mb-12" aria-labelledby="success-heading">
             <div className="text-6xl mb-6" role="img" aria-label="Celebration">
               🎉
             </div>
-            <h1 className="text-4xl md:text-6xl font-playfair font-bold mb-6">
+            <h1 id="success-heading" className="text-4xl md:text-6xl font-playfair font-bold mb-6">
               Thank You for Your Purchase!
             </h1>
             <p className="text-xl font-inter mb-8">
               Your Hausa Wedding Guide PDF is ready to download.
             </p>
-          </div>
+          </section>
 
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-8">
-            <h2 className="text-2xl font-playfair font-bold mb-4">
+          <section className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-8" aria-labelledby="guide-contents">
+            <h2 id="guide-contents" className="text-2xl font-playfair font-bold mb-4">
               What's Inside Your Guide:
             </h2>
             <ul className="space-y-3 text-lg font-inter">
@@ -101,10 +109,10 @@ function App() {
                 <span>Checklists, timelines, and planning templates</span>
               </li>
             </ul>
-          </div>
+          </section>
 
-          <div className="bg-[#CE805C]/20 border-2 border-[#CE805C] rounded-2xl p-6 mb-8">
-            <h3 className="text-xl font-playfair font-bold mb-3">
+          <section className="bg-[#CE805C]/20 border-2 border-[#CE805C] rounded-2xl p-6 mb-8" aria-labelledby="email-notice">
+            <h3 id="email-notice" className="text-xl font-playfair font-bold mb-3">
               <span role="img" aria-label="Email">
                 📧
               </span>{" "}
@@ -118,9 +126,9 @@ function App() {
               Link expires in 24 hours. If you don't see the email, check your
               spam folder.
             </p>
-          </div>
+          </section>
 
-          <div className="bg-white/5 rounded-xl p-6 text-center">
+          <aside className="bg-white/5 rounded-xl p-6 text-center">
             <p className="text-sm font-inter opacity-75">
               <span role="img" aria-label="Light bulb">
                 💡
@@ -128,8 +136,8 @@ function App() {
               <strong>Pro Tip:</strong> Save the PDF to your device for offline
               access. You can also print it for easy reference during planning.
             </p>
-          </div>
-        </div>
+          </aside>
+        </main>
       </div>
     );
   }
@@ -137,19 +145,27 @@ function App() {
   // Default landing page for new visitors
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#990200] to-[#531946] flex items-center justify-center p-8">
-      <div className="max-w-6xl mx-auto">
+      {/* Skip to main content link for accessibility */}
+      <a 
+        href="#main-content" 
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:text-[#990200] focus:px-4 focus:py-2 focus:rounded-lg focus:font-semibold"
+      >
+        Skip to main content
+      </a>
+      
+      <main id="main-content" className="max-w-6xl mx-auto">
         {/* Logo Header */}
-        <div className="text-center mb-8">
+        <header className="text-center mb-8">
           <img
             src="/assets/logowhite.jpg"
             alt="Hausa Wedding Guide Logo"
             className="h-20 md:h-24 mx-auto mb-4 rounded-lg shadow-2xl"
           />
-        </div>
+        </header>
 
         {/* Hero Section with Image */}
-        <div className="text-center text-white mb-12">
-          <h1 className="text-5xl md:text-7xl font-playfair font-bold mb-6 bg-gradient-to-r from-white to-[#CE805C] bg-clip-text text-transparent">
+        <section className="text-center text-white mb-12" aria-labelledby="hero-heading">
+          <h1 id="hero-heading" className="text-5xl md:text-7xl font-playfair font-bold mb-6 bg-gradient-to-r from-white to-[#CE805C] bg-clip-text text-transparent">
             Hausa Wedding Guide
           </h1>
           <p className="text-2xl font-inter mb-4">
@@ -159,10 +175,10 @@ function App() {
             Everything you need to plan a beautiful, traditional Hausa wedding
             ceremony
           </p>
-        </div>
+        </section>
 
         {/* Hero Images Grid */}
-        <div className="grid md:grid-cols-3 gap-4 mb-12">
+        <div className="grid md:grid-cols-3 gap-4 mb-12" role="img" aria-label="Traditional Hausa wedding photography gallery">
           <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
             <img
               src="/assets/couple1.png"
@@ -347,7 +363,7 @@ function App() {
             Instant download • Lifetime access • Print-friendly format
           </p>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
