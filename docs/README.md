@@ -39,21 +39,25 @@
 ## 🗂 Documentation Categories
 
 ### Getting Started
+
 - ✅ **README.md** - Project overview & quick start
 - ✅ **QUICK_SETUP_GUIDE.md** - Environment setup & configuration
 - ✅ **LOCAL_TESTING_GUIDE.md** - Development & testing workflows
 
 ### Project Status
+
 - ✅ **SPRINT_3_REVIEW.md** - Latest sprint review (production-ready)
 - ✅ **CLEANUP_PLAN.md** - Repository cleanup documentation (this cleanup)
 - ✅ **GO_LIVE_CHECKLIST.md** - Final deployment steps
 
 ### Development
+
 - ✅ **CONTRIBUTING.md** - How to contribute
 - ✅ **.github/copilot-instructions.md** - AI agent guidelines & patterns
 - ✅ **LICENSE** - MIT License
 
 ### Historical Reference (Archived)
+
 - 📦 **docs/archive/** - Completed sprint plans, phase documentation, and historical notes
 
 ---
@@ -63,17 +67,20 @@
 ### Architecture & Workflows
 
 **Payment Flow:**
+
 ```
 Customer → Paystack Storefront → Payment → Webhook → Generate Token → Send Email → Download PDF
 ```
 
 **Token System:**
+
 - 64-character hex tokens (crypto.randomBytes)
 - 24-hour expiration
 - 3 downloads per purchase (enforced via SQLite)
 - HMAC signature verification
 
 **Tech Stack:**
+
 - Frontend: React 19 + Vite + Tailwind CSS 4
 - Backend: Vercel Serverless Functions
 - Database: SQLite (auto-created `downloads.db`)
@@ -83,17 +90,20 @@ Customer → Paystack Storefront → Payment → Webhook → Generate Token → 
 ### Key Files
 
 **Frontend:**
+
 - `src/App.jsx` - Main app & download logic
 - `src/components/InteractiveGuide.jsx` - Wedding planning tool orchestration
 - `src/features/dashboard/Dashboard.jsx` - Main dashboard (fully extracted)
 
 **Backend:**
+
 - `api/paystack-webhook.js` - Payment processing
 - `api/download.js` - Secure PDF delivery
 - `lib/database.cjs` - SQLite token persistence
 - `lib/email.js` - Email service with PII-safe logging
 
 **Configuration:**
+
 - `vercel.json` - Security headers, routing, caching
 - `.env.local` - Environment variables (not in repo)
 - `package.json` - Dependencies
@@ -143,6 +153,7 @@ chmod +x setup.sh && ./setup.sh
 **After:** 24 modular components (~2,400 lines distributed)
 
 **Shared UI Library:**
+
 - `components/ui/Button.jsx` - 4 variants, 3 sizes, loading states
 - `components/ui/Card.jsx` - Glassmorphism container
 - `components/ui/Input.jsx` - Form inputs with validation
@@ -151,6 +162,7 @@ chmod +x setup.sh && ./setup.sh
 - `components/ui/Spinner.jsx` - Loading indicators
 
 **Feature Components:**
+
 - `features/dashboard/` - Dashboard, QuickStats, ProgressRing (✅ Complete)
 - `features/vision-quiz/` - Vision quiz (⏳ Placeholder)
 - `features/vision/` - Vision planner (⏳ Placeholder)
@@ -160,9 +172,11 @@ chmod +x setup.sh && ./setup.sh
 - `features/blueprint/` - Final blueprint (⏳ Placeholder)
 
 **Shared Components:**
+
 - `components/shared/MobileNav.jsx` - Mobile navigation drawer
 
 **Utilities:**
+
 - `lib/constants.js` - Data models, quiz questions, category configs
 
 ---
@@ -170,17 +184,20 @@ chmod +x setup.sh && ./setup.sh
 ## 🔒 Security & Best Practices
 
 ### Token Security
+
 - HMAC signatures on all download URLs
 - Server-side validation (`validate-token.js`)
 - Rate limiting (60 requests/minute per IP)
 - Single-use enforcement (3 downloads max)
 
 ### PII Protection
+
 - Email masking in logs (`k****@domain.com`)
 - Never log tokens or signatures
 - Secure environment variable handling
 
 ### Accessibility
+
 - WCAG 2.1 AA compliant (94/100 Lighthouse)
 - Touch targets ≥44x44px (AAA)
 - Keyboard navigation complete
@@ -189,6 +206,7 @@ chmod +x setup.sh && ./setup.sh
 - Reduced motion support
 
 ### Mobile Optimization
+
 - Mobile-first responsive design
 - 360px minimum screen width
 - Hamburger navigation menu
@@ -200,12 +218,14 @@ chmod +x setup.sh && ./setup.sh
 ## 📊 Project Metrics
 
 ### Code Quality
+
 - **Components:** 24 modular components
 - **Code Reduction:** 89% (3,753 → 400 lines in main shell)
 - **Accessibility:** 94/100 Lighthouse (estimated)
 - **Bundle Size:** ~600KB JS, ~60KB CSS (minimal)
 
 ### Features Completed
+
 - ✅ Dashboard with progress tracking
 - ✅ Dark mode toggle
 - ✅ Data export/import
@@ -218,6 +238,7 @@ chmod +x setup.sh && ./setup.sh
 - ✅ Payment integration
 
 ### Testing Status
+
 - ✅ Manual testing on Chrome, Firefox, Edge
 - ✅ Mobile testing (360px-1920px)
 - ✅ Keyboard navigation verified
@@ -231,6 +252,7 @@ chmod +x setup.sh && ./setup.sh
 ## 🚀 Next Steps
 
 ### Option 1: Deploy & Audit (Recommended)
+
 1. Deploy to Vercel production
 2. Run Lighthouse audit on live URL
 3. Test with NVDA and VoiceOver
@@ -238,6 +260,7 @@ chmod +x setup.sh && ./setup.sh
 5. Monitor performance and errors
 
 ### Option 2: Continue Feature Extraction
+
 1. Extract VisionQuiz + VisionPlanner
 2. Extract BudgetBuilder + VendorTracker
 3. Extract TimelineManager + FinalBlueprint
@@ -245,6 +268,7 @@ chmod +x setup.sh && ./setup.sh
 5. Write unit tests (Jest + React Testing Library)
 
 ### Option 3: Advanced Features
+
 1. PDF export of wedding plans
 2. Email reminders for tasks
 3. Vendor collaboration features
@@ -256,17 +280,20 @@ chmod +x setup.sh && ./setup.sh
 ## 📞 Support & Resources
 
 ### External Links
+
 - **Paystack Dashboard:** https://dashboard.paystack.com
 - **Resend Dashboard:** https://resend.com/dashboard
 - **Vercel Dashboard:** https://vercel.com/dashboard
 - **GitHub Repository:** https://github.com/devbydijah/TheHausaWedingGuide
 
 ### Debugging
+
 - **Debug Page:** `/?debug=1` (production-gated with secret param)
 - **Webhook Logs:** Vercel Functions → Logs
 - **Email Delivery:** Resend → Logs
 
 ### Common Issues
+
 - **Webhook not triggering:** Check Paystack webhook URL and signature
 - **Email not sending:** Verify RESEND_API_KEY and domain verification
 - **Download failing:** Check token expiration and signature validity
@@ -279,29 +306,34 @@ chmod +x setup.sh && ./setup.sh
 ### When to Update Documentation
 
 **Update README.md when:**
+
 - Adding new features
 - Changing deployment process
 - Modifying environment variables
 - Updating dependencies
 
 **Update QUICK_SETUP_GUIDE.md when:**
+
 - Changing Paystack configuration
 - Adding new environment variables
 - Modifying webhook URLs
 - Updating deployment URLs
 
 **Update GO_LIVE_CHECKLIST.md when:**
+
 - Adding production requirements
 - Changing monitoring setup
 - Modifying security configurations
 
 **Update .github/copilot-instructions.md when:**
+
 - Changing architecture patterns
 - Adding new workflows
 - Modifying security practices
 - Updating coding conventions
 
 ### Documentation Principles
+
 1. **Single Source of Truth** - No duplicate information
 2. **Keep Current** - Update docs with code changes
 3. **Be Specific** - Include exact commands and values
@@ -317,7 +349,7 @@ chmod +x setup.sh && ./setup.sh
 **Production Ready:** ✅ YES  
 **Accessibility:** ✅ WCAG 2.1 AA  
 **Mobile Optimized:** ✅ YES  
-**Documentation:** ✅ Clean & Current  
+**Documentation:** ✅ Clean & Current
 
 **Ready for deployment and external audits!** 🚀
 
