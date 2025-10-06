@@ -55,6 +55,31 @@ html {
   animation: fadeInUp 0.6s ease-out;
 }
 
+/* Staggered animation delays for sequential entrance */
+.fade-in-up-delay-1 {
+  animation: fadeInUp 0.6s ease-out 0.1s both;
+}
+
+.fade-in-up-delay-2 {
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.fade-in-up-delay-3 {
+  animation: fadeInUp 0.6s ease-out 0.3s both;
+}
+
+.fade-in-up-delay-4 {
+  animation: fadeInUp 0.6s ease-out 0.4s both;
+}
+
+.fade-in-up-delay-5 {
+  animation: fadeInUp 0.6s ease-out 0.5s both;
+}
+
+.fade-in-up-delay-6 {
+  animation: fadeInUp 0.6s ease-out 0.6s both;
+}
+
 .shimmer {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200px 100%;
