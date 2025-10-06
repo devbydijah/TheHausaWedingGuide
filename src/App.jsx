@@ -41,6 +41,15 @@ function App() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#990200] to-[#531946] flex items-center justify-center p-8">
         <div className="max-w-4xl mx-auto text-white">
+          {/* Logo Header */}
+          <div className="text-center mb-8">
+            <img 
+              src="/assets/logowhite.jpg" 
+              alt="Hausa Wedding Guide Logo" 
+              className="h-16 md:h-20 mx-auto mb-4 rounded-lg shadow-lg"
+            />
+          </div>
+
           <div className="text-center mb-12">
             <div className="text-6xl mb-6" role="img" aria-label="Celebration">🎉</div>
             <h1 className="font-playfair text-4xl md:text-6xl font-bold mb-6">
@@ -109,6 +118,15 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#990200] to-[#531946] flex items-center justify-center p-8">
       <div className="max-w-6xl mx-auto">
+        {/* Logo Header */}
+        <div className="text-center mb-8">
+          <img 
+            src="/assets/logowhite.jpg" 
+            alt="Hausa Wedding Guide Logo" 
+            className="h-20 md:h-24 mx-auto mb-4 rounded-lg shadow-2xl"
+          />
+        </div>
+
         <div className="text-center text-white mb-12">
           <h1 className="font-playfair text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-[#CE805C] bg-clip-text text-transparent">
             Interactive Wedding Guide
@@ -119,6 +137,31 @@ function App() {
           <p className="font-inter text-xl opacity-90">
             Plan your perfect Hausa wedding with our comprehensive interactive tools
           </p>
+        </div>
+
+        {/* Hero Images Grid */}
+        <div className="grid md:grid-cols-3 gap-4 mb-12">
+          <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
+            <img 
+              src="/assets/couple2.png" 
+              alt="Traditional Hausa wedding couple celebrating" 
+              className="w-full h-64 object-cover"
+            />
+          </div>
+          <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
+            <img 
+              src="/assets/bride2.png" 
+              alt="Hausa bride in traditional wedding attire" 
+              className="w-full h-64 object-cover"
+            />
+          </div>
+          <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
+            <img 
+              src="/assets/bride3.png" 
+              alt="Beautiful Hausa bride portrait" 
+              className="w-full h-64 object-cover"
+            />
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 mb-12">
