@@ -39,21 +39,21 @@ function App() {
   // Show claim/success page after purchase
   if (showClaim) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#531946] to-[#990200] flex items-center justify-center p-8">
+      <div className="min-h-screen bg-gradient-to-b from-[#990200] to-[#531946] flex items-center justify-center p-8">
         <div className="max-w-4xl mx-auto text-white">
           <div className="text-center mb-12">
-            <div className="text-6xl mb-6">🎉</div>
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            <div className="text-6xl mb-6" role="img" aria-label="Celebration">🎉</div>
+            <h1 className="font-playfair text-4xl md:text-6xl font-bold mb-6">
               Thank You for Your Purchase!
             </h1>
-            <p className="text-xl mb-8">
+            <p className="font-inter text-xl mb-8">
               Your Interactive Wedding Guide is ready to use.
             </p>
           </div>
 
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-8">
-            <h2 className="text-2xl font-bold mb-4">What's Included:</h2>
-            <ul className="space-y-3 text-lg">
+            <h2 className="font-playfair text-2xl font-bold mb-4">What's Included:</h2>
+            <ul className="space-y-3 text-lg font-inter">
               <li className="flex items-start">
                 <span className="text-2xl mr-3">✨</span>
                 <span>Vision & Values Quiz to discover your wedding style</span>
@@ -82,11 +82,11 @@ function App() {
           </div>
 
           <div className="bg-[#CE805C]/20 border-2 border-[#CE805C] rounded-2xl p-6 mb-8">
-            <h3 className="text-xl font-bold mb-3">📧 Check Your Email</h3>
-            <p className="text-lg mb-2">
+            <h3 className="font-playfair text-xl font-bold mb-3">📧 Check Your Email</h3>
+            <p className="font-inter text-lg mb-2">
               We've sent you an email with your login credentials and access instructions.
             </p>
-            <p className="text-sm opacity-90">
+            <p className="font-inter text-sm opacity-90">
               If you don't see it, check your spam folder.
             </p>
           </div>
@@ -94,7 +94,8 @@ function App() {
           <div className="text-center">
             <button
               onClick={handleAccessGuide}
-              className="bg-[#CE805C] hover:bg-[#740015] text-white px-12 py-4 rounded-xl text-xl font-semibold transition-colors shadow-lg"
+              className="bg-[#CE805C] hover:bg-[#740015] text-white px-12 py-4 rounded-xl text-xl font-semibold font-inter transition-all shadow-lg hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[#CE805C]/50"
+              aria-label="Access your interactive wedding guide"
             >
               Access Your Interactive Guide
             </button>
@@ -106,49 +107,49 @@ function App() {
 
   // Default landing page for new visitors
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#531946] to-[#990200] flex items-center justify-center p-8">
+    <div className="min-h-screen bg-gradient-to-b from-[#990200] to-[#531946] flex items-center justify-center p-8">
       <div className="max-w-6xl mx-auto">
         <div className="text-center text-white mb-12">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-[#CE805C] bg-clip-text text-transparent">
+          <h1 className="font-playfair text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-[#CE805C] bg-clip-text text-transparent">
             Interactive Wedding Guide
           </h1>
-          <p className="text-2xl mb-4">
+          <p className="font-inter text-2xl mb-4">
             Your Complete Digital Wedding Planning Assistant
           </p>
-          <p className="text-xl opacity-90">
+          <p className="font-inter text-xl opacity-90">
             Plan your perfect Hausa wedding with our comprehensive interactive tools
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 mb-12">
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-all">
-            <div className="text-4xl mb-4">✨</div>
-            <h3 className="text-2xl font-bold text-white mb-3">Discover Your Style</h3>
-            <p className="text-white/90">
+            <div className="text-4xl mb-4" role="img" aria-label="Sparkles">✨</div>
+            <h3 className="font-playfair text-2xl font-bold text-white mb-3">Discover Your Style</h3>
+            <p className="font-inter text-white/90">
               Take our Vision & Values Quiz to uncover your unique wedding aesthetic and preferences
             </p>
           </div>
 
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-all">
-            <div className="text-4xl mb-4">💰</div>
-            <h3 className="text-2xl font-bold text-white mb-3">Smart Budgeting</h3>
-            <p className="text-white/90">
+            <div className="text-4xl mb-4" role="img" aria-label="Money bag">💰</div>
+            <h3 className="font-playfair text-2xl font-bold text-white mb-3">Smart Budgeting</h3>
+            <p className="font-inter text-white/90">
               Build and manage your wedding budget with real-time calculations and expense tracking
             </p>
           </div>
 
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-all">
-            <div className="text-4xl mb-4">📋</div>
-            <h3 className="text-2xl font-bold text-white mb-3">Vendor Management</h3>
-            <p className="text-white/90">
+            <div className="text-4xl mb-4" role="img" aria-label="Clipboard">📋</div>
+            <h3 className="font-playfair text-2xl font-bold text-white mb-3">Vendor Management</h3>
+            <p className="font-inter text-white/90">
               Keep track of all your vendors, contracts, and communications in one organized place
             </p>
           </div>
 
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-all">
-            <div className="text-4xl mb-4">☁️</div>
-            <h3 className="text-2xl font-bold text-white mb-3">Cloud Sync</h3>
-            <p className="text-white/90">
+            <div className="text-4xl mb-4" role="img" aria-label="Cloud">☁️</div>
+            <h3 className="font-playfair text-2xl font-bold text-white mb-3">Cloud Sync</h3>
+            <p className="font-inter text-white/90">
               Access your wedding plans from any device - your data automatically syncs everywhere
             </p>
           </div>
@@ -156,16 +157,17 @@ function App() {
 
         <div className="text-center">
           <div className="mb-6">
-            <span className="text-5xl font-bold text-white">₦100</span>
-            <span className="text-xl text-white/80 ml-2">one-time payment</span>
+            <span className="font-playfair text-5xl font-bold text-white">₦100</span>
+            <span className="font-inter text-xl text-white/80 ml-2">one-time payment</span>
           </div>
           <button
             onClick={handlePurchase}
-            className="bg-[#CE805C] hover:bg-[#740015] text-white px-12 py-5 rounded-xl text-2xl font-semibold transition-all shadow-2xl hover:scale-105"
+            className="bg-[#CE805C] hover:bg-[#740015] text-white px-12 py-5 rounded-xl text-2xl font-semibold font-inter transition-all shadow-2xl hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[#CE805C]/50"
+            aria-label="Purchase Interactive Wedding Guide for 100 Naira"
           >
             Get Started - ₦100
           </button>
-          <p className="text-white/70 mt-4 text-sm">
+          <p className="font-inter text-white/70 mt-4 text-sm">
             Lifetime access • Cloud sync included • No monthly fees
           </p>
         </div>
