@@ -5,8 +5,8 @@ import LoginGate from "./components/LoginGate";
 // Paystack Storefront URLs
 const USE_TEST_STOREFRONT = window.location.search.includes("test=1");
 const STOREFRONT_URL = USE_TEST_STOREFRONT
-  ? "https://paystack.shop/the-hausa-wedding-guide?test=1"
-  : "https://paystack.shop/the-hausa-wedding-guide";
+  ? "https://paystack.shop/hausaroom-wedding-guide-GLQSt?test=1"
+  : "https://paystack.shop/hausaroom-wedding-guide-GLQSt";
 
 function App() {
   // State management
@@ -404,10 +404,10 @@ function App() {
 
       {/* Hero Section */}
       <section className="relative min-h-screen bg-gradient-to-br from-[#8B0000] via-[#740015] to-[#531946] overflow-hidden">
-        <div className="container mx-auto px-4 py-16 md:py-20">
-          <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center min-h-[calc(100vh-8rem)]">
+        <div className="container mx-auto px-4 py-12 sm:py-16 md:py-20">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center min-h-[calc(100vh-6rem)]">
             {/* Left side - Text content */}
-            <div className="text-left space-y-6">
+            <div className="text-left space-y-4 sm:space-y-6 order-2 md:order-1">
               <div className="inline-flex items-center px-3 py-1.5 bg-white/10 backdrop-blur-sm rounded-full text-white text-xs md:text-sm font-medium">
                 <span className="w-2 h-2 bg-[#CE805C] rounded-full mr-2 animate-pulse"></span>
                 Welcome to the Wedding Guide
@@ -419,7 +419,7 @@ function App() {
                 </div>
               )}
 
-              <h1 className="font-playfair text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight">
+              <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
                 Your Complete
                 <br />
                 <span className="text-[#D4A574]">Hausa Wedding</span>
@@ -427,7 +427,7 @@ function App() {
                 <span className="text-[#D4A574]">Guide</span>
               </h1>
 
-              <p className="font-inter text-base md:text-lg text-white/90 leading-relaxed max-w-lg">
+              <p className="font-inter text-sm sm:text-base md:text-lg text-white/90 leading-relaxed max-w-lg">
                 Welcome! Your comprehensive guide with{" "}
                 <strong className="text-white">budget planning tools</strong>, traditional ceremony
                 guidance, and authentic cultural customs is ready for you.
@@ -516,16 +516,16 @@ function App() {
 
               {/* Purchase buttons */}
               {!downloadStatus && (
-                <div className="flex flex-col sm:flex-row gap-3 mt-6">
+                <div className="flex flex-col sm:flex-row gap-3 mt-4 sm:mt-6">
                   <button
                     onClick={handleBuyNow}
-                    className="inline-flex items-center justify-center px-8 py-3.5 bg-[#CE805C] hover:bg-[#B87050] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-3.5 bg-[#CE805C] hover:bg-[#B87050] text-white text-sm sm:text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 min-h-[44px]"
                   >
                     Buy Your Guide Now
                   </button>
                   <button
                     onClick={() => setClaimMode(!claimMode)}
-                    className="inline-flex items-center justify-center px-6 py-3 border-2 border-white/60 text-white font-semibold rounded-xl hover:bg-white hover:text-[#740015] transition-all duration-300"
+                    className="inline-flex items-center justify-center px-4 sm:px-6 py-3 border-2 border-white/60 text-white text-sm sm:text-base font-semibold rounded-xl hover:bg-white hover:text-[#740015] transition-all duration-300 min-h-[44px]"
                   >
                     {claimMode ? "Hide" : "Already Purchased?"}
                   </button>
@@ -533,13 +533,13 @@ function App() {
               )}
 
               {/* Stats cards */}
-              <div className="grid grid-cols-2 gap-3 max-w-sm mt-6">
+              <div className="grid grid-cols-2 gap-3 max-w-sm mt-4 sm:mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center border border-white/20">
-                  <div className="text-xl md:text-2xl font-bold text-[#D4A574]">Complete</div>
+                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#D4A574]">Complete</div>
                   <div className="text-xs md:text-sm text-white/80">Planning Guide</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center border border-white/20">
-                  <div className="text-xl md:text-2xl font-bold text-[#D4A574]">Cultural</div>
+                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#D4A574]">Cultural</div>
                   <div className="text-xs md:text-sm text-white/80">Traditions</div>
                 </div>
               </div>
@@ -556,11 +556,11 @@ function App() {
             </div>
 
             {/* Right side - Phone mockup with bride image */}
-            <div className="flex justify-center md:justify-end">
+            <div className="flex justify-center md:justify-end order-1 md:order-2">
               <div className="relative group">
                 {/* Phone mockup */}
-                <div className="relative w-[280px] sm:w-[320px] md:w-[360px]">
-                  <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-[10px] border-gray-800 bg-gray-900">
+                <div className="relative w-[220px] sm:w-[260px] md:w-[300px] lg:w-[360px]">
+                  <div className="relative rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl border-[8px] sm:border-[10px] border-gray-800 bg-gray-900">
                     <div className="relative aspect-[9/16] overflow-hidden">
                       {!imagesLoaded["/assets/bride1.png"] && (
                         <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-white/5 animate-pulse"></div>
@@ -576,15 +576,15 @@ function App() {
                       />
                     </div>
                     {/* Phone notch */}
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-gray-900 rounded-b-2xl z-10"></div>
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 sm:w-28 md:w-32 h-5 sm:h-6 bg-gray-900 rounded-b-2xl z-10"></div>
                   </div>
                 </div>
 
                 {/* Decorative elements */}
-                <div className="absolute -top-4 -right-4 w-12 h-12 opacity-70">
+                <div className="absolute -top-3 -right-3 sm:-top-4 sm:-right-4 w-10 h-10 sm:w-12 sm:h-12 opacity-70">
                   <img src="/assets/purpleoutline.png" alt="" className="w-full h-full" />
                 </div>
-                <div className="absolute -bottom-4 -left-4 w-10 h-10 opacity-50">
+                <div className="absolute -bottom-3 -left-3 sm:-bottom-4 sm:-left-4 w-8 h-8 sm:w-10 sm:h-10 opacity-50">
                   <img src="/assets/greenoutline.png" alt="" className="w-full h-full" />
                 </div>
               </div>
@@ -594,60 +594,60 @@ function App() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-16 md:py-24 bg-[#F9F4F1]">
+      <section id="about" className="py-12 sm:py-16 md:py-24 bg-[#F9F4F1]">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
-            <div className="space-y-6">
-              <h2 className="font-playfair text-3xl md:text-4xl lg:text-5xl font-bold text-[#740015] leading-tight">
+          <div className="grid md:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
+            <div className="space-y-4 sm:space-y-6">
+              <h2 className="font-playfair text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[#740015] leading-tight">
                 Your Complete Wedding Planning Resource
               </h2>
-              <p className="font-inter text-base md:text-lg text-gray-700 leading-relaxed">
+              <p className="font-inter text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed">
                 Created with deep respect for Hausa traditions and modern planning needs. This comprehensive guide helps you navigate cultural customs, budget planning, and timeline management for your special day.
               </p>
 
-              <div className="bg-white p-6 rounded-2xl shadow-lg space-y-4">
-                <h4 className="font-semibold text-[#740015] text-lg">What You'll Discover:</h4>
-                <ul className="space-y-3 text-sm text-gray-700">
+              <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg space-y-3 sm:space-y-4">
+                <h4 className="font-semibold text-[#740015] text-base sm:text-lg">What You'll Discover:</h4>
+                <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm text-gray-700">
                   <li className="flex items-start">
-                    <span className="w-1.5 h-1.5 bg-[#CE805C] rounded-full mr-3 mt-2 flex-shrink-0"></span>
+                    <span className="w-1.5 h-1.5 bg-[#CE805C] rounded-full mr-2 sm:mr-3 mt-1.5 sm:mt-2 flex-shrink-0"></span>
                     <span>Traditional ceremony steps and cultural significance</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="w-1.5 h-1.5 bg-[#CE805C] rounded-full mr-3 mt-2 flex-shrink-0"></span>
+                    <span className="w-1.5 h-1.5 bg-[#CE805C] rounded-full mr-2 sm:mr-3 mt-1.5 sm:mt-2 flex-shrink-0"></span>
                     <span>Comprehensive budget breakdowns and expense tracking</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="w-1.5 h-1.5 bg-[#CE805C] rounded-full mr-3 mt-2 flex-shrink-0"></span>
+                    <span className="w-1.5 h-1.5 bg-[#CE805C] rounded-full mr-2 sm:mr-3 mt-1.5 sm:mt-2 flex-shrink-0"></span>
                     <span>Step-by-step planning timelines for organized execution</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="w-1.5 h-1.5 bg-[#CE805C] rounded-full mr-3 mt-2 flex-shrink-0"></span>
+                    <span className="w-1.5 h-1.5 bg-[#CE805C] rounded-full mr-2 sm:mr-3 mt-1.5 sm:mt-2 flex-shrink-0"></span>
                     <span>Essential wedding planning guidance and practical tips</span>
                   </li>
                 </ul>
               </div>
 
-              <div className="flex items-center gap-4 pt-4">
+              <div className="flex items-center gap-3 sm:gap-4 pt-2 sm:pt-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-[#740015]">Comprehensive</div>
-                  <div className="text-sm text-gray-600">Guidance</div>
+                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#740015]">Comprehensive</div>
+                  <div className="text-xs sm:text-sm text-gray-600">Guidance</div>
                 </div>
-                <div className="w-px h-12 bg-gray-300"></div>
+                <div className="w-px h-10 sm:h-12 bg-gray-300"></div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-[#740015]">Authentic</div>
-                  <div className="text-sm text-gray-600">Traditions</div>
+                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#740015]">Authentic</div>
+                  <div className="text-xs sm:text-sm text-gray-600">Traditions</div>
                 </div>
-                <div className="w-px h-12 bg-gray-300"></div>
+                <div className="w-px h-10 sm:h-12 bg-gray-300"></div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-[#740015]">Practical</div>
-                  <div className="text-sm text-gray-600">Tools</div>
+                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#740015]">Practical</div>
+                  <div className="text-xs sm:text-sm text-gray-600">Tools</div>
                 </div>
               </div>
             </div>
 
             {/* Circular bride image */}
             <div className="flex justify-center">
-              <div className="relative w-[320px] h-[320px] md:w-[400px] md:h-[400px] rounded-full overflow-hidden shadow-2xl border-8 border-white">
+              <div className="relative w-[240px] h-[240px] sm:w-[280px] sm:h-[280px] md:w-[320px] md:h-[320px] lg:w-[400px] lg:h-[400px] rounded-full overflow-hidden shadow-2xl border-6 sm:border-8 border-white">
                 {!imagesLoaded["/assets/bride2.png"] && (
                   <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-100 animate-pulse"></div>
                 )}
@@ -669,53 +669,53 @@ function App() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-16 md:py-24 bg-white">
+      <section id="features" className="py-12 sm:py-16 md:py-24 bg-white">
         <div className="container mx-auto px-4">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 className="font-playfair text-3xl md:text-4xl lg:text-5xl font-bold text-[#740015] mb-4">
+          <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12">
+            <h2 className="font-playfair text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[#740015] mb-3 sm:mb-4">
               What Makes This Guide Special
             </h2>
-            <p className="text-gray-600 text-base md:text-lg">
+            <p className="text-gray-600 text-sm sm:text-base md:text-lg">
               Everything you need to plan an authentic Hausa wedding with confidence and cultural respect.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-6 sm:gap-8">
             {/* Feature 1 */}
-            <div className="bg-[#F9F4F1] rounded-2xl p-8 text-center hover:shadow-xl transition-shadow">
-              <div className="w-16 h-16 bg-[#740015] rounded-xl flex items-center justify-center mx-auto mb-6" role="img" aria-label="Book icon">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <div className="bg-[#F9F4F1] rounded-2xl p-6 sm:p-8 text-center hover:shadow-xl transition-shadow">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-[#740015] rounded-xl flex items-center justify-center mx-auto mb-4 sm:mb-6" role="img" aria-label="Book icon">
+                <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-[#740015] mb-3">Traditional Ceremonies & Customs</h3>
-              <p className="text-gray-700 text-sm leading-relaxed">
+              <h3 className="text-lg sm:text-xl font-bold text-[#740015] mb-2 sm:mb-3">Traditional Ceremonies & Customs</h3>
+              <p className="text-gray-700 text-xs sm:text-sm leading-relaxed">
                 Complete guide to traditional Hausa wedding ceremonies including Kunshi, Kamu, Sa-Lalle, Fatihah, and more. Learn the cultural customs and meanings to help you honor traditions respectfully.
               </p>
             </div>
 
             {/* Feature 2 */}
-            <div className="bg-[#F9F4F1] rounded-2xl p-8 text-center hover:shadow-xl transition-shadow">
-              <div className="w-16 h-16 bg-[#740015] rounded-xl flex items-center justify-center mx-auto mb-6" role="img" aria-label="Clipboard icon">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <div className="bg-[#F9F4F1] rounded-2xl p-6 sm:p-8 text-center hover:shadow-xl transition-shadow">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-[#740015] rounded-xl flex items-center justify-center mx-auto mb-4 sm:mb-6" role="img" aria-label="Clipboard icon">
+                <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-[#740015] mb-3">Timeline Planning & Management</h3>
-              <p className="text-gray-700 text-sm leading-relaxed">
+              <h3 className="text-lg sm:text-xl font-bold text-[#740015] mb-2 sm:mb-3">Timeline Planning & Management</h3>
+              <p className="text-gray-700 text-xs sm:text-sm leading-relaxed">
                 Comprehensive budget timelines and planning checklists to keep you organized. Includes money-saving strategies for effective wedding planning at any budget level.
               </p>
             </div>
 
             {/* Feature 3 */}
-            <div className="bg-[#F9F4F1] rounded-2xl p-8 text-center hover:shadow-xl transition-shadow">
-              <div className="w-16 h-16 bg-[#740015] rounded-xl flex items-center justify-center mx-auto mb-6" role="img" aria-label="Money icon">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <div className="bg-[#F9F4F1] rounded-2xl p-6 sm:p-8 text-center hover:shadow-xl transition-shadow">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-[#740015] rounded-xl flex items-center justify-center mx-auto mb-4 sm:mb-6" role="img" aria-label="Money icon">
+                <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-[#740015] mb-3">Wedding Planning & Budgeting</h3>
-              <p className="text-gray-700 text-sm leading-relaxed">
+              <h3 className="text-lg sm:text-xl font-bold text-[#740015] mb-2 sm:mb-3">Wedding Planning & Budgeting</h3>
+              <p className="text-gray-700 text-xs sm:text-sm leading-relaxed">
                 Comprehensive budget breakdown tables with detailed guidance and practical tips for organizing your authentic Hausa wedding within your preferred budget range.
               </p>
             </div>
@@ -724,18 +724,18 @@ function App() {
       </section>
 
       {/* PDF Preview Section */}
-      <section id="preview" className="py-16 md:py-24 bg-[#F9F4F1]">
+      <section id="preview" className="py-12 sm:py-16 md:py-24 bg-[#F9F4F1]">
         <div className="container mx-auto px-4">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 className="font-playfair text-3xl md:text-4xl lg:text-5xl font-bold text-[#740015] mb-4">
+          <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12">
+            <h2 className="font-playfair text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[#740015] mb-3 sm:mb-4">
               Inside the Guide
             </h2>
-            <p className="text-gray-600 text-base md:text-lg">
+            <p className="text-gray-600 text-sm sm:text-base md:text-lg">
               Preview some of the beautifully designed pages that await you in the complete guide. Click on any page to view details.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
             {[
               { src: "/assets/samplepage1.png", label: "Get Your Copy" },
               { src: "/assets/samplepage2.png", label: "Timeline" },
@@ -781,18 +781,18 @@ function App() {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="py-16 md:py-24 bg-white">
+      <section id="faq" className="py-12 sm:py-16 md:py-24 bg-white">
         <div className="container mx-auto px-4 max-w-3xl">
-          <div className="text-center mb-12">
-            <h2 className="font-playfair text-3xl md:text-4xl lg:text-5xl font-bold text-[#740015] mb-4">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="font-playfair text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[#740015] mb-3 sm:mb-4">
               Frequently Asked Questions
             </h2>
-            <p className="text-gray-600 text-base">
+            <p className="text-gray-600 text-sm sm:text-base">
               Everything you need to know about the Hausa Wedding Guide.
             </p>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {faqs.map((faq, index) => (
               <div
                 key={index}
@@ -800,13 +800,13 @@ function App() {
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-[#F0E6DD] transition-colors"
+                  className="w-full px-4 sm:px-6 py-4 sm:py-5 text-left flex items-center justify-between hover:bg-[#F0E6DD] transition-colors min-h-[44px]"
                 >
-                  <span className="font-semibold text-[#740015] pr-4">
+                  <span className="font-semibold text-[#740015] pr-3 sm:pr-4 text-sm sm:text-base">
                     {faq.question}
                   </span>
                   <svg
-                    className={`w-5 h-5 text-[#740015] flex-shrink-0 transition-transform ${
+                    className={`w-4 h-4 sm:w-5 sm:h-5 text-[#740015] flex-shrink-0 transition-transform ${
                       openFaq === index ? "rotate-180" : ""
                     }`}
                     fill="none"
@@ -822,8 +822,8 @@ function App() {
                   </svg>
                 </button>
                 {openFaq === index && (
-                  <div className="px-6 pb-5">
-                    <p className="text-gray-700 text-sm leading-relaxed">
+                  <div className="px-4 sm:px-6 pb-4 sm:pb-5">
+                    <p className="text-gray-700 text-xs sm:text-sm leading-relaxed">
                       {faq.answer}
                     </p>
                   </div>
@@ -835,38 +835,38 @@ function App() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-20 bg-gradient-to-br from-[#8B0000] via-[#740015] to-[#531946]">
+      <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-br from-[#8B0000] via-[#740015] to-[#531946]">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="font-playfair text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+          <h2 className="font-playfair text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
             Ready to Start Planning Your Perfect Wedding?
           </h2>
-          <p className="text-white/90 text-base md:text-lg mb-8 max-w-2xl mx-auto">
+          <p className="text-white/90 text-sm sm:text-base md:text-lg mb-6 sm:mb-8 max-w-2xl mx-auto">
             Get instant access to your guide now. Includes budget templates, cultural customs, and planning timelines for your unforgettable celebration.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg px-6 py-3 border border-white/20">
-              <div className="text-xl md:text-2xl font-bold text-[#D4A574]">Instant</div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 sm:px-6 py-2.5 sm:py-3 border border-white/20">
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#D4A574]">Instant</div>
               <div className="text-xs md:text-sm text-white/80">Download</div>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg px-6 py-3 border border-white/20">
-              <div className="text-xl md:text-2xl font-bold text-[#D4A574]">Complete</div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 sm:px-6 py-2.5 sm:py-3 border border-white/20">
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#D4A574]">Complete</div>
               <div className="text-xs md:text-sm text-white/80">Planning Tools</div>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg px-6 py-3 border border-white/20">
-              <div className="text-xl md:text-2xl font-bold text-[#D4A574]">Authentic</div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 sm:px-6 py-2.5 sm:py-3 border border-white/20">
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#D4A574]">Authentic</div>
               <div className="text-xs md:text-sm text-white/80">Cultural Guide</div>
             </div>
           </div>
 
           <button
             onClick={handleBuyNow}
-            className="inline-flex items-center px-8 md:px-10 py-4 bg-[#CE805C] hover:bg-[#B87050] text-white text-lg font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+            className="inline-flex items-center px-6 sm:px-8 md:px-10 py-3 sm:py-3.5 md:py-4 bg-[#CE805C] hover:bg-[#B87050] text-white text-base sm:text-lg font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 min-h-[44px]"
           >
             Get Your Complete Guide Now
           </button>
 
-          <p className="text-white/70 text-sm mt-6">
+          <p className="text-white/70 text-xs sm:text-sm mt-4 sm:mt-6">
             Instant digital download • PDF format • Access on any device
           </p>
         </div>
