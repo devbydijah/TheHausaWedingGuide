@@ -99,9 +99,7 @@ TheHausaWedingGuide/
 │   ├── paystack-webhook.js       # Payment webhook handler
 │   ├── issue-link.js             # Manual link issuance
 │   ├── validate-token.js         # Token validation
-│   ├── download.js               # Secure PDF download
-│   ├── claim-by-email.js         # Email-based claim system
-│   └── verify-and-email.js       # Payment verification
+│   └── download.js               # Secure PDF download
 ├── lib/                          # Shared utilities
 │   ├── database.cjs              # SQLite database operations
 │   ├── email.js                  # Email service
@@ -109,67 +107,24 @@ TheHausaWedingGuide/
 │   └── logger.js                 # PII-safe logging
 ├── public/
 │   ├── Hausa_Wedding_Guide.pdf   # Main guide PDF
-│   ├── logowhite.svg             # Brand logo
-│   ├── debug.html                # Payment flow testing (production-gated)
-│   └── assets/                   # Images, icons, and sample pages
-├── src/                          # React application
-│   ├── App.jsx                   # Main app & post-purchase flow
-│   ├── SuccessPage.jsx           # Success page component
-│   ├── main.jsx                  # Application entry point
-│   ├── index.css                 # Global styles & Tailwind
-│   ├── components/               # Shared & feature components
-│   │   ├── InteractiveGuide.jsx  # Main orchestration shell
-│   │   ├── LoginGate.jsx         # Authentication wrapper
-│   │   ├── shared/               # Shared components
-│   │   │   └── MobileNav.jsx     # Mobile navigation drawer
-│   │   └── ui/                   # UI component library
-│   │       ├── Button.jsx        # Standardized button
-│   │       ├── Card.jsx          # Card container
-│   │       ├── Input.jsx         # Form input
-│   │       ├── Modal.jsx         # Modal dialog
-│   │       ├── Toast.jsx         # Toast notifications
-│   │       ├── Spinner.jsx       # Loading spinner
-│   │       └── index.js          # Barrel exports
-│   ├── features/                 # Feature-based components
-│   │   ├── dashboard/            # Dashboard feature
-│   │   │   ├── Dashboard.jsx     # Main dashboard
-│   │   │   ├── QuickStats.jsx    # Statistics cards
-│   │   │   ├── ProgressRing.jsx  # Progress visualization
-│   │   │   └── index.js          # Feature exports
-│   │   ├── vision-quiz/          # Vision quiz feature (placeholder)
-│   │   ├── vision/               # Vision planner (placeholder)
-│   │   ├── budget/               # Budget builder (placeholder)
-│   │   ├── vendors/              # Vendor tracker (placeholder)
-│   │   ├── timeline/             # Timeline manager (placeholder)
-│   │   └── blueprint/            # Final blueprint (placeholder)
-│   ├── hooks/                    # Custom React hooks
-│   │   ├── useSyncToCloud.js     # Cloud synchronization
-│   │   ├── useLocalProgress.js   # Local progress tracking
-│   │   └── useDebouncedCallback.js # Debounced functions
-│   └── lib/                      # Frontend utilities
-│       ├── constants.js          # Data models & configurations
-│       └── supabase.js           # Supabase client (optional)
-├── docs/
-│   └── archive/                  # Historical documentation
+│   ├── logowhite.svg             # Logo
+│   ├── debug.html                # Debug/testing page
+│   └── assets/                   # Images and sample pages
+├── src/
+│   ├── App.jsx                   # Main application component
+│   ├── SuccessPage.jsx           # Post-purchase page
+│   ├── main.jsx                  # Entry point
+│   ├── index.css                 # Global styles
+│   └── components/
+│       └── GuideForm.jsx         # Interactive guide form
+├── sql/                          # Database setup scripts
 ├── .github/
-│   └── copilot-instructions.md   # AI coding agent guidelines
-├── index.html                    # Vite HTML template
+│   └── copilot-instructions.md   # AI coding guidelines
+├── index.html                    # HTML template
 ├── vercel.json                   # Vercel configuration
-├── vite.config.js                # Vite build configuration
-├── tailwind.config.js            # Tailwind CSS config
+├── vite.config.js                # Vite configuration
 ├── package.json                  # Dependencies and scripts
-├── deploy.bat                    # Windows deployment script
-├── setup.bat                     # Windows setup script
-├── setup.sh                      # Unix/Mac setup script
-├── downloads.db                  # SQLite database (auto-created)
-├── CLEANUP_PLAN.md               # Repository cleanup documentation
-├── GO_LIVE_CHECKLIST.md          # Production deployment checklist
-├── QUICK_SETUP_GUIDE.md          # Quick start guide
-├── LOCAL_TESTING_GUIDE.md        # Development testing guide
-├── SPRINT_3_REVIEW.md            # Latest sprint review & status
-├── README.md                     # This file
-├── CONTRIBUTING.md               # Contribution guidelines
-└── LICENSE                       # MIT License
+└── deploy.bat                    # Windows deployment script
 ```
 
 ## 🎨 Technologies Used
