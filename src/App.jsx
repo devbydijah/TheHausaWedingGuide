@@ -197,21 +197,21 @@ function App() {
           role="img"
           aria-label="Traditional Hausa wedding photography gallery"
         >
-          <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300 fade-in-up-delay-1">
+          <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
             <img
               src="/assets/couple2.png"
               alt="Traditional Hausa wedding couple celebrating"
               className="w-full h-64 object-cover"
             />
           </div>
-          <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300 fade-in-up-delay-2">
+          <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
             <img
               src="/assets/bride2.png"
               alt="Hausa bride in traditional wedding attire"
               className="w-full h-64 object-cover"
             />
           </div>
-          <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300 fade-in-up-delay-3">
+          <div className="rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
             <img
               src="/assets/bride3.png"
               alt="Beautiful Hausa bride portrait"
@@ -220,8 +220,8 @@ function App() {
           </div>
         </div>
 
-        <section className="grid md:grid-cols-2 gap-8 mb-12">
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-all duration-300 fade-in-up-delay-1">
+        <div className="grid md:grid-cols-2 gap-8 mb-12">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-all">
             <div className="text-4xl mb-4" role="img" aria-label="Sparkles">
               ✨
             </div>
@@ -234,7 +234,7 @@ function App() {
             </p>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-all duration-300 fade-in-up-delay-2">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-all">
             <div className="text-4xl mb-4" role="img" aria-label="Money bag">
               💰
             </div>
@@ -247,7 +247,7 @@ function App() {
             </p>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-all duration-300 fade-in-up-delay-3">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-all">
             <div className="text-4xl mb-4" role="img" aria-label="Clipboard">
               📋
             </div>
@@ -260,7 +260,7 @@ function App() {
             </p>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-all duration-300 fade-in-up-delay-4">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-all">
             <div className="text-4xl mb-4" role="img" aria-label="Cloud">
               ☁️
             </div>
@@ -272,9 +272,9 @@ function App() {
               automatically syncs everywhere
             </p>
           </div>
-        </section>
+        </div>
 
-        <section className="text-center fade-in-up-delay-5">
+        <div className="text-center">
           <div className="mb-6">
             <span className="font-playfair text-5xl font-bold text-white">
               ₦100
@@ -293,7 +293,7 @@ function App() {
           <p className="font-inter text-white/70 mt-4 text-sm">
             Lifetime access • Cloud sync included • No monthly fees
           </p>
-        </section>
+        </div>
       </main>
     </div>
   );

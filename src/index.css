@@ -2,8 +2,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-family-playfair: "Playfair Display", serif;
-  --font-family-inter: "Inter", sans-serif;
+  --font-playfair: "Playfair Display", serif;
+  --font-inter: "Inter", sans-serif;
 }
 
 /* Smooth scroll behavior */
@@ -142,9 +142,76 @@ html {
 
 /* Focus states for accessibility */
 button:focus,
-a:focus {
+a:focus,
+input:focus,
+textarea:focus,
+select:focus {
   outline: 2px solid #ce805c;
   outline-offset: 2px;
+}
+
+/* Focus visible (only show on keyboard navigation) */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #ce805c;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px rgba(206, 128, 92, 0.2);
+}
+
+/* Remove outline for mouse clicks */
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Touch target enhancement for all interactive elements */
+button,
+a[href],
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+[role="button"],
+[tabindex]:not([tabindex="-1"]) {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+}
+
+/* Icon buttons specifically */
+button[aria-label]:empty,
+a[aria-label]:empty {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.75rem;
+}
+
+/* Responsive Typography Utilities */
+.responsive-h1 {
+  @apply text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-playfair font-bold;
+}
+
+.responsive-h2 {
+  @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-playfair font-semibold;
+}
+
+.responsive-h3 {
+  @apply text-xl sm:text-2xl md:text-3xl font-playfair font-semibold;
+}
+
+.responsive-h4 {
+  @apply text-lg sm:text-xl md:text-2xl font-playfair font-medium;
+}
+
+.responsive-body {
+  @apply text-sm sm:text-base md:text-lg font-inter;
+}
+
+.responsive-small {
+  @apply text-xs sm:text-sm font-inter;
 }
 
 /* Screen reader only utility class */
