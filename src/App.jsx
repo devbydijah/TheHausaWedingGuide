@@ -33,6 +33,9 @@ function App() {
   const [claimBusy, setClaimBusy] = useState(false);
   const claimInputRef = useRef(null);
 
+  // Mobile menu state
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   // Extract URL parameters for download token
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -101,11 +104,15 @@ function App() {
     setDownloadStatus("downloading");
 
     try {
-      // Call the download API endpoint with token validation
+      // Extract signature from URL for security
+      const params = new URLSearchParams(window.location.search);
+      const sig = params.get("sig") || "";
+      
+      // Call the download API endpoint with token validation and signature
       const response = await fetch(
         `/api/download?token=${encodeURIComponent(
           token
-        )}&email=${encodeURIComponent(email)}&expires=${expires}`
+        )}&email=${encodeURIComponent(email)}&expires=${expires}&sig=${encodeURIComponent(sig)}`
       );
 
       if (response.ok) {
@@ -122,7 +129,11 @@ function App() {
         setDownloadStatus("valid");
       } else {
         const errorData = await response.json();
-        alert(errorData.error || "Download failed. Please try again.");
+        if (response.status === 429) {
+          alert("Too many download attempts. Please wait a moment and try again.");
+        } else {
+          alert(errorData.error || "Download failed. Please try again.");
+        }
         setDownloadStatus("valid");
       }
     } catch (error) {
@@ -303,7 +314,7 @@ function App() {
                 className="h-8"
               />
 
-              {/* Navigation Items */}
+              {/* Desktop Navigation Items */}
               <div className="hidden md:flex items-center space-x-6">
                 {[
                   { id: "about", label: "About" },
@@ -314,7 +325,7 @@ function App() {
                   <button
                     key={item.id}
                     onClick={() => scrollToSection(item.id)}
-                    className={`text-sm font-medium transition-colors duration-200 px-3 py-2 rounded-lg ${
+                    className={`text-sm font-medium transition-colors duration-200 px-3 py-2 rounded-lg min-h-[44px] min-w-[44px] ${
                       activeSection === item.id
                         ? "text-[#740015] font-semibold bg-[#740015]/5"
                         : "text-gray-700 hover:text-[#740015]"
@@ -325,14 +336,68 @@ function App() {
                 ))}
               </div>
 
-              {/* Buy Guide Button */}
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden p-2 text-gray-700 hover:text-[#740015] min-h-[44px] min-w-[44px]"
+                aria-label="Toggle menu"
+                aria-expanded={mobileMenuOpen}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {mobileMenuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
+
+              {/* Desktop Buy Guide Button */}
               <button
                 onClick={handleBuyNow}
-                className="px-6 py-2.5 bg-[#CE805C] hover:bg-[#B87050] text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
+                className="hidden md:block px-6 py-2.5 bg-[#CE805C] hover:bg-[#B87050] text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 min-h-[44px]"
               >
                 Buy Guide
               </button>
             </div>
+
+            {/* Mobile Menu Dropdown */}
+            {mobileMenuOpen && (
+              <div className="md:hidden border-t border-gray-100 py-4">
+                <div className="flex flex-col space-y-2">
+                  {[
+                    { id: "about", label: "About" },
+                    { id: "features", label: "Features" },
+                    { id: "preview", label: "Preview" },
+                    { id: "faq", label: "FAQ" },
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        scrollToSection(item.id);
+                        setMobileMenuOpen(false);
+                      }}
+                      className={`text-left px-4 py-3 rounded-lg transition-colors min-h-[44px] ${
+                        activeSection === item.id
+                          ? "text-[#740015] font-semibold bg-[#740015]/5"
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => {
+                      handleBuyNow();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="px-4 py-3 bg-[#CE805C] hover:bg-[#B87050] text-white font-semibold rounded-lg shadow-md transition-all duration-300 min-h-[44px]"
+                  >
+                    Buy Guide
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </nav>
@@ -593,6 +658,9 @@ function App() {
                     imagesLoaded["/assets/bride2.png"] ? "opacity-100" : "opacity-0"
                   }`}
                   onLoad={() => handleImageLoad("/assets/bride2.png")}
+                  loading="lazy"
+                  width="400"
+                  height="400"
                 />
               </div>
             </div>
@@ -615,39 +683,39 @@ function App() {
           <div className="grid md:grid-cols-3 gap-8">
             {/* Feature 1 */}
             <div className="bg-[#F9F4F1] rounded-2xl p-8 text-center hover:shadow-xl transition-shadow">
-              <div className="w-16 h-16 bg-[#740015] rounded-xl flex items-center justify-center mx-auto mb-6">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 bg-[#740015] rounded-xl flex items-center justify-center mx-auto mb-6" role="img" aria-label="Book icon">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
               </div>
               <h3 className="text-xl font-bold text-[#740015] mb-3">Traditional Ceremonies & Customs</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <p className="text-gray-700 text-sm leading-relaxed">
                 Complete guide to traditional Hausa wedding ceremonies including Kunshi, Kamu, Sa-Lalle, Fatihah, and more. Learn the cultural customs and meanings to help you honor traditions respectfully.
               </p>
             </div>
 
             {/* Feature 2 */}
             <div className="bg-[#F9F4F1] rounded-2xl p-8 text-center hover:shadow-xl transition-shadow">
-              <div className="w-16 h-16 bg-[#740015] rounded-xl flex items-center justify-center mx-auto mb-6">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 bg-[#740015] rounded-xl flex items-center justify-center mx-auto mb-6" role="img" aria-label="Clipboard icon">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                 </svg>
               </div>
               <h3 className="text-xl font-bold text-[#740015] mb-3">Timeline Planning & Management</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <p className="text-gray-700 text-sm leading-relaxed">
                 Comprehensive budget timelines and planning checklists to keep you organized. Includes money-saving strategies for effective wedding planning at any budget level.
               </p>
             </div>
 
             {/* Feature 3 */}
             <div className="bg-[#F9F4F1] rounded-2xl p-8 text-center hover:shadow-xl transition-shadow">
-              <div className="w-16 h-16 bg-[#740015] rounded-xl flex items-center justify-center mx-auto mb-6">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 bg-[#740015] rounded-xl flex items-center justify-center mx-auto mb-6" role="img" aria-label="Money icon">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <h3 className="text-xl font-bold text-[#740015] mb-3">Wedding Planning & Budgeting</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <p className="text-gray-700 text-sm leading-relaxed">
                 Comprehensive budget breakdown tables with detailed guidance and practical tips for organizing your authentic Hausa wedding within your preferred budget range.
               </p>
             </div>
@@ -683,11 +751,14 @@ function App() {
                     )}
                     <img
                       src={page.src}
-                      alt={`Preview page ${index + 1}`}
+                      alt={`${page.label} preview page from Hausa Wedding Guide`}
                       className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ${
                         imagesLoaded[page.src] ? "opacity-100" : "opacity-0"
                       }`}
                       onLoad={() => handleImageLoad(page.src)}
+                      loading="lazy"
+                      width="300"
+                      height="400"
                     />
                   </div>
                   <div className="p-3 text-center bg-[#740015]">
