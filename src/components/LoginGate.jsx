@@ -101,34 +101,40 @@ export default function LoginGate({ onAuthenticated }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#8B0000] via-[#740015] to-[#531946] flex items-center justify-center p-4 sm:p-6 lg:p-8">
       <div className="max-w-md w-full">
         {/* Logo/Brand */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full mb-4">
-            <span className="text-3xl">💍</span>
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="flex justify-center mb-4 sm:mb-6">
+            <img
+              src="/logowhite.svg"
+              alt="Hausa Wedding Guide"
+              className="h-12 sm:h-16"
+            />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="font-playfair text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">
             Hausa Wedding Guide
           </h1>
-          <p className="text-gray-600">Interactive Wedding Planner</p>
+          <p className="text-white/90 text-sm sm:text-base">
+            Interactive Wedding Planner
+          </p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+        <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8">
+          <h2 className="font-playfair text-xl sm:text-2xl font-semibold text-[#740015] mb-2">
             Welcome Back
           </h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-700 text-sm sm:text-base mb-6">
             Enter your details to access your wedding planner
           </p>
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4 sm:space-y-5">
             {/* Email Input */}
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-gray-700 mb-2"
               >
                 Email Address
               </label>
@@ -137,13 +143,13 @@ export default function LoginGate({ onAuthenticated }) {
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#740015] focus:border-transparent transition-all text-gray-900 placeholder-gray-400 text-sm sm:text-base min-h-[44px]"
                 placeholder="bride@example.com"
                 disabled={isLoading}
                 autoComplete="email"
                 autoFocus
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-600 mt-1.5">
                 Use the email you provided at purchase
               </p>
             </div>
@@ -152,7 +158,7 @@ export default function LoginGate({ onAuthenticated }) {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-gray-700 mb-2"
               >
                 Access Password
               </label>
@@ -161,19 +167,22 @@ export default function LoginGate({ onAuthenticated }) {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#740015] focus:border-transparent transition-all text-gray-900 placeholder-gray-400 text-sm sm:text-base min-h-[44px]"
                 placeholder="Enter password from email"
                 disabled={isLoading}
                 autoComplete="current-password"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-600 mt-1.5">
                 Check your purchase confirmation email for the password
               </p>
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <div
+                className="bg-red-50 border border-red-300 rounded-lg p-3 sm:p-4"
+                role="alert"
+              >
                 <p className="text-sm text-red-800">{error}</p>
               </div>
             )}
@@ -182,47 +191,99 @@ export default function LoginGate({ onAuthenticated }) {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 px-6 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+              className="w-full bg-[#CE805C] hover:bg-[#B87050] text-white py-3 sm:py-3.5 px-6 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl min-h-[44px] text-sm sm:text-base"
             >
-              {isLoading ? "Logging in..." : "Access Planner"}
+              {isLoading ? (
+                <span className="flex items-center justify-center">
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Logging in...
+                </span>
+              ) : (
+                "Access Planner"
+              )}
             </button>
           </form>
 
           {/* Help Text */}
           <div className="mt-6 pt-6 border-t border-gray-200">
-            <h3 className="text-sm font-medium text-gray-900 mb-2">
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">
               Don't have access yet?
             </h3>
-            <p className="text-sm text-gray-600 mb-3">
+            <p className="text-sm text-gray-700 mb-3">
               Purchase the Interactive Wedding Planner to receive your access
               password via email.
             </p>
             <a
-              href="https://hausaroom.com"
-              className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+              href="https://paystack.shop/hausaroom-wedding-guide-GLQSt"
+              className="inline-flex items-center text-sm text-[#740015] hover:text-[#B87050] font-semibold transition-colors min-h-[44px] py-2"
               target="_blank"
               rel="noopener noreferrer"
             >
-              Visit HausaRoom.com →
+              Get Your Guide Now
+              <svg
+                className="w-4 h-4 ml-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
             </a>
           </div>
 
           {/* Security Note */}
-          <div className="mt-4 bg-gray-50 rounded-lg p-3">
-            <p className="text-xs text-gray-600">
-              🔒 Your data is encrypted and secure. Your wedding plans are saved
-              automatically and accessible from any device.
-            </p>
+          <div className="mt-4 bg-[#F9F4F1] rounded-lg p-3 sm:p-4">
+            <div className="flex items-start">
+              <svg
+                className="w-5 h-5 text-[#740015] mr-2 flex-shrink-0 mt-0.5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <p className="text-xs sm:text-sm text-gray-700">
+                Your data is encrypted and secure. Your wedding plans are saved
+                automatically and accessible from any device.
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Footer */}
         <div className="text-center mt-6">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-white/80">
             Need help? Email{" "}
             <a
               href="mailto:support@hausaroom.com"
-              className="text-purple-600 hover:underline"
+              className="text-[#D4A574] hover:text-white font-medium underline"
             >
               support@hausaroom.com
             </a>

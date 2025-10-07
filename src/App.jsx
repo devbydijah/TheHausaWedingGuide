@@ -88,9 +88,7 @@ function App() {
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-      setTimeLeft(
-        `${hours}h ${minutes}m ${seconds}s`
-      );
+      setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
     };
 
     updateCountdown();
@@ -107,7 +105,7 @@ function App() {
       // Extract signature from URL for security
       const params = new URLSearchParams(window.location.search);
       const sig = params.get("sig") || "";
-      
+
       // Call the download API endpoint with token validation and signature
       const response = await fetch(
         `/api/download?token=${encodeURIComponent(
@@ -130,7 +128,9 @@ function App() {
       } else {
         const errorData = await response.json();
         if (response.status === 429) {
-          alert("Too many download attempts. Please wait a moment and try again.");
+          alert(
+            "Too many download attempts. Please wait a moment and try again."
+          );
         } else {
           alert(errorData.error || "Download failed. Please try again.");
         }
@@ -343,11 +343,26 @@ function App() {
                 aria-label="Toggle menu"
                 aria-expanded={mobileMenuOpen}
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   {mobileMenuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
                   )}
                 </svg>
               </button>
@@ -429,8 +444,9 @@ function App() {
 
               <p className="font-inter text-sm sm:text-base md:text-lg text-white/90 leading-relaxed max-w-lg">
                 Welcome! Your comprehensive guide with{" "}
-                <strong className="text-white">budget planning tools</strong>, traditional ceremony
-                guidance, and authentic cultural customs is ready for you.
+                <strong className="text-white">budget planning tools</strong>,
+                traditional ceremony guidance, and authentic cultural customs is
+                ready for you.
               </p>
 
               {/* Conditional UI based on download status */}
@@ -439,18 +455,29 @@ function App() {
                 <div className="flex flex-col gap-4 mt-6">
                   <div className="bg-green-500/20 backdrop-blur-sm border border-green-300/30 rounded-xl p-4">
                     <h3 className="text-white font-semibold mb-2 flex items-center">
-                      <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      <svg
+                        className="w-5 h-5 mr-2"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                       Purchase Complete!
                     </h3>
                     <p className="text-white/90 text-sm mb-3">
-                      Thank you for your purchase! Your Hausa Wedding Guide is ready for download.
+                      Thank you for your purchase! Your Hausa Wedding Guide is
+                      ready for download.
                     </p>
                     <div className="flex flex-wrap items-center gap-2 text-xs">
                       <span className="text-white/80">Sent to: {email}</span>
                       <span className="text-white/40">•</span>
-                      <span className="text-white/80">Expires in {timeLeft}</span>
+                      <span className="text-white/80">
+                        Expires in {timeLeft}
+                      </span>
                     </div>
                   </div>
 
@@ -459,10 +486,22 @@ function App() {
                     disabled={downloadStatus === "downloading"}
                     className="inline-flex items-center justify-center px-8 py-3.5 bg-[#CE805C] hover:bg-[#B87050] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
                   >
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <svg
+                      className="w-5 h-5 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
                     </svg>
-                    {downloadStatus === "downloading" ? "Downloading..." : "Download Your Guide Now"}
+                    {downloadStatus === "downloading"
+                      ? "Downloading..."
+                      : "Download Your Guide Now"}
                   </button>
                   <p className="text-white/70 text-xs text-center">
                     PDF file • ~3 MB • Please save a copy after download
@@ -471,12 +510,16 @@ function App() {
               ) : downloadStatus === "expired" ? (
                 // Expired Token
                 <div className="bg-red-500/20 backdrop-blur-sm border border-red-300/30 rounded-xl p-4 mt-6">
-                  <h3 className="text-white font-semibold mb-2">⚠️ Download Link Expired</h3>
+                  <h3 className="text-white font-semibold mb-2">
+                    ⚠️ Download Link Expired
+                  </h3>
                   <p className="text-white/90 text-sm mb-2">
-                    Your download link has expired. For security, links are valid for 24 hours.
+                    Your download link has expired. For security, links are
+                    valid for 24 hours.
                   </p>
                   <p className="text-white/70 text-xs">
-                    Click "Already Purchased?" below to get a fresh link using the same email from checkout.
+                    Click "Already Purchased?" below to get a fresh link using
+                    the same email from checkout.
                   </p>
                 </div>
               ) : null}
@@ -509,7 +552,8 @@ function App() {
                     <p className="text-white/90 text-sm">{claimMsg}</p>
                   )}
                   <p className="text-white/70 text-xs">
-                    Use the <strong>same email</strong> from checkout. We'll match it to a recent payment.
+                    Use the <strong>same email</strong> from checkout. We'll
+                    match it to a recent payment.
                   </p>
                 </div>
               )}
@@ -535,12 +579,20 @@ function App() {
               {/* Stats cards */}
               <div className="grid grid-cols-2 gap-3 max-w-sm mt-4 sm:mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center border border-white/20">
-                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#D4A574]">Complete</div>
-                  <div className="text-xs md:text-sm text-white/80">Planning Guide</div>
+                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#D4A574]">
+                    Complete
+                  </div>
+                  <div className="text-xs md:text-sm text-white/80">
+                    Planning Guide
+                  </div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center border border-white/20">
-                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#D4A574]">Cultural</div>
-                  <div className="text-xs md:text-sm text-white/80">Traditions</div>
+                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#D4A574]">
+                    Cultural
+                  </div>
+                  <div className="text-xs md:text-sm text-white/80">
+                    Traditions
+                  </div>
                 </div>
               </div>
 
@@ -569,7 +621,9 @@ function App() {
                         src="/assets/bride1.png"
                         alt="Beautiful Hausa Bride"
                         className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${
-                          imagesLoaded["/assets/bride1.png"] ? "opacity-100" : "opacity-0"
+                          imagesLoaded["/assets/bride1.png"]
+                            ? "opacity-100"
+                            : "opacity-0"
                         }`}
                         onLoad={() => handleImageLoad("/assets/bride1.png")}
                         loading="eager"
@@ -582,10 +636,18 @@ function App() {
 
                 {/* Decorative elements */}
                 <div className="absolute -top-3 -right-3 sm:-top-4 sm:-right-4 w-10 h-10 sm:w-12 sm:h-12 opacity-70">
-                  <img src="/assets/purpleoutline.png" alt="" className="w-full h-full" />
+                  <img
+                    src="/assets/purpleoutline.png"
+                    alt=""
+                    className="w-full h-full"
+                  />
                 </div>
                 <div className="absolute -bottom-3 -left-3 sm:-bottom-4 sm:-left-4 w-8 h-8 sm:w-10 sm:h-10 opacity-50">
-                  <img src="/assets/greenoutline.png" alt="" className="w-full h-full" />
+                  <img
+                    src="/assets/greenoutline.png"
+                    alt=""
+                    className="w-full h-full"
+                  />
                 </div>
               </div>
             </div>
@@ -602,44 +664,67 @@ function App() {
                 Your Complete Wedding Planning Resource
               </h2>
               <p className="font-inter text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed">
-                Created with deep respect for Hausa traditions and modern planning needs. This comprehensive guide helps you navigate cultural customs, budget planning, and timeline management for your special day.
+                Created with deep respect for Hausa traditions and modern
+                planning needs. This comprehensive guide helps you navigate
+                cultural customs, budget planning, and timeline management for
+                your special day.
               </p>
 
               <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg space-y-3 sm:space-y-4">
-                <h4 className="font-semibold text-[#740015] text-base sm:text-lg">What You'll Discover:</h4>
+                <h4 className="font-semibold text-[#740015] text-base sm:text-lg">
+                  What You'll Discover:
+                </h4>
                 <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm text-gray-700">
                   <li className="flex items-start">
                     <span className="w-1.5 h-1.5 bg-[#CE805C] rounded-full mr-2 sm:mr-3 mt-1.5 sm:mt-2 flex-shrink-0"></span>
-                    <span>Traditional ceremony steps and cultural significance</span>
+                    <span>
+                      Traditional ceremony steps and cultural significance
+                    </span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-1.5 h-1.5 bg-[#CE805C] rounded-full mr-2 sm:mr-3 mt-1.5 sm:mt-2 flex-shrink-0"></span>
-                    <span>Comprehensive budget breakdowns and expense tracking</span>
+                    <span>
+                      Comprehensive budget breakdowns and expense tracking
+                    </span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-1.5 h-1.5 bg-[#CE805C] rounded-full mr-2 sm:mr-3 mt-1.5 sm:mt-2 flex-shrink-0"></span>
-                    <span>Step-by-step planning timelines for organized execution</span>
+                    <span>
+                      Step-by-step planning timelines for organized execution
+                    </span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-1.5 h-1.5 bg-[#CE805C] rounded-full mr-2 sm:mr-3 mt-1.5 sm:mt-2 flex-shrink-0"></span>
-                    <span>Essential wedding planning guidance and practical tips</span>
+                    <span>
+                      Essential wedding planning guidance and practical tips
+                    </span>
                   </li>
                 </ul>
               </div>
 
               <div className="flex items-center gap-3 sm:gap-4 pt-2 sm:pt-4">
                 <div className="text-center">
-                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#740015]">Comprehensive</div>
-                  <div className="text-xs sm:text-sm text-gray-600">Guidance</div>
+                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#740015]">
+                    Comprehensive
+                  </div>
+                  <div className="text-xs sm:text-sm text-gray-600">
+                    Guidance
+                  </div>
                 </div>
                 <div className="w-px h-10 sm:h-12 bg-gray-300"></div>
                 <div className="text-center">
-                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#740015]">Authentic</div>
-                  <div className="text-xs sm:text-sm text-gray-600">Traditions</div>
+                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#740015]">
+                    Authentic
+                  </div>
+                  <div className="text-xs sm:text-sm text-gray-600">
+                    Traditions
+                  </div>
                 </div>
                 <div className="w-px h-10 sm:h-12 bg-gray-300"></div>
                 <div className="text-center">
-                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#740015]">Practical</div>
+                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#740015]">
+                    Practical
+                  </div>
                   <div className="text-xs sm:text-sm text-gray-600">Tools</div>
                 </div>
               </div>
@@ -655,7 +740,9 @@ function App() {
                   src="/assets/bride2.png"
                   alt="Hausa bride with traditional gele"
                   className={`w-full h-full object-cover transition-opacity duration-700 ${
-                    imagesLoaded["/assets/bride2.png"] ? "opacity-100" : "opacity-0"
+                    imagesLoaded["/assets/bride2.png"]
+                      ? "opacity-100"
+                      : "opacity-0"
                   }`}
                   onLoad={() => handleImageLoad("/assets/bride2.png")}
                   loading="lazy"
@@ -676,47 +763,105 @@ function App() {
               What Makes This Guide Special
             </h2>
             <p className="text-gray-600 text-sm sm:text-base md:text-lg">
-              Everything you need to plan an authentic Hausa wedding with confidence and cultural respect.
+              Everything you need to plan an authentic Hausa wedding with
+              confidence and cultural respect.
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 sm:gap-8">
             {/* Feature 1 */}
             <div className="bg-[#F9F4F1] rounded-2xl p-6 sm:p-8 text-center hover:shadow-xl transition-shadow">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-[#740015] rounded-xl flex items-center justify-center mx-auto mb-4 sm:mb-6" role="img" aria-label="Book icon">
-                <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              <div
+                className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-[#740015] rounded-xl flex items-center justify-center mx-auto mb-4 sm:mb-6"
+                role="img"
+                aria-label="Book icon"
+              >
+                <svg
+                  className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                  />
                 </svg>
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-[#740015] mb-2 sm:mb-3">Traditional Ceremonies & Customs</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-[#740015] mb-2 sm:mb-3">
+                Traditional Ceremonies & Customs
+              </h3>
               <p className="text-gray-700 text-xs sm:text-sm leading-relaxed">
-                Complete guide to traditional Hausa wedding ceremonies including Kunshi, Kamu, Sa-Lalle, Fatihah, and more. Learn the cultural customs and meanings to help you honor traditions respectfully.
+                Complete guide to traditional Hausa wedding ceremonies including
+                Kunshi, Kamu, Sa-Lalle, Fatihah, and more. Learn the cultural
+                customs and meanings to help you honor traditions respectfully.
               </p>
             </div>
 
             {/* Feature 2 */}
             <div className="bg-[#F9F4F1] rounded-2xl p-6 sm:p-8 text-center hover:shadow-xl transition-shadow">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-[#740015] rounded-xl flex items-center justify-center mx-auto mb-4 sm:mb-6" role="img" aria-label="Clipboard icon">
-                <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+              <div
+                className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-[#740015] rounded-xl flex items-center justify-center mx-auto mb-4 sm:mb-6"
+                role="img"
+                aria-label="Clipboard icon"
+              >
+                <svg
+                  className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                  />
                 </svg>
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-[#740015] mb-2 sm:mb-3">Timeline Planning & Management</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-[#740015] mb-2 sm:mb-3">
+                Timeline Planning & Management
+              </h3>
               <p className="text-gray-700 text-xs sm:text-sm leading-relaxed">
-                Comprehensive budget timelines and planning checklists to keep you organized. Includes money-saving strategies for effective wedding planning at any budget level.
+                Comprehensive budget timelines and planning checklists to keep
+                you organized. Includes money-saving strategies for effective
+                wedding planning at any budget level.
               </p>
             </div>
 
             {/* Feature 3 */}
             <div className="bg-[#F9F4F1] rounded-2xl p-6 sm:p-8 text-center hover:shadow-xl transition-shadow">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-[#740015] rounded-xl flex items-center justify-center mx-auto mb-4 sm:mb-6" role="img" aria-label="Money icon">
-                <svg className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <div
+                className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-[#740015] rounded-xl flex items-center justify-center mx-auto mb-4 sm:mb-6"
+                role="img"
+                aria-label="Money icon"
+              >
+                <svg
+                  className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-[#740015] mb-2 sm:mb-3">Wedding Planning & Budgeting</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-[#740015] mb-2 sm:mb-3">
+                Wedding Planning & Budgeting
+              </h3>
               <p className="text-gray-700 text-xs sm:text-sm leading-relaxed">
-                Comprehensive budget breakdown tables with detailed guidance and practical tips for organizing your authentic Hausa wedding within your preferred budget range.
+                Comprehensive budget breakdown tables with detailed guidance and
+                practical tips for organizing your authentic Hausa wedding
+                within your preferred budget range.
               </p>
             </div>
           </div>
@@ -731,7 +876,8 @@ function App() {
               Inside the Guide
             </h2>
             <p className="text-gray-600 text-sm sm:text-base md:text-lg">
-              Preview some of the beautifully designed pages that await you in the complete guide. Click on any page to view details.
+              Preview some of the beautifully designed pages that await you in
+              the complete guide. Click on any page to view details.
             </p>
           </div>
 
@@ -762,7 +908,9 @@ function App() {
                     />
                   </div>
                   <div className="p-3 text-center bg-[#740015]">
-                    <p className="text-white text-xs font-semibold">{page.label}</p>
+                    <p className="text-white text-xs font-semibold">
+                      {page.label}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -841,21 +989,33 @@ function App() {
             Ready to Start Planning Your Perfect Wedding?
           </h2>
           <p className="text-white/90 text-sm sm:text-base md:text-lg mb-6 sm:mb-8 max-w-2xl mx-auto">
-            Get instant access to your guide now. Includes budget templates, cultural customs, and planning timelines for your unforgettable celebration.
+            Get instant access to your guide now. Includes budget templates,
+            cultural customs, and planning timelines for your unforgettable
+            celebration.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-6 sm:mb-8">
             <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 sm:px-6 py-2.5 sm:py-3 border border-white/20">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#D4A574]">Instant</div>
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#D4A574]">
+                Instant
+              </div>
               <div className="text-xs md:text-sm text-white/80">Download</div>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 sm:px-6 py-2.5 sm:py-3 border border-white/20">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#D4A574]">Complete</div>
-              <div className="text-xs md:text-sm text-white/80">Planning Tools</div>
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#D4A574]">
+                Complete
+              </div>
+              <div className="text-xs md:text-sm text-white/80">
+                Planning Tools
+              </div>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 sm:px-6 py-2.5 sm:py-3 border border-white/20">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#D4A574]">Authentic</div>
-              <div className="text-xs md:text-sm text-white/80">Cultural Guide</div>
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#D4A574]">
+                Authentic
+              </div>
+              <div className="text-xs md:text-sm text-white/80">
+                Cultural Guide
+              </div>
             </div>
           </div>
 
@@ -882,11 +1042,13 @@ function App() {
               className="h-10 mx-auto mb-6"
             />
             <p className="text-gray-400 text-sm">
-              Preserving traditions, celebrating love. Your trusted companion for an authentic Hausa wedding.
+              Preserving traditions, celebrating love. Your trusted companion
+              for an authentic Hausa wedding.
             </p>
             <div className="pt-6 border-t border-gray-700">
               <p className="text-gray-500 text-xs">
-                © {new Date().getFullYear()} The Hausa Wedding Guide. All rights reserved.
+                © {new Date().getFullYear()} The Hausa Wedding Guide. All
+                rights reserved.
               </p>
             </div>
           </div>
