@@ -69,35 +69,53 @@ export default function LoginGate({ onAuthenticated }) {
       return;
     }
 
-    // Get shared password from environment variable
-    const correctPassword =
-      import.meta.env.VITE_SHARED_PASSWORD || "HausaPlanner2025";
+    try {
+      // Call backend validation endpoint
+      const response = await fetch('/api/validate-access', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          password: password.trim(),
+        }),
+      });
 
-    // Validate password (case-sensitive)
-    if (password !== correctPassword) {
-      setError(
-        "Incorrect password. Please check your purchase email for the correct password."
-      );
+      const data = await response.json();
+
+      if (response.ok && data.hasAccess) {
+        // Success - user has valid purchase
+        const session = {
+          email: email.trim().toLowerCase(),
+          authenticatedAt: Date.now(),
+          expiresAt: Date.now() + SESSION_DURATION,
+        };
+
+        // Store session
+        localStorage.setItem("hwg_auth_session", JSON.stringify(session));
+
+        // Call parent callback
+        setIsLoading(false);
+        onAuthenticated(session.email);
+      } else {
+        // Failed validation
+        let errorMessage = data.error || "Authentication failed";
+        
+        if (response.status === 401) {
+          errorMessage = "Incorrect password. Please check your purchase email for the correct password.";
+        } else if (response.status === 403) {
+          errorMessage = "No valid purchase found for this email. Please check your email or contact support.";
+        }
+        
+        setError(errorMessage);
+        setIsLoading(false);
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Connection error. Please check your internet and try again.");
       setIsLoading(false);
-      return;
     }
-
-    // TODO: Phase 2 - Validate email against Supabase purchases
-    // For now, accept any email with correct password
-
-    // Create session
-    const session = {
-      email: email.trim().toLowerCase(),
-      authenticatedAt: Date.now(),
-      expiresAt: Date.now() + SESSION_DURATION,
-    };
-
-    // Store session
-    localStorage.setItem("hwg_auth_session", JSON.stringify(session));
-
-    // Success - call parent callback
-    setIsLoading(false);
-    onAuthenticated(session.email);
   };
 
   return (

@@ -42,6 +42,7 @@ function App() {
     const downloadToken = params.get("download");
     const expiresParam = params.get("expires");
     const emailParam = params.get("email");
+    const sig = params.get("sig");
     const guideParam = params.get("guide");
 
     // If guide parameter is present, show interactive guide
@@ -60,13 +61,31 @@ function App() {
       const expiresTime = parseInt(expiresParam, 10);
       setExpires(expiresTime);
 
-      // Validate token expiration
-      const now = Date.now();
-      if (expiresTime > now) {
-        setDownloadStatus("valid");
-      } else {
-        setDownloadStatus("expired");
+      // Check if signature is present (required for security)
+      if (!sig || sig.length !== 64) {
+        setDownloadStatus("invalid");
+        alert("Invalid download link. Please contact support for a new link.");
+        return;
       }
+
+      // Server-side validation via API
+      fetch(`/api/validate-token?token=${downloadToken}&email=${encodeURIComponent(emailParam)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'valid') {
+            setDownloadStatus('valid');
+          } else if (data.status === 'limit_reached') {
+            setDownloadStatus('limit_reached');
+          } else if (data.status === 'expired') {
+            setDownloadStatus('expired');
+          } else {
+            setDownloadStatus('invalid');
+          }
+        })
+        .catch(error => {
+          console.error("Token validation error:", error);
+          setDownloadStatus('invalid');
+        });
     }
   }, []);
 
@@ -124,21 +143,42 @@ function App() {
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
-        setDownloadStatus("valid");
+        
+        // Re-validate token to update download count
+        const validateRes = await fetch(`/api/validate-token?token=${token}&email=${encodeURIComponent(email)}`);
+        const validateData = await validateRes.json();
+        setDownloadStatus(validateData.status || 'valid');
       } else {
         const errorData = await response.json();
+        
+        // Specific error handling
         if (response.status === 429) {
           alert(
             "Too many download attempts. Please wait a moment and try again."
           );
+          setDownloadStatus("valid");
+        } else if (response.status === 401) {
+          // Could be invalid signature, expired token, or limit reached
+          if (errorData.error?.includes("limit") || errorData.error?.includes("downloads")) {
+            alert(
+              "You have used all your downloads for this link. Please contact support@hausaroom.com if you need additional access."
+            );
+            setDownloadStatus("limit_reached");
+          } else if (errorData.error?.includes("expired")) {
+            alert("Your download link has expired. Please request a new link.");
+            setDownloadStatus("expired");
+          } else {
+            alert("Invalid download link. Please contact support for a new link.");
+            setDownloadStatus("invalid");
+          }
         } else {
-          alert(errorData.error || "Download failed. Please try again.");
+          alert(errorData.error || "Download failed. Please contact support@hausaroom.com for assistance.");
+          setDownloadStatus("valid");
         }
-        setDownloadStatus("valid");
       }
     } catch (error) {
       console.error("Download error:", error);
-      alert("Download failed. Please try again.");
+      alert("Download failed due to a network error. Please check your connection and try again.");
       setDownloadStatus("valid");
     }
   };
@@ -520,6 +560,40 @@ function App() {
                   <p className="text-white/70 text-xs">
                     Click "Already Purchased?" below to get a fresh link using
                     the same email from checkout.
+                  </p>
+                </div>
+              ) : downloadStatus === "limit_reached" ? (
+                // Download Limit Reached
+                <div className="bg-orange-500/20 backdrop-blur-sm border border-orange-300/30 rounded-xl p-4 mt-6">
+                  <h3 className="text-white font-semibold mb-2">
+                    ⚠️ Download Limit Reached
+                  </h3>
+                  <p className="text-white/90 text-sm mb-2">
+                    You have used all 3 downloads for this link. Each purchase allows up to 3 downloads for safety.
+                  </p>
+                  <p className="text-white/70 text-xs">
+                    Need more downloads? Contact{" "}
+                    <a href="mailto:support@hausaroom.com" className="text-[#D4A574] underline hover:text-white">
+                      support@hausaroom.com
+                    </a>
+                    {" "}for assistance.
+                  </p>
+                </div>
+              ) : downloadStatus === "invalid" ? (
+                // Invalid Token
+                <div className="bg-red-500/20 backdrop-blur-sm border border-red-300/30 rounded-xl p-4 mt-6">
+                  <h3 className="text-white font-semibold mb-2">
+                    ❌ Invalid Download Link
+                  </h3>
+                  <p className="text-white/90 text-sm mb-2">
+                    This download link is not valid or has been tampered with.
+                  </p>
+                  <p className="text-white/70 text-xs">
+                    Please use the link from your purchase confirmation email, or contact{" "}
+                    <a href="mailto:support@hausaroom.com" className="text-[#D4A574] underline hover:text-white">
+                      support@hausaroom.com
+                    </a>
+                    {" "}for help.
                   </p>
                 </div>
               ) : null}

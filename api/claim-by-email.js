@@ -4,6 +4,8 @@
 
 import crypto from "crypto";
 import { sendDownloadEmail } from "../lib/email.js";
+import tokenDB from "../lib/database.cjs";
+import { rateLimit } from "../lib/rateLimit.js";
 
 const PAYSTACK_TEST_SECRET = process.env.PAYSTACK_TEST_SECRET_KEY || null;
 const PAYSTACK_LIVE_SECRET = process.env.PAYSTACK_SECRET_KEY || null;
@@ -45,6 +47,17 @@ function parseDateSafe(d) {
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  // Rate limiting: 10 requests per minute per IP
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+  const rateLimitResult = rateLimit(ip, 10, 60000); // 10 requests per minute
+  
+  if (!rateLimitResult.allowed) {
+    return res.status(429).json({ 
+      error: "Too many requests. Please try again later.",
+      retryAfter: Math.ceil(rateLimitResult.resetTime / 1000)
+    });
   }
 
   try {
@@ -110,12 +123,23 @@ export default async function handler(req, res) {
         .json({ error: "No recent successful payment found for this email" });
     }
 
-    // Issue link to the provided email
+    // Issue link to the provided email with HMAC signature
     const token = crypto.randomBytes(32).toString("hex");
     const expires = Date.now() + 24 * 60 * 60 * 1000;
+    
+    // Generate HMAC signature for security
+    const secretKey = mode === "live" ? PAYSTACK_LIVE_SECRET : PAYSTACK_TEST_SECRET;
+    const sig = crypto
+      .createHmac("sha256", secretKey)
+      .update(`${token}${email}${expires}`)
+      .digest("hex");
+    
+    // Store token in database for download tracking
+    await tokenDB.storeToken(email, token, expires);
+    
     const downloadLink = `${PUBLIC_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
       email
-    )}`;
+    )}&sig=${sig}`;
 
     await sendDownloadEmail(email, downloadLink);
     return res.status(200).json({ ok: true, email, mode, downloadLink });
