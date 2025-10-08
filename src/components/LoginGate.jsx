@@ -17,11 +17,13 @@ import { useState, useEffect } from "react";
 
 const SESSION_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
 
-export default function LoginGate({ onAuthenticated }) {
+export default function LoginGate({ children, onAuthenticated }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
 
   // Check for existing valid session on mount
   useEffect(() => {
@@ -33,7 +35,11 @@ export default function LoginGate({ onAuthenticated }) {
 
         if (now < expiresAt && savedEmail) {
           // Valid session exists, auto-login
-          onAuthenticated(savedEmail);
+          setIsAuthenticated(true);
+          setUserEmail(savedEmail);
+          if (onAuthenticated) {
+            onAuthenticated(savedEmail);
+          }
         } else {
           // Session expired, clear it
           localStorage.removeItem("hwg_auth_session");
@@ -95,10 +101,20 @@ export default function LoginGate({ onAuthenticated }) {
     // Store session
     localStorage.setItem("hwg_auth_session", JSON.stringify(session));
 
-    // Success - call parent callback
+    // Success - authenticate user
     setIsLoading(false);
-    onAuthenticated(session.email);
+    setIsAuthenticated(true);
+    setUserEmail(session.email);
+
+    if (onAuthenticated) {
+      onAuthenticated(session.email);
+    }
   };
+
+  // If authenticated, render children
+  if (isAuthenticated) {
+    return <>{children}</>;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 flex items-center justify-center p-4">
