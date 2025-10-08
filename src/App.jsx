@@ -236,7 +236,8 @@ function App() {
       <nav className="fixed top-0 left-0 right-0 z-[70] bg-white shadow-lg border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
-            {/* Logo - Always visible */}
+            
+            {/* Logo - Always visible on all screens */}
             <div className="flex items-center py-2">
               <img
                 src="/assets/logowhite.jpg"
@@ -245,7 +246,7 @@ function App() {
               />
             </div>
 
-            {/* Desktop Navigation Links - Hidden on mobile */}
+            {/* Desktop Navigation - Only visible on medium+ screens */}
             <div className="hidden md:flex items-center space-x-8">
               {[
                 { id: "hero", label: "Home" },
@@ -268,18 +269,18 @@ function App() {
               ))}
             </div>
 
-            {/* Desktop CTA Button - Hidden on mobile */}
+            {/* Desktop CTA Button - Only visible on medium+ screens */}
             <button
               onClick={handlePurchase}
-              className="hidden md:inline-flex px-6 py-2.5 bg-[#CE805C] hover:bg-[#B87050] text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
+              className="hidden md:flex items-center px-6 py-2.5 bg-[#CE805C] hover:bg-[#B87050] text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
             >
               Get Started
             </button>
 
-            {/* Mobile Menu Button - ONLY visible on mobile, HIDDEN on desktop */}
+            {/* Mobile Hamburger Button - Only visible on small screens */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="max-md:flex hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+              className="md:hidden flex items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? (
@@ -292,7 +293,7 @@ function App() {
         </div>
       </nav>
 
-      {/* Mobile Menu Slide-out Panel - Only on small screens */}
+      {/* Mobile Menu Slide-out Panel - Only visible on small screens */}
       <div
         className={`md:hidden fixed top-16 right-0 h-screen w-64 bg-white shadow-2xl z-[80] transform transition-transform duration-300 ease-in-out ${
           mobileMenuOpen ? "translate-x-0" : "translate-x-full"
