@@ -279,7 +279,7 @@ function App() {
             {/* Mobile Menu Button - ONLY visible on mobile, HIDDEN on desktop */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="inline-flex md:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+              className="max-md:flex hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? (
