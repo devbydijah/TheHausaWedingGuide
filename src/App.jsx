@@ -271,7 +271,7 @@ function App() {
             {/* Desktop CTA Button - Only visible on medium+ screens */}
             <button
               onClick={handlePurchase}
-              className="hidden md:flex items-center px-6 py-2.5 bg-[#CE805C] hover:bg-[#B87050] text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
+              className="hidden md:inline-flex items-center px-6 py-2.5 bg-[#CE805C] hover:bg-[#B87050] text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
             >
               Get Started
             </button>
@@ -279,8 +279,9 @@ function App() {
             {/* Mobile Hamburger Button - Only visible on small screens */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden flex items-center justify-center p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+              className="block md:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
               aria-label="Toggle menu"
+              aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? (
                 <X size={28} weight="bold" />
@@ -308,7 +309,10 @@ function App() {
           ].map((item) => (
             <button
               key={item.id}
-              onClick={() => scrollToSection(item.id)}
+              onClick={() => {
+                scrollToSection(item.id);
+                setMobileMenuOpen(false);
+              }}
               className={`block w-full text-left px-4 py-3 rounded-lg transition-colors ${
                 activeSection === item.id
                   ? "bg-[#740015]/5 text-[#740015] font-semibold"
@@ -319,7 +323,10 @@ function App() {
             </button>
           ))}
           <button
-            onClick={handlePurchase}
+            onClick={() => {
+              handlePurchase();
+              setMobileMenuOpen(false);
+            }}
             className="w-full px-6 py-3 bg-[#CE805C] hover:bg-[#B87050] text-white font-semibold rounded-lg shadow-md transition-all duration-300 mt-4"
           >
             Get Started
