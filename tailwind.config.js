@@ -4,8 +4,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        playfair: ['"Playfair Display"', 'serif'],
-        inter: ['Inter', 'sans-serif'],
+        playfair: ['"Playfair Display"', "serif"],
+        inter: ["Inter", "sans-serif"],
       },
     },
   },
