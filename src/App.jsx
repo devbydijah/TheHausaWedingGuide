@@ -245,8 +245,8 @@ function App() {
               />
             </div>
 
-            {/* Desktop Navigation - Only visible on medium+ screens */}
-            <div className="hidden md:flex items-center space-x-8">
+            {/* Desktop Navigation Links - HIDDEN on mobile, SHOWN on desktop */}
+            <div className="desktop-nav-links hidden md:flex items-center space-x-8">
               {[
                 { id: "hero", label: "Home" },
                 { id: "features", label: "Features" },
@@ -271,7 +271,7 @@ function App() {
             {/* Desktop CTA Button - Only visible on medium+ screens */}
             <button
               onClick={handlePurchase}
-              className="hidden md:inline-flex items-center px-6 py-2.5 bg-[#CE805C] hover:bg-[#B87050] text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
+              className="desktop-cta-button hidden md:inline-flex items-center px-6 py-2.5 bg-[#CE805C] hover:bg-[#B87050] text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
             >
               Get Started
             </button>
@@ -279,7 +279,7 @@ function App() {
             {/* Mobile Hamburger Button - Only visible on small screens */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="block md:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+              className="mobile-menu-button block md:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
               aria-label="Toggle menu"
               aria-expanded={mobileMenuOpen}
             >
@@ -295,7 +295,7 @@ function App() {
 
       {/* Mobile Menu Slide-out Panel - Only visible on small screens */}
       <div
-        className={`md:hidden fixed top-16 right-0 h-screen w-64 bg-white shadow-2xl z-[80] transform transition-transform duration-300 ease-in-out ${
+        className={`mobile-menu-panel fixed top-16 right-0 h-screen w-64 bg-white shadow-2xl z-[80] md:hidden transform transition-transform duration-300 ease-in-out ${
           mobileMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >

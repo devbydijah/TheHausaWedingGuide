@@ -11,6 +11,26 @@ html {
   scroll-behavior: smooth;
 }
 
+/* CRITICAL FIX: Force hide hamburger on desktop */
+@media (min-width: 768px) {
+  .mobile-menu-button {
+    display: none !important;
+  }
+  .mobile-menu-panel {
+    display: none !important;
+  }
+}
+
+/* CRITICAL FIX: Force hide desktop nav on mobile */
+@media (max-width: 767px) {
+  .desktop-nav-links {
+    display: none !important;
+  }
+  .desktop-cta-button {
+    display: none !important;
+  }
+}
+
 /* Custom scrollbar for gallery */
 .gallery-scroll::-webkit-scrollbar {
   height: 8px;
