@@ -8,6 +8,7 @@ import {
   CheckCircle,
   ArrowRight,
   Info,
+  Question,
   Star,
   Palette,
   BookOpen,
@@ -687,14 +688,14 @@ export default function VisionPlanner({
                         e.stopPropagation();
                         setSelectedValueInfo(option);
                       }}
-                      className={`absolute top-2 right-2 z-10 w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+                      className={`absolute top-2 right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center border-2 transition-all ${
                         darkMode
-                          ? "bg-gray-700 hover:bg-gray-600 text-gray-400 hover:text-white"
-                          : "bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900"
+                          ? "border-[#CE805C] text-[#CE805C] hover:bg-[#CE805C] hover:text-white"
+                          : "border-[#740015] text-[#740015] hover:bg-[#740015] hover:text-white"
                       }`}
                       title="More info"
                     >
-                      <Info size={14} weight="bold" />
+                      <Question size={16} weight="bold" />
                     </motion.button>
 
                     {/* Value Card */}
@@ -1004,18 +1005,18 @@ export default function VisionPlanner({
           </Card>
 
           {/* Value Info Modal */}
-          <Modal
-            isOpen={selectedValueInfo !== null}
-            onClose={() => setSelectedValueInfo(null)}
-            title={selectedValueInfo?.label || ""}
-            darkMode={darkMode}
-            size="md"
-          >
-            {selectedValueInfo && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
+          {selectedValueInfo && (
+            <Modal
+              isOpen={selectedValueInfo !== null}
+              onClose={() => setSelectedValueInfo(null)}
+              title={selectedValueInfo.label}
+              darkMode={darkMode}
+              size="md"
+            >
+              <div className="space-y-4 max-h-[75vh] overflow-y-auto p-6">
+                <div className="flex items-center gap-4">
                   <div
-                    className="w-16 h-16 rounded-xl flex items-center justify-center text-white"
+                    className="w-16 h-16 rounded-xl flex items-center justify-center text-white flex-shrink-0"
                     style={{
                       background:
                         "linear-gradient(135deg, #740015 0%, #531946 100%)",
@@ -1025,16 +1026,16 @@ export default function VisionPlanner({
                       <selectedValueInfo.icon size={32} weight="bold" />
                     )}
                   </div>
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <h3
-                      className={`text-xl font-semibold ${
+                      className={`text-xl font-bold ${
                         darkMode ? "text-white" : "text-gray-900"
                       }`}
                     >
                       {selectedValueInfo.label}
                     </h3>
                     <p
-                      className={`text-sm ${
+                      className={`text-sm mt-1 ${
                         darkMode ? "text-gray-400" : "text-gray-600"
                       }`}
                     >
@@ -1043,9 +1044,9 @@ export default function VisionPlanner({
                   </div>
                 </div>
 
-                <div>
+                <div className="pt-2">
                   <h4
-                    className={`font-semibold mb-2 ${
+                    className={`font-bold mb-3 text-base ${
                       darkMode ? "text-white" : "text-gray-900"
                     }`}
                   >
@@ -1060,69 +1061,72 @@ export default function VisionPlanner({
                   </p>
                 </div>
 
-                {selectedValueInfo.recommendations && (
-                  <div>
-                    <h4
-                      className={`font-semibold mb-3 ${
-                        darkMode ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      Recommendations
-                    </h4>
-                    <div className="space-y-2">
-                      {selectedValueInfo.recommendations.map((rec, index) => (
-                        <div
-                          key={index}
-                          className={`flex items-start gap-2 p-2 rounded-lg ${
-                            darkMode ? "bg-gray-700/50" : "bg-gray-50"
-                          }`}
-                        >
-                          <CheckCircle
-                            size={18}
-                            weight="fill"
-                            className="text-[#740015] flex-shrink-0 mt-0.5"
-                          />
-                          <p
-                            className={`text-sm ${
-                              darkMode ? "text-gray-300" : "text-gray-700"
+                {selectedValueInfo.recommendations &&
+                  selectedValueInfo.recommendations.length > 0 && (
+                    <div className="pt-2">
+                      <h4
+                        className={`font-bold mb-3 text-base ${
+                          darkMode ? "text-white" : "text-gray-900"
+                        }`}
+                      >
+                        Recommendations
+                      </h4>
+                      <div className="space-y-2">
+                        {selectedValueInfo.recommendations.map((rec, index) => (
+                          <div
+                            key={index}
+                            className={`flex items-start gap-3 p-3 rounded-lg ${
+                              darkMode ? "bg-gray-700/50" : "bg-gray-50"
                             }`}
                           >
-                            {rec}
-                          </p>
-                        </div>
-                      ))}
+                            <CheckCircle
+                              size={18}
+                              weight="fill"
+                              className="text-[#740015] flex-shrink-0 mt-0.5"
+                            />
+                            <p
+                              className={`text-sm ${
+                                darkMode ? "text-gray-300" : "text-gray-700"
+                              }`}
+                            >
+                              {rec}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => {
-                    toggleValue(selectedValueInfo.value);
-                    setSelectedValueInfo(null);
-                  }}
-                  className={`w-full py-3 rounded-lg font-semibold text-white transition-all ${
-                    selectedValues.includes(selectedValueInfo.value)
-                      ? "bg-gray-500 hover:bg-gray-600"
-                      : "hover:opacity-90"
-                  }`}
-                  style={
-                    !selectedValues.includes(selectedValueInfo.value)
-                      ? {
-                          background:
-                            "linear-gradient(135deg, #740015 0%, #531946 100%)",
-                        }
-                      : {}
-                  }
-                >
-                  {selectedValues.includes(selectedValueInfo.value)
-                    ? "Remove from Selection"
-                    : "Add to My Values"}
-                </motion.button>
+                <div className="pt-3 pb-2">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      toggleValue(selectedValueInfo.value);
+                      setSelectedValueInfo(null);
+                    }}
+                    className={`w-full py-3 rounded-lg font-semibold text-white transition-all ${
+                      selectedValues.includes(selectedValueInfo.value)
+                        ? "bg-gray-500 hover:bg-gray-600"
+                        : "hover:opacity-90"
+                    }`}
+                    style={
+                      !selectedValues.includes(selectedValueInfo.value)
+                        ? {
+                            background:
+                              "linear-gradient(135deg, #740015 0%, #531946 100%)",
+                          }
+                        : {}
+                    }
+                  >
+                    {selectedValues.includes(selectedValueInfo.value)
+                      ? "Remove from Selection"
+                      : "Add to My Values"}
+                  </motion.button>
+                </div>
               </div>
-            )}
-          </Modal>
+            </Modal>
+          )}
         </AnimatedCard>
       )}
 

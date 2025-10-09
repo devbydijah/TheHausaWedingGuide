@@ -1,15 +1,544 @@
 import { useState, useMemo, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  CurrencyCircleDollar,
   ChartPieSlice,
   Warning,
   CheckCircle,
   Info,
   TrendUp,
   Calculator,
+  MapPin,
+  ForkKnife,
+  Dress,
+  Camera,
+  Sparkle,
+  DotsThree,
+  List,
+  SquaresFour,
+  ArrowsClockwise,
 } from "@phosphor-icons/react";
-import { Card } from "../../components/ui";
+import { Gauge } from "@mui/x-charts/Gauge";
+import { Card, AnimatedCard, GradientHeader } from "../../components/ui";
 import { BUDGET_CATEGORIES } from "../../lib/constants";
+
+// Icon mapping for dynamic rendering
+const ICON_MAP = {
+  MapPin,
+  ForkKnife,
+  Dress,
+  Camera,
+  Sparkle,
+  Dots: DotsThree,
+};
+
+// MUI Gauge Wrapper Component
+const MUIGaugeWrapper = ({ percentage, darkMode, index }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
+      className="flex items-center justify-center"
+    >
+      <Gauge
+        width={140}
+        height={140}
+        value={percentage}
+        valueMin={0}
+        valueMax={100}
+        startAngle={-110}
+        endAngle={110}
+        innerRadius="70%"
+        outerRadius="100%"
+        cornerRadius="50%"
+        text={({ value }) => `${value}%`}
+        sx={{
+          [`& .MuiGauge-valueArc`]: {
+            fill: "url(#gauge-gradient)",
+          },
+          [`& .MuiGauge-referenceArc`]: {
+            fill: darkMode ? "#1F2937" : "#F3F4F6",
+          },
+          [`& .MuiGauge-valueText`]: {
+            fontSize: 20,
+            fontWeight: "bold",
+            fill: darkMode ? "#FFFFFF" : "#111827",
+          },
+        }}
+      >
+        <defs>
+          <linearGradient
+            id="gauge-gradient"
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="100%"
+          >
+            <stop offset="0%" style={{ stopColor: "#740015" }} />
+            <stop offset="50%" style={{ stopColor: "#CE805C" }} />
+            <stop offset="100%" style={{ stopColor: "#531946" }} />
+          </linearGradient>
+        </defs>
+      </Gauge>
+    </motion.div>
+  );
+};
+
+// Chart Component - Custom Radial Gauge (Fallback)
+const RadialGauge = ({ percentage, darkMode, icon: Icon, index }) => {
+  const angle = (percentage / 100) * 270; // 270 degrees for a more modern 3/4 circle
+  const needleRotation = -135 + angle; // Start from bottom-left
+  const radius = 48;
+  const circumference = 2 * Math.PI * radius;
+  const arcLength = (270 / 360) * circumference; // 3/4 circle
+  const strokeDashoffset = arcLength - (percentage / 100) * arcLength;
+
+  return (
+    <div className="relative w-36 h-32">
+      {/* SVG Gauge */}
+      <svg className="w-full h-full" viewBox="0 0 144 128">
+        {/* Background Arc (3/4 circle) */}
+        <motion.circle
+          cx="72"
+          cy="80"
+          r={radius}
+          fill="none"
+          stroke={darkMode ? "#1F2937" : "#F3F4F6"}
+          strokeWidth="12"
+          strokeDasharray={`${arcLength} ${circumference}`}
+          strokeLinecap="round"
+          transform="rotate(-135 72 80)"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        />
+
+        {/* Progress Arc with Gradient */}
+        <defs>
+          <linearGradient
+            id={`gauge-gradient-${index}`}
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="100%"
+          >
+            <stop offset="0%" stopColor="#740015" />
+            <stop offset="50%" stopColor="#CE805C" />
+            <stop offset="100%" stopColor="#531946" />
+          </linearGradient>
+          <filter id={`glow-${index}`}>
+            <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+            <feMerge>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        <motion.circle
+          cx="72"
+          cy="80"
+          r={radius}
+          fill="none"
+          stroke={`url(#gauge-gradient-${index})`}
+          strokeWidth="12"
+          strokeDasharray={`${arcLength} ${circumference}`}
+          strokeLinecap="round"
+          transform="rotate(-135 72 80)"
+          filter={`url(#glow-${index})`}
+          initial={{ strokeDashoffset: arcLength }}
+          animate={{ strokeDashoffset }}
+          transition={{
+            duration: 1.5,
+            delay: 0.2 + index * 0.1,
+            ease: "easeOut",
+          }}
+        />
+
+        {/* Tick Marks */}
+        {[0, 25, 50, 75, 100].map((tick) => {
+          const tickAngle = -135 + (tick / 100) * 270;
+          const tickRad = (tickAngle * Math.PI) / 180;
+          const x1 = 72 + (radius - 8) * Math.cos(tickRad);
+          const y1 = 80 + (radius - 8) * Math.sin(tickRad);
+          const x2 = 72 + (radius - 2) * Math.cos(tickRad);
+          const y2 = 80 + (radius - 2) * Math.sin(tickRad);
+
+          return (
+            <motion.line
+              key={tick}
+              x1={x1}
+              y1={y1}
+              x2={x2}
+              y2={y2}
+              stroke={darkMode ? "#4B5563" : "#D1D5DB"}
+              strokeWidth="2"
+              strokeLinecap="round"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 + tick * 0.01 }}
+            />
+          );
+        })}
+
+        {/* Animated Needle */}
+        <motion.g
+          initial={{ rotate: -135 }}
+          animate={{ rotate: needleRotation }}
+          transition={{ duration: 1.2, delay: 0.5, ease: "easeOut" }}
+          style={{ transformOrigin: "72px 80px" }}
+        >
+          <line
+            x1="72"
+            y1="80"
+            x2="72"
+            y2="38"
+            stroke="url(#needle-gradient)"
+            strokeWidth="3"
+            strokeLinecap="round"
+          />
+          <defs>
+            <linearGradient
+              id="needle-gradient"
+              x1="0%"
+              y1="100%"
+              x2="0%"
+              y2="0%"
+            >
+              <stop offset="0%" stopColor="#740015" />
+              <stop offset="100%" stopColor="#CE805C" />
+            </linearGradient>
+          </defs>
+          {/* Needle tip */}
+          <circle cx="72" cy="38" r="3" fill="#740015" />
+        </motion.g>
+
+        {/* Center pivot */}
+        <circle
+          cx="72"
+          cy="80"
+          r="6"
+          fill={darkMode ? "#1F2937" : "#FFFFFF"}
+          stroke="#740015"
+          strokeWidth="2"
+        />
+        <circle cx="72" cy="80" r="3" fill="#740015" />
+      </svg>
+
+      {/* Icon Badge */}
+      <motion.div
+        className="absolute bottom-2 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg"
+        style={{
+          background: "linear-gradient(135deg, #740015 0%, #531946 100%)",
+        }}
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 0.4, delay: 0.8, type: "spring" }}
+      >
+        <Gauge size={24} weight="bold" />
+      </motion.div>
+    </div>
+  );
+};
+
+const LiquidFill = ({ percentage, darkMode, icon: Icon }) => {
+  return (
+    <div className="relative w-28 h-28">
+      <svg className="w-full h-full" viewBox="0 0 112 112">
+        {/* Container Circle */}
+        <circle
+          cx="56"
+          cy="56"
+          r="52"
+          fill="none"
+          stroke={darkMode ? "#374151" : "#E5E7EB"}
+          strokeWidth="4"
+        />
+        {/* Liquid Fill */}
+        <defs>
+          <clipPath id="liquid-clip">
+            <circle cx="56" cy="56" r="50" />
+          </clipPath>
+        </defs>
+        <motion.rect
+          x="0"
+          y="112"
+          width="112"
+          height="112"
+          fill="url(#liquid-gradient)"
+          clipPath="url(#liquid-clip)"
+          initial={{ y: 112 }}
+          animate={{ y: 112 - (percentage / 100) * 112 }}
+          transition={{ duration: 1.2, delay: 0.2 }}
+        />
+        <defs>
+          <linearGradient
+            id="liquid-gradient"
+            x1="0%"
+            y1="100%"
+            x2="0%"
+            y2="0%"
+          >
+            <stop offset="0%" stopColor="#740015" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#531946" stopOpacity="0.9" />
+          </linearGradient>
+        </defs>
+
+        {/* Wave animation */}
+        <motion.path
+          d="M 0 56 Q 14 50, 28 56 T 56 56 T 84 56 T 112 56 L 112 112 L 0 112 Z"
+          fill="url(#wave-gradient)"
+          clipPath="url(#liquid-clip)"
+          initial={{ y: 112 }}
+          animate={{
+            y: 112 - (percentage / 100) * 112,
+            d: [
+              "M 0 56 Q 14 50, 28 56 T 56 56 T 84 56 T 112 56 L 112 112 L 0 112 Z",
+              "M 0 56 Q 14 62, 28 56 T 56 56 T 84 56 T 112 56 L 112 112 L 0 112 Z",
+              "M 0 56 Q 14 50, 28 56 T 56 56 T 84 56 T 112 56 L 112 112 L 0 112 Z",
+            ],
+          }}
+          transition={{
+            y: { duration: 1.2, delay: 0.2 },
+            d: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+          }}
+        />
+        <defs>
+          <linearGradient id="wave-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#CE805C" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#B87050" stopOpacity="0.7" />
+          </linearGradient>
+        </defs>
+      </svg>
+
+      {/* Icon overlay */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div
+          className="w-12 h-12 rounded-full flex items-center justify-center text-white backdrop-blur-sm"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(116, 0, 21, 0.9) 0%, rgba(83, 25, 70, 0.9) 100%)",
+          }}
+        >
+          <Icon size={24} weight="bold" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const HexagonProgress = ({ percentage, darkMode, icon: Icon }) => {
+  const points = "56,8 100,28 100,68 56,88 12,68 12,28";
+  const pathLength = 240;
+
+  return (
+    <div className="relative w-28 h-28">
+      <svg className="w-full h-full" viewBox="0 0 112 96">
+        {/* Background Hexagon */}
+        <polygon
+          points={points}
+          fill="none"
+          stroke={darkMode ? "#374151" : "#E5E7EB"}
+          strokeWidth="6"
+        />
+        {/* Progress Hexagon */}
+        <motion.polygon
+          points={points}
+          fill="none"
+          stroke="url(#hex-gradient)"
+          strokeWidth="6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          initial={{
+            strokeDasharray: pathLength,
+            strokeDashoffset: pathLength,
+          }}
+          animate={{
+            strokeDashoffset: pathLength - (percentage / 100) * pathLength,
+          }}
+          transition={{ duration: 1, delay: 0.2 }}
+        />
+        <defs>
+          <linearGradient id="hex-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#740015" />
+            <stop offset="100%" stopColor="#531946" />
+          </linearGradient>
+        </defs>
+      </svg>
+
+      {/* Icon in center */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div
+          className="w-14 h-14 rounded-full flex items-center justify-center text-white"
+          style={{
+            background: "linear-gradient(135deg, #740015 0%, #531946 100%)",
+          }}
+        >
+          <Icon size={28} weight="bold" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const RingSegments = ({ percentage, darkMode, icon: Icon }) => {
+  const circumference = 2 * Math.PI * 40;
+
+  return (
+    <div className="relative w-28 h-28">
+      <svg className="w-full h-full transform -rotate-90">
+        {/* Outer ring background */}
+        <circle
+          cx="56"
+          cy="56"
+          r="40"
+          stroke={darkMode ? "#374151" : "#E5E7EB"}
+          strokeWidth="12"
+          fill="none"
+        />
+        {/* Outer ring progress */}
+        <motion.circle
+          cx="56"
+          cy="56"
+          r="40"
+          stroke="url(#ring-gradient)"
+          strokeWidth="12"
+          fill="none"
+          strokeLinecap="round"
+          initial={{
+            strokeDasharray: circumference,
+            strokeDashoffset: circumference,
+          }}
+          animate={{
+            strokeDashoffset:
+              circumference - (percentage / 100) * circumference,
+          }}
+          transition={{ duration: 1, delay: 0.2 }}
+        />
+        <defs>
+          <linearGradient
+            id="ring-gradient"
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="100%"
+          >
+            <stop offset="0%" stopColor="#740015" />
+            <stop offset="50%" stopColor="#CE805C" />
+            <stop offset="100%" stopColor="#531946" />
+          </linearGradient>
+        </defs>
+      </svg>
+
+      {/* Icon in center */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div
+          className="w-16 h-16 rounded-full flex items-center justify-center text-white"
+          style={{
+            background: "linear-gradient(135deg, #740015 0%, #531946 100%)",
+          }}
+        >
+          <Icon size={32} weight="bold" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const VerticalThermometer = ({ percentage, darkMode, icon: Icon }) => {
+  return (
+    <div className="relative w-24 h-28 flex flex-col items-center">
+      {/* Thermometer body */}
+      <div
+        className={`relative w-8 h-20 rounded-full ${darkMode ? "bg-gray-700" : "bg-gray-200"} overflow-hidden`}
+      >
+        {/* Fill */}
+        <motion.div
+          className="absolute bottom-0 w-full rounded-full"
+          style={{
+            background: "linear-gradient(to top, #740015 0%, #CE805C 100%)",
+          }}
+          initial={{ height: 0 }}
+          animate={{ height: `${percentage}%` }}
+          transition={{ duration: 1, delay: 0.2 }}
+        />
+
+        {/* Markers */}
+        <div className="absolute inset-0 flex flex-col justify-between py-2">
+          {[100, 75, 50, 25, 0].map((mark) => (
+            <div key={mark} className="w-full h-px bg-white/30" />
+          ))}
+        </div>
+      </div>
+
+      {/* Bulb at bottom */}
+      <div
+        className="mt-1 w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg"
+        style={{
+          background: "linear-gradient(135deg, #740015 0%, #531946 100%)",
+        }}
+      >
+        <Icon size={24} weight="bold" />
+      </div>
+    </div>
+  );
+};
+
+const CircularProgress = ({ percentage, darkMode, icon: Icon, index }) => {
+  const circumference = 2 * Math.PI * 36;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+  return (
+    <div className="relative">
+      <svg className="w-28 h-28 transform -rotate-90">
+        <circle
+          cx="56"
+          cy="56"
+          r="36"
+          stroke={darkMode ? "#374151" : "#E5E7EB"}
+          strokeWidth="8"
+          fill="none"
+        />
+        <motion.circle
+          cx="56"
+          cy="56"
+          r="36"
+          stroke="url(#circular-gradient)"
+          strokeWidth="8"
+          fill="none"
+          strokeLinecap="round"
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset }}
+          transition={{ duration: 1, delay: 0.2 + index * 0.1 }}
+          strokeDasharray={circumference}
+        />
+        <defs>
+          <linearGradient
+            id="circular-gradient"
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="100%"
+          >
+            <stop offset="0%" stopColor="#740015" />
+            <stop offset="100%" stopColor="#531946" />
+          </linearGradient>
+        </defs>
+      </svg>
+
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div
+          className="w-14 h-14 rounded-full flex items-center justify-center text-white"
+          style={{
+            background: "linear-gradient(135deg, #740015 0%, #531946 100%)",
+          }}
+        >
+          <Icon size={28} weight="bold" />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 /**
  * BudgetBuilder Component
@@ -24,6 +553,7 @@ export default function BudgetBuilder({
   darkMode,
 }) {
   const [showChart, setShowChart] = useState(true);
+  const [viewMode, setViewMode] = useState("grid"); // 'grid' or 'list'
   const totalBudgetInputRef = useRef(null);
 
   const totalBudget = data?.totalBudget || 0;
@@ -136,33 +666,24 @@ export default function BudgetBuilder({
   };
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="space-y-6"
+    >
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#740015] to-[#531946] rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
-
-        <div className="relative z-10 text-center">
-          <div className="text-6xl sm:text-7xl mb-4" aria-hidden="true">
-            💰
-          </div>
-          <h1 className="font-playfair text-3xl sm:text-4xl font-bold mb-3">
-            Budget Builder
-          </h1>
-          <p className="font-inter text-lg opacity-90">
-            Plan and track your wedding expenses
-          </p>
-        </div>
-      </div>
+      <GradientHeader
+        icon={Calculator}
+        title="Budget Builder"
+        subtitle="Plan and track your wedding expenses"
+        gradientFrom="#740015"
+        gradientTo="#531946"
+        iconSize={56}
+      />
 
       {/* Total Budget Input */}
       <Card className="!p-6">
         <div className="flex items-center gap-3 mb-4">
-          <CurrencyCircleDollar
-            size={32}
-            weight="bold"
-            className="text-[#CE805C]"
-          />
           <div className="flex-1">
             <label
               htmlFor="total-budget"
@@ -241,170 +762,370 @@ export default function BudgetBuilder({
 
       {/* Budget Status Alert */}
       {totalBudget > 0 && budgetStats.totalPercentage > 0 && (
-        <div
-          role="status"
-          aria-live="polite"
-          className={`rounded-xl p-4 border-2 ${
-            budgetStats.isOverBudget
-              ? "bg-red-50 border-red-300 dark:bg-red-900/20 dark:border-red-700"
-              : budgetStats.isFullyAllocated
-                ? "bg-green-50 border-green-300 dark:bg-green-900/20 dark:border-green-700"
-                : budgetStats.remainingPercentage < 10
-                  ? "bg-yellow-50 border-yellow-300 dark:bg-yellow-900/20 dark:border-yellow-700"
-                  : "bg-blue-50 border-blue-300 dark:bg-blue-900/20 dark:border-blue-700"
-          }`}
-        >
-          <div className="flex items-start gap-3">
-            {budgetStats.isOverBudget ? (
-              <Warning
-                size={24}
-                weight="bold"
-                className="text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5"
-              />
-            ) : budgetStats.isFullyAllocated ? (
-              <CheckCircle
-                size={24}
-                weight="fill"
-                className="text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5"
-              />
-            ) : budgetStats.remainingPercentage < 10 ? (
-              <Info
-                size={24}
-                weight="bold"
-                className="text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5"
-              />
-            ) : (
-              <TrendUp
-                size={24}
-                weight="bold"
-                className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5"
-              />
-            )}
-
-            <div className="flex-1">
-              <p
-                className={`font-semibold mb-1 ${
+        <Card className="!p-0 w-full">
+          <div
+            role="status"
+            aria-live="polite"
+            className={`rounded-xl p-5 border-2 w-full ${
+              budgetStats.isOverBudget
+                ? "bg-red-50 border-red-300 dark:bg-red-900/20 dark:border-red-700"
+                : budgetStats.isFullyAllocated
+                  ? "border-[#740015] dark:border-[#CE805C]"
+                  : budgetStats.remainingPercentage < 10
+                    ? "bg-yellow-50 border-yellow-300 dark:bg-yellow-900/20 dark:border-yellow-700"
+                    : "bg-blue-50 border-blue-300 dark:bg-blue-900/20 dark:border-blue-700"
+            }`}
+            style={
+              budgetStats.isFullyAllocated
+                ? {
+                    background:
+                      "linear-gradient(135deg, rgba(116, 0, 21, 0.1) 0%, rgba(83, 25, 70, 0.1) 100%)",
+                  }
+                : {}
+            }
+          >
+            <div className="flex items-start gap-4 w-full">
+              <motion.div
+                animate={
                   budgetStats.isOverBudget
-                    ? "text-red-700 dark:text-red-400"
-                    : budgetStats.isFullyAllocated
-                      ? "text-green-700 dark:text-green-400"
-                      : budgetStats.remainingPercentage < 10
-                        ? "text-yellow-700 dark:text-yellow-400"
-                        : "text-blue-700 dark:text-blue-400"
-                }`}
-              >
-                {budgetStats.isOverBudget
-                  ? "⚠️ Over Budget!"
-                  : budgetStats.isFullyAllocated
-                    ? "✅ Budget Fully Allocated"
-                    : budgetStats.remainingPercentage < 10
-                      ? "⚡ Almost Fully Allocated"
-                      : "📊 Budget In Progress"}
-              </p>
-              <p
-                className={`text-sm ${
-                  budgetStats.isOverBudget
-                    ? "text-red-600 dark:text-red-300"
-                    : budgetStats.isFullyAllocated
-                      ? "text-green-600 dark:text-green-300"
-                      : budgetStats.remainingPercentage < 10
-                        ? "text-yellow-600 dark:text-yellow-300"
-                        : "text-blue-600 dark:text-blue-300"
-                }`}
+                    ? { rotate: [0, -5, 5, -5, 5, 0] }
+                    : {}
+                }
+                transition={{ duration: 0.5 }}
               >
                 {budgetStats.isOverBudget ? (
-                  <>
-                    Total allocated: {budgetStats.totalPercentage.toFixed(1)}% (
-                    {(budgetStats.totalPercentage - 100).toFixed(1)}% over) • ₦
-                    {budgetStats.totalAllocated.toLocaleString()} (₦
-                    {(
-                      budgetStats.totalAllocated - totalBudget
-                    ).toLocaleString()}{" "}
-                    over budget)
-                  </>
+                  <Warning
+                    size={32}
+                    weight="bold"
+                    className="text-red-600 dark:text-red-400 flex-shrink-0"
+                  />
                 ) : budgetStats.isFullyAllocated ? (
-                  <>
-                    Perfect! All 100% of your budget is allocated (₦
-                    {budgetStats.totalAllocated.toLocaleString()})
-                  </>
+                  <CheckCircle
+                    size={32}
+                    weight="fill"
+                    className="text-[#740015] dark:text-[#CE805C] flex-shrink-0"
+                  />
+                ) : budgetStats.remainingPercentage < 10 ? (
+                  <Info
+                    size={32}
+                    weight="bold"
+                    className="text-yellow-600 dark:text-yellow-400 flex-shrink-0"
+                  />
                 ) : (
-                  <>
-                    Remaining: {budgetStats.remainingPercentage.toFixed(1)}% • ₦
-                    {budgetStats.remainingAmount.toLocaleString()} left to
-                    allocate
-                  </>
+                  <TrendUp
+                    size={32}
+                    weight="bold"
+                    className="text-blue-600 dark:text-blue-400 flex-shrink-0"
+                  />
                 )}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+              </motion.div>
 
-      {/* Visual Chart */}
-      {totalBudget > 0 && showChart && budgetStats.totalPercentage > 0 && (
-        <Card className="!p-6">
-          <h2
-            className={`font-playfair text-xl sm:text-2xl font-bold mb-4 ${
-              darkMode ? "text-white" : "text-gray-900"
-            }`}
-          >
-            Budget Distribution
-          </h2>
-
-          {/* Simple Bar Chart */}
-          <div className="space-y-3">
-            {budgetStats.categoryStats.map((cat) => {
-              if (cat.percentage === 0) return null;
-
-              return (
-                <div key={cat.key}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span
-                      className={`text-sm font-medium flex items-center gap-2 ${
-                        darkMode ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
-                      <span aria-hidden="true">{cat.icon}</span>
-                      {cat.label}
-                    </span>
-                    <span
-                      className={`text-sm font-bold ${getPercentageColor(
-                        cat.percentage
-                      )}`}
-                    >
-                      {cat.percentage.toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-6 overflow-hidden relative">
-                    <div
-                      className="h-full bg-gradient-to-r from-[#CE805C] to-[#B87050] transition-all duration-500 flex items-center justify-end pr-2"
-                      style={{ width: `${Math.min(cat.percentage, 100)}%` }}
-                    >
-                      {cat.percentage >= 15 && (
-                        <span className="text-xs font-bold text-white">
-                          ₦{cat.amount.toLocaleString()}
-                        </span>
-                      )}
-                    </div>
-                    {cat.percentage < 15 && cat.percentage > 0 && (
-                      <span
-                        className={`absolute left-2 top-1/2 -translate-y-1/2 text-xs font-bold ${
-                          darkMode ? "text-gray-400" : "text-gray-600"
-                        }`}
-                      >
-                        ₦{cat.amount.toLocaleString()}
+              <div className="flex-1">
+                <p
+                  className={`font-bold mb-2 text-lg ${
+                    budgetStats.isOverBudget
+                      ? "text-red-700 dark:text-red-400"
+                      : budgetStats.isFullyAllocated
+                        ? "text-[#740015] dark:text-[#CE805C]"
+                        : budgetStats.remainingPercentage < 10
+                          ? "text-yellow-700 dark:text-yellow-400"
+                          : "text-blue-700 dark:text-blue-400"
+                  }`}
+                >
+                  {budgetStats.isOverBudget
+                    ? "Over Budget Warning!"
+                    : budgetStats.isFullyAllocated
+                      ? "Budget Fully Allocated"
+                      : budgetStats.remainingPercentage < 10
+                        ? "Almost Fully Allocated"
+                        : "Budget In Progress"}
+                </p>
+                <p
+                  className={`text-sm leading-relaxed ${
+                    budgetStats.isOverBudget
+                      ? "text-red-600 dark:text-red-300"
+                      : budgetStats.isFullyAllocated
+                        ? "text-[#740015] dark:text-[#CE805C]"
+                        : budgetStats.remainingPercentage < 10
+                          ? "text-yellow-600 dark:text-yellow-300"
+                          : "text-blue-600 dark:text-blue-300"
+                  }`}
+                >
+                  {budgetStats.isOverBudget ? (
+                    <>
+                      Total allocated: {budgetStats.totalPercentage.toFixed(1)}%
+                      (
+                      <span className="font-bold">
+                        {(budgetStats.totalPercentage - 100).toFixed(1)}% over
                       </span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                      ) • ₦{budgetStats.totalAllocated.toLocaleString()} (
+                      <span className="font-bold">
+                        ₦
+                        {(
+                          budgetStats.totalAllocated - totalBudget
+                        ).toLocaleString()}{" "}
+                        over budget
+                      </span>
+                      )
+                    </>
+                  ) : budgetStats.isFullyAllocated ? (
+                    <>
+                      Perfect! All 100% of your budget is allocated (₦
+                      {budgetStats.totalAllocated.toLocaleString()})
+                    </>
+                  ) : (
+                    <>
+                      Remaining: {budgetStats.remainingPercentage.toFixed(1)}% •
+                      ₦{budgetStats.remainingAmount.toLocaleString()} left to
+                      allocate
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
           </div>
         </Card>
       )}
 
+      {/* Visual Chart */}
+      {totalBudget > 0 && showChart && budgetStats.totalPercentage > 0 && (
+        <Card className="!p-6 w-full">
+          <div className="flex items-center justify-between mb-6">
+            <h2
+              className={`font-playfair text-xl sm:text-2xl font-bold ${
+                darkMode ? "text-white" : "text-gray-900"
+              }`}
+            >
+              Budget Distribution
+            </h2>
+
+            {/* View Toggle */}
+            <div
+              className={`flex items-center gap-1 p-1 rounded-lg ${
+                darkMode ? "bg-gray-700" : "bg-gray-100"
+              }`}
+            >
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setViewMode("grid")}
+                className={`p-2 rounded-md transition-all ${
+                  viewMode === "grid"
+                    ? "text-white"
+                    : darkMode
+                      ? "text-gray-400 hover:text-gray-300"
+                      : "text-gray-600 hover:text-gray-900"
+                }`}
+                style={
+                  viewMode === "grid"
+                    ? {
+                        background:
+                          "linear-gradient(135deg, #740015 0%, #531946 100%)",
+                      }
+                    : {}
+                }
+                title="Grid view"
+              >
+                <SquaresFour size={20} weight="bold" />
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setViewMode("list")}
+                className={`p-2 rounded-md transition-all ${
+                  viewMode === "list"
+                    ? "text-white"
+                    : darkMode
+                      ? "text-gray-400 hover:text-gray-300"
+                      : "text-gray-600 hover:text-gray-900"
+                }`}
+                style={
+                  viewMode === "list"
+                    ? {
+                        background:
+                          "linear-gradient(135deg, #740015 0%, #531946 100%)",
+                      }
+                    : {}
+                }
+                title="List view"
+              >
+                <List size={20} weight="bold" />
+              </motion.button>
+            </div>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {viewMode === "grid" ? (
+              <motion.div
+                key="grid"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+              >
+                {budgetStats.categoryStats.map((cat, index) => {
+                  if (cat.percentage === 0) return null;
+
+                  const IconComponent = ICON_MAP[cat.icon] || DotsThree;
+
+                  return (
+                    <motion.div
+                      key={cat.key}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: index * 0.1 }}
+                      className={`p-6 rounded-2xl border-2 transition-all hover:shadow-lg ${
+                        darkMode
+                          ? "bg-gray-800/50 border-gray-700 hover:border-[#CE805C]"
+                          : "bg-white border-gray-200 hover:border-[#CE805C] shadow-sm"
+                      }`}
+                    >
+                      {/* Chart Display */}
+                      <div className="flex items-center justify-center mb-5">
+                        <MUIGaugeWrapper
+                          percentage={cat.percentage}
+                          darkMode={darkMode}
+                          index={index}
+                        />
+                      </div>
+
+                      {/* Category Info */}
+                      <div className="text-center space-y-2">
+                        <h3
+                          className={`font-bold text-base ${
+                            darkMode ? "text-white" : "text-gray-900"
+                          }`}
+                        >
+                          {cat.label}
+                        </h3>
+                        <p
+                          className={`text-3xl font-bold ${getPercentageColor(
+                            cat.percentage
+                          )}`}
+                        >
+                          {cat.percentage.toFixed(1)}%
+                        </p>
+                        <div
+                          className={`pt-3 border-t ${
+                            darkMode ? "border-gray-700" : "border-gray-200"
+                          }`}
+                        >
+                          <p
+                            className={`text-xs font-medium mb-1 ${
+                              darkMode ? "text-gray-400" : "text-gray-600"
+                            }`}
+                          >
+                            Allocated Amount
+                          </p>
+                          <p
+                            className={`text-xl font-bold ${
+                              darkMode ? "text-white" : "text-gray-900"
+                            }`}
+                          >
+                            ₦{cat.amount.toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="list"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-3"
+              >
+                {budgetStats.categoryStats.map((cat, index) => {
+                  if (cat.percentage === 0) return null;
+
+                  const IconComponent = ICON_MAP[cat.icon] || DotsThree;
+
+                  return (
+                    <motion.div
+                      key={cat.key}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span
+                          className={`text-sm font-medium flex items-center gap-2 ${
+                            darkMode ? "text-gray-300" : "text-gray-700"
+                          }`}
+                        >
+                          <div
+                            className="w-8 h-8 rounded-lg flex items-center justify-center text-white"
+                            style={{
+                              background:
+                                "linear-gradient(135deg, #740015 0%, #531946 100%)",
+                            }}
+                          >
+                            <IconComponent size={16} weight="bold" />
+                          </div>
+                          {cat.label}
+                        </span>
+                        <span
+                          className={`text-sm font-bold ${getPercentageColor(
+                            cat.percentage
+                          )}`}
+                        >
+                          {cat.percentage.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div
+                        className={`w-full rounded-full h-8 overflow-hidden relative ${
+                          darkMode ? "bg-gray-700" : "bg-gray-200"
+                        }`}
+                      >
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{
+                            width: `${Math.min(cat.percentage, 100)}%`,
+                          }}
+                          transition={{ duration: 1, delay: index * 0.05 }}
+                          className="h-full flex items-center justify-end pr-3"
+                          style={{
+                            background:
+                              "linear-gradient(90deg, #CE805C 0%, #B87050 100%)",
+                          }}
+                        >
+                          {cat.percentage >= 15 && (
+                            <motion.span
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ delay: 0.5 + index * 0.05 }}
+                              className="text-xs font-bold text-white"
+                            >
+                              ₦{cat.amount.toLocaleString()}
+                            </motion.span>
+                          )}
+                        </motion.div>
+                        {cat.percentage < 15 && cat.percentage > 0 && (
+                          <span
+                            className={`absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold ${
+                              darkMode ? "text-gray-400" : "text-gray-600"
+                            }`}
+                          >
+                            ₦{cat.amount.toLocaleString()}
+                          </span>
+                        )}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </Card>
+      )}
+
       {/* Category Allocations */}
-      <Card className="!p-6">
+      <Card className="!p-6 w-full">
         <h2
           className={`font-playfair text-xl sm:text-2xl font-bold mb-6 ${
             darkMode ? "text-white" : "text-gray-900"
@@ -431,17 +1152,22 @@ export default function BudgetBuilder({
           </div>
         )}
 
-        <div className="space-y-6">
-          {Object.keys(BUDGET_CATEGORIES).map((categoryKey) => {
+        {/* Grid Layout for Categories */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {Object.keys(BUDGET_CATEGORIES).map((categoryKey, index) => {
             const category = BUDGET_CATEGORIES[categoryKey];
             const values = categories[categoryKey] || {
               percentage: 0,
               amount: 0,
             };
+            const IconComponent = ICON_MAP[category.icon] || DotsThree;
 
             return (
-              <div
+              <motion.div
                 key={categoryKey}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
                 className={`p-4 rounded-xl border-2 transition-all ${
                   darkMode
                     ? "bg-gray-800/50 border-gray-700 hover:border-[#CE805C]/50"
@@ -450,19 +1176,25 @@ export default function BudgetBuilder({
               >
                 {/* Category Header */}
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="text-3xl" aria-hidden="true">
-                    {category.icon}
-                  </span>
-                  <div className="flex-1">
+                  <div
+                    className="w-12 h-12 rounded-lg flex items-center justify-center text-white flex-shrink-0"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, #740015 0%, #531946 100%)",
+                    }}
+                  >
+                    <IconComponent size={24} weight="bold" />
+                  </div>
+                  <div className="flex-1 min-w-0">
                     <h3
-                      className={`font-semibold text-lg ${
+                      className={`font-semibold text-base ${
                         darkMode ? "text-white" : "text-gray-900"
                       }`}
                     >
                       {category.label}
                     </h3>
                     <p
-                      className={`text-sm ${
+                      className={`text-xs ${
                         darkMode ? "text-gray-400" : "text-gray-600"
                       }`}
                     >
@@ -473,14 +1205,6 @@ export default function BudgetBuilder({
 
                 {/* Slider */}
                 <div className="mb-4">
-                  <label
-                    htmlFor={`${categoryKey}-slider`}
-                    className={`block text-sm font-medium mb-2 ${
-                      darkMode ? "text-gray-300" : "text-gray-700"
-                    }`}
-                  >
-                    Allocation
-                  </label>
                   <input
                     type="range"
                     id={`${categoryKey}-slider`}
@@ -492,7 +1216,7 @@ export default function BudgetBuilder({
                       handlePercentageChange(categoryKey, e.target.value)
                     }
                     disabled={!totalBudget}
-                    className="w-full h-3 rounded-lg appearance-none cursor-pointer budget-slider"
+                    className="w-full h-2 rounded-lg appearance-none cursor-pointer budget-slider"
                     style={{
                       background: `linear-gradient(to right, #CE805C 0%, #CE805C ${values.percentage || 0}%, ${
                         darkMode ? "#374151" : "#E5E7EB"
@@ -508,12 +1232,12 @@ export default function BudgetBuilder({
                 </div>
 
                 {/* Input Fields */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   {/* Percentage Input */}
                   <div>
                     <label
                       htmlFor={`${categoryKey}-percentage`}
-                      className={`block text-sm font-medium mb-2 ${
+                      className={`block text-xs font-medium mb-2 ${
                         darkMode ? "text-gray-300" : "text-gray-700"
                       }`}
                     >
@@ -531,7 +1255,7 @@ export default function BudgetBuilder({
                         max="100"
                         step="0.5"
                         disabled={!totalBudget}
-                        className={`flex-1 px-3 py-2 rounded-lg border-2 transition-colors focus:outline-none focus:ring-2 focus:ring-[#CE805C] ${
+                        className={`w-full px-3 py-2 text-sm rounded-lg border-2 transition-colors focus:outline-none focus:ring-2 focus:ring-[#CE805C] ${
                           darkMode
                             ? "bg-gray-700 border-gray-600 text-white disabled:bg-gray-800 disabled:text-gray-500"
                             : "bg-white border-gray-300 text-gray-900 disabled:bg-gray-100 disabled:text-gray-400"
@@ -540,7 +1264,7 @@ export default function BudgetBuilder({
                         aria-label={`${category.label} percentage`}
                       />
                       <span
-                        className={`text-lg font-bold ${
+                        className={`text-sm font-semibold ${
                           darkMode ? "text-gray-400" : "text-gray-600"
                         }`}
                       >
@@ -553,7 +1277,7 @@ export default function BudgetBuilder({
                   <div>
                     <label
                       htmlFor={`${categoryKey}-amount`}
-                      className={`block text-sm font-medium mb-2 ${
+                      className={`block text-xs font-medium mb-2 ${
                         darkMode ? "text-gray-300" : "text-gray-700"
                       }`}
                     >
@@ -561,7 +1285,7 @@ export default function BudgetBuilder({
                     </label>
                     <div className="flex items-center gap-2">
                       <span
-                        className={`text-lg font-bold ${
+                        className={`text-sm font-semibold ${
                           darkMode ? "text-gray-400" : "text-gray-600"
                         }`}
                       >
@@ -577,7 +1301,7 @@ export default function BudgetBuilder({
                         min="0"
                         step="1000"
                         disabled={!totalBudget}
-                        className={`flex-1 px-3 py-2 rounded-lg border-2 transition-colors focus:outline-none focus:ring-2 focus:ring-[#CE805C] ${
+                        className={`w-full px-3 py-2 text-sm rounded-lg border-2 transition-colors focus:outline-none focus:ring-2 focus:ring-[#CE805C] ${
                           darkMode
                             ? "bg-gray-700 border-gray-600 text-white disabled:bg-gray-800 disabled:text-gray-500"
                             : "bg-white border-gray-300 text-gray-900 disabled:bg-gray-100 disabled:text-gray-400"
@@ -588,7 +1312,7 @@ export default function BudgetBuilder({
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
@@ -596,129 +1320,144 @@ export default function BudgetBuilder({
 
       {/* Budget Summary Table */}
       {totalBudget > 0 && budgetStats.totalPercentage > 0 && (
-        <Card className="!p-6 overflow-x-auto">
+        <Card className="!p-6 w-full">
           <h2
-            className={`font-playfair text-xl sm:text-2xl font-bold mb-4 ${
+            className={`font-playfair text-xl sm:text-2xl font-bold mb-6 ${
               darkMode ? "text-white" : "text-gray-900"
             }`}
           >
             Budget Summary
           </h2>
 
-          <table className="w-full">
-            <thead>
-              <tr
-                className={`border-b-2 ${
-                  darkMode ? "border-gray-700" : "border-gray-200"
-                }`}
-              >
-                <th
-                  className={`text-left py-3 px-2 font-semibold ${
-                    darkMode ? "text-gray-300" : "text-gray-700"
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr
+                  className={`border-b-2 ${
+                    darkMode ? "border-gray-700" : "border-gray-200"
                   }`}
                 >
-                  Category
-                </th>
-                <th
-                  className={`text-right py-3 px-2 font-semibold ${
-                    darkMode ? "text-gray-300" : "text-gray-700"
-                  }`}
-                >
-                  %
-                </th>
-                <th
-                  className={`text-right py-3 px-2 font-semibold ${
-                    darkMode ? "text-gray-300" : "text-gray-700"
-                  }`}
-                >
-                  Amount
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {budgetStats.categoryStats.map((cat) => {
-                if (cat.percentage === 0) return null;
-
-                return (
-                  <tr
-                    key={cat.key}
-                    className={`border-b ${
-                      darkMode ? "border-gray-700" : "border-gray-100"
+                  <th
+                    className={`text-left py-3 px-2 font-semibold ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
                     }`}
                   >
-                    <td className="py-3 px-2">
-                      <div className="flex items-center gap-2">
-                        <span aria-hidden="true">{cat.icon}</span>
-                        <span
-                          className={`font-medium ${
-                            darkMode ? "text-white" : "text-gray-900"
-                          }`}
-                        >
-                          {cat.label}
-                        </span>
-                      </div>
-                    </td>
-                    <td
-                      className={`text-right py-3 px-2 font-semibold ${getPercentageColor(
-                        cat.percentage
-                      )}`}
-                    >
-                      {cat.percentage.toFixed(1)}%
-                    </td>
-                    <td
-                      className={`text-right py-3 px-2 font-semibold ${
-                        darkMode ? "text-white" : "text-gray-900"
+                    Category
+                  </th>
+                  <th
+                    className={`text-right py-3 px-2 font-semibold ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    %
+                  </th>
+                  <th
+                    className={`text-right py-3 px-2 font-semibold ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    Amount
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {budgetStats.categoryStats.map((cat, index) => {
+                  if (cat.percentage === 0) return null;
+
+                  const IconComponent = ICON_MAP[cat.icon] || DotsThree;
+
+                  return (
+                    <motion.tr
+                      key={cat.key}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className={`border-b ${
+                        darkMode ? "border-gray-700" : "border-gray-100"
                       }`}
                     >
-                      ₦{cat.amount.toLocaleString()}
-                    </td>
-                  </tr>
-                );
-              })}
-              <tr
-                className={`border-t-2 font-bold ${
-                  darkMode ? "border-gray-600" : "border-gray-300"
-                }`}
-              >
-                <td
-                  className={`py-3 px-2 ${
-                    darkMode ? "text-white" : "text-gray-900"
+                      <td className="py-3 px-2">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-8 h-8 rounded-lg flex items-center justify-center text-white"
+                            style={{
+                              background:
+                                "linear-gradient(135deg, #740015 0%, #531946 100%)",
+                            }}
+                          >
+                            <IconComponent size={16} weight="bold" />
+                          </div>
+                          <span
+                            className={`font-medium ${
+                              darkMode ? "text-white" : "text-gray-900"
+                            }`}
+                          >
+                            {cat.label}
+                          </span>
+                        </div>
+                      </td>
+                      <td
+                        className={`text-right py-3 px-2 font-semibold ${getPercentageColor(
+                          cat.percentage
+                        )}`}
+                      >
+                        {cat.percentage.toFixed(1)}%
+                      </td>
+                      <td
+                        className={`text-right py-3 px-2 font-semibold ${
+                          darkMode ? "text-white" : "text-gray-900"
+                        }`}
+                      >
+                        ₦{cat.amount.toLocaleString()}
+                      </td>
+                    </motion.tr>
+                  );
+                })}
+                <tr
+                  className={`border-t-2 font-bold ${
+                    darkMode ? "border-gray-600" : "border-gray-300"
                   }`}
                 >
-                  Total Allocated
-                </td>
-                <td
-                  className={`text-right py-3 px-2 ${
-                    budgetStats.isOverBudget
-                      ? "text-red-600 dark:text-red-400"
-                      : budgetStats.isFullyAllocated
-                        ? "text-green-600 dark:text-green-400"
-                        : "text-blue-600 dark:text-blue-400"
-                  }`}
-                >
-                  {budgetStats.totalPercentage.toFixed(1)}%
-                </td>
-                <td
-                  className={`text-right py-3 px-2 ${
-                    darkMode ? "text-white" : "text-gray-900"
-                  }`}
-                >
-                  ₦{budgetStats.totalAllocated.toLocaleString()}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  <td
+                    className={`py-3 px-2 ${
+                      darkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
+                    Total Allocated
+                  </td>
+                  <td
+                    className={`text-right py-3 px-2 ${
+                      budgetStats.isOverBudget
+                        ? "text-red-600 dark:text-red-400"
+                        : budgetStats.isFullyAllocated
+                          ? "text-[#740015] dark:text-[#CE805C]"
+                          : "text-blue-600 dark:text-blue-400"
+                    }`}
+                  >
+                    {budgetStats.totalPercentage.toFixed(1)}%
+                  </td>
+                  <td
+                    className={`text-right py-3 px-2 ${
+                      darkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
+                    ₦{budgetStats.totalAllocated.toLocaleString()}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </Card>
       )}
 
       {/* Custom Slider Styles */}
-      <style jsx>{`
+      <style>{`
         .budget-slider::-webkit-slider-thumb {
           appearance: none;
-          width: 20px;
-          height: 20px;
+          width: 16px;
+          height: 16px;
           border-radius: 50%;
-          background: #ce805c;
+          background: #740015;
           cursor: pointer;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
           transition: transform 0.15s ease;
@@ -726,13 +1465,14 @@ export default function BudgetBuilder({
 
         .budget-slider::-webkit-slider-thumb:hover {
           transform: scale(1.2);
+          background: #531946;
         }
 
         .budget-slider::-moz-range-thumb {
-          width: 20px;
-          height: 20px;
+          width: 16px;
+          height: 16px;
           border-radius: 50%;
-          background: #ce805c;
+          background: #740015;
           cursor: pointer;
           border: none;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -741,6 +1481,7 @@ export default function BudgetBuilder({
 
         .budget-slider::-moz-range-thumb:hover {
           transform: scale(1.2);
+          background: #531946;
         }
 
         .budget-slider:disabled {
@@ -748,6 +1489,6 @@ export default function BudgetBuilder({
           cursor: not-allowed;
         }
       `}</style>
-    </div>
+    </motion.div>
   );
 }
