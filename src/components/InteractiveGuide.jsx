@@ -626,6 +626,7 @@ export default function InteractiveGuide({ auth, onLogout }) {
             submitQuiz={submitQuiz}
             resetQuiz={resetQuiz}
             setActiveSection={setActiveSection}
+            darkMode={darkMode}
           />
         )}
         {activeSection === "vision" && (

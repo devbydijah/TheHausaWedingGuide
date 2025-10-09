@@ -1,10 +1,11 @@
 import { useEffect } from "react";
-import Button from "./Button";
+import { motion, AnimatePresence } from "framer-motion";
+import { X } from "@phosphor-icons/react";
 
 /**
  * Modal Component
  *
- * Full-screen overlay dialog with close functionality
+ * Animated full-screen overlay dialog with brand styling
  *
  * @param {Object} props
  * @param {boolean} props.isOpen - Whether modal is visible
@@ -13,6 +14,8 @@ import Button from "./Button";
  * @param {React.ReactNode} props.children - Modal content
  * @param {React.ReactNode} props.footer - Optional footer content
  * @param {string} props.size - Modal size (sm, md, lg, xl)
+ * @param {boolean} props.darkMode - Dark mode state
+ * @param {boolean} props.closeOnBackdrop - Close when clicking backdrop
  */
 export default function Modal({
   isOpen,
@@ -22,6 +25,8 @@ export default function Modal({
   footer,
   size = "md",
   className = "",
+  darkMode = false,
+  closeOnBackdrop = true,
 }) {
   // Close on Escape key
   useEffect(() => {
@@ -48,8 +53,6 @@ export default function Modal({
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
   const sizeClasses = {
     sm: "max-w-md",
     md: "max-w-2xl",
@@ -58,63 +61,83 @@ export default function Modal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-    >
-      <div
-        className={`
-          bg-white dark:bg-gray-800 
-          rounded-xl shadow-2xl 
-          w-full ${sizeClasses[size]}
-          max-h-[90vh] overflow-hidden
-          flex flex-col
-          ${className}
-        `}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2
-            id="modal-title"
-            className="font-playfair text-2xl font-bold text-gray-900 dark:text-white"
-          >
-            {title}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:ring-2 focus:ring-[#531946]/50 focus:outline-none"
-            aria-label="Close modal"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            onClick={closeOnBackdrop ? onClose : undefined}
+            aria-hidden="true"
+          />
+
+          {/* Modal */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.3, type: "spring", damping: 25 }}
+              className={`${sizeClasses[size]} w-full pointer-events-auto ${className}`}
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="modal-title"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
+              <div
+                className={`rounded-2xl shadow-2xl overflow-hidden ${
+                  darkMode ? "bg-gray-800 border border-gray-700" : "bg-white"
+                }`}
+              >
+                {/* Header */}
+                <div
+                  className="px-6 py-4 border-b flex items-center justify-between"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #740015 0%, #531946 100%)",
+                  }}
+                >
+                  <h2
+                    id="modal-title"
+                    className="font-playfair text-2xl font-bold text-white"
+                  >
+                    {title}
+                  </h2>
+                  <motion.button
+                    whileHover={{ scale: 1.1, rotate: 90 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={onClose}
+                    className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
+                    aria-label="Close modal"
+                  >
+                    <X size={24} weight="bold" className="text-white" />
+                  </motion.button>
+                </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">{children}</div>
+                {/* Content */}
+                <div className="p-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+                  {children}
+                </div>
 
-        {/* Footer */}
-        {footer && (
-          <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700">
-            {footer}
+                {/* Footer */}
+                {footer && (
+                  <div
+                    className={`flex items-center justify-end gap-3 p-6 border-t ${
+                      darkMode ? "border-gray-700" : "border-gray-200"
+                    }`}
+                  >
+                    {footer}
+                  </div>
+                )}
+              </div>
+            </motion.div>
           </div>
-        )}
-      </div>
-    </div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }

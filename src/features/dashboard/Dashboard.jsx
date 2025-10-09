@@ -53,7 +53,9 @@ export default function Dashboard({
       bgGradient: "from-[#CE805C] to-[#B87050]",
       accentShape: "diamond", // Diamond for values
       description: "Define your wedding priorities and intentions",
-      stats: `${data.weddingPriorities?.filter((p) => p).length || 0} priorities`,
+      stats: data.priorities
+        ? `${Object.keys(data.priorities).length} priorities set`
+        : "Not set",
     },
     {
       id: "budget",
