@@ -6,12 +6,12 @@ import {
   DownloadSimple,
   UploadSimple,
   List,
+  X,
 } from "@phosphor-icons/react";
 import { useSyncToCloud } from "../hooks/useSyncToCloud";
 import { Toast } from "./ui";
 import Modal from "./ui/Modal";
 import { DEFAULT_GUIDE } from "../lib/constants";
-import MobileNav from "./shared/MobileNav";
 
 // Feature Components
 import { Dashboard } from "../features/dashboard";
@@ -347,7 +347,7 @@ export default function InteractiveGuide({ auth, onLogout }) {
 
       {/* Header with navigation */}
       <header
-        className={`${darkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"} sticky top-0 z-10 border-b shadow-sm`}
+        className={`${darkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"} sticky top-0 z-50 border-b shadow-sm backdrop-blur-sm bg-opacity-95`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Top Bar */}
@@ -401,7 +401,7 @@ export default function InteractiveGuide({ auth, onLogout }) {
                 </div>
               )}
 
-              {/* Dark Mode Toggle */}
+              {/* Dark Mode Toggle - Always Visible */}
               <button
                 onClick={toggleDarkMode}
                 className={`p-2.5 rounded-lg transition-all ${
@@ -421,13 +421,13 @@ export default function InteractiveGuide({ auth, onLogout }) {
                 )}
               </button>
 
-              {/* Export */}
+              {/* Export - Desktop Only (≥1024px) */}
               <button
                 onClick={exportData}
-                className={`hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all ${
+                className={`!hidden lg:!flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all ${
                   darkMode
-                    ? "bg-gray-800 hover:bg-gray-700 text-blue-400"
-                    : "bg-blue-50 hover:bg-blue-100 text-blue-700"
+                    ? "bg-gray-800 hover:bg-gray-700 text-[#CE805C]"
+                    : "bg-[#CE805C]/10 hover:bg-[#CE805C]/20 text-[#740015]"
                 }`}
                 aria-label="Export wedding planning data to JSON file"
               >
@@ -435,13 +435,13 @@ export default function InteractiveGuide({ auth, onLogout }) {
                 <span className="text-sm">Export</span>
               </button>
 
-              {/* Import */}
+              {/* Import - Desktop Only (≥1024px) */}
               <button
                 onClick={importData}
-                className={`hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all ${
+                className={`!hidden lg:!flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all ${
                   darkMode
-                    ? "bg-gray-800 hover:bg-gray-700 text-green-400"
-                    : "bg-green-50 hover:bg-green-100 text-green-700"
+                    ? "bg-gray-800 hover:bg-gray-700 text-[#CE805C]"
+                    : "bg-[#CE805C]/10 hover:bg-[#CE805C]/20 text-[#740015]"
                 }`}
                 aria-label="Import wedding planning data from JSON file"
               >
@@ -449,10 +449,10 @@ export default function InteractiveGuide({ auth, onLogout }) {
                 <span className="text-sm">Import</span>
               </button>
 
-              {/* Logout Button */}
+              {/* Logout Button - Desktop Only (≥1024px) */}
               <button
                 onClick={handleLogout}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                className={`!hidden lg:!flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
                   darkMode
                     ? "bg-gray-800 hover:bg-gray-700 text-gray-300"
                     : "bg-gray-100 hover:bg-gray-200 text-gray-700"
@@ -460,27 +460,32 @@ export default function InteractiveGuide({ auth, onLogout }) {
                 aria-label="Logout from wedding planner"
               >
                 <SignOut size={20} weight="bold" aria-hidden="true" />
-                <span className="hidden sm:inline text-sm">Logout</span>
+                <span className="text-sm">Logout</span>
               </button>
 
-              {/* Mobile Menu Toggle */}
+              {/* Mobile Menu Toggle - Mobile/Tablet Only (<1024px) */}
               <button
-                onClick={() => setMobileMenuOpen(true)}
-                className={`md:hidden p-2.5 rounded-lg transition-all ${
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className={`lg:!hidden p-2.5 rounded-lg transition-all ${
                   darkMode
                     ? "bg-gray-800 hover:bg-gray-700"
                     : "bg-gray-100 hover:bg-gray-200"
                 }`}
-                aria-label="Open navigation menu"
+                aria-label="Toggle menu"
+                aria-expanded={mobileMenuOpen}
               >
-                <List size={24} weight="bold" />
+                {mobileMenuOpen ? (
+                  <X size={24} weight="bold" />
+                ) : (
+                  <List size={24} weight="bold" />
+                )}
               </button>
             </div>
           </div>
 
-          {/* Navigation Tabs - Desktop Only */}
+          {/* Navigation Tabs - Desktop Only (≥1024px) */}
           <nav
-            className="hidden md:flex gap-2 pb-3 overflow-x-auto scrollbar-hide"
+            className="!hidden lg:!flex gap-2 pb-3 overflow-x-auto scrollbar-hide"
             role="navigation"
             aria-label="Main sections"
           >
@@ -490,7 +495,7 @@ export default function InteractiveGuide({ auth, onLogout }) {
                 onClick={() => setActiveSection(section.id)}
                 className={`px-4 py-2.5 rounded-lg font-medium whitespace-nowrap transition-all ${
                   activeSection === section.id
-                    ? "bg-gradient-to-r from-[#990200] to-[#531946] text-white shadow-md"
+                    ? "bg-gradient-to-r from-[#740015] to-[#531946] text-white shadow-md"
                     : darkMode
                       ? "text-gray-400 hover:bg-gray-800 hover:text-white"
                       : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
@@ -504,18 +509,106 @@ export default function InteractiveGuide({ auth, onLogout }) {
         </div>
       </header>
 
-      {/* Mobile Navigation */}
-      <MobileNav
-        isOpen={mobileMenuOpen}
-        onClose={() => setMobileMenuOpen(false)}
-        sections={sections}
-        activeSection={activeSection}
-        onSectionChange={(sectionId) => {
-          setActiveSection(sectionId);
-          setMobileMenuOpen(false);
-        }}
-        darkMode={darkMode}
-      />
+      {/* Mobile Menu Slide-out Panel - Mobile/Tablet Only (<1024px) */}
+      <div
+        className={`fixed top-0 right-0 h-screen w-72 shadow-2xl z-[80] lg:!hidden transform transition-transform duration-300 ease-in-out ${
+          mobileMenuOpen ? "translate-x-0" : "translate-x-full"
+        } ${darkMode ? "bg-gray-800" : "bg-white"}`}
+      >
+        <div className="px-4 py-6 space-y-3">
+          {/* Action Buttons */}
+          <div className="space-y-2 pb-4 border-b border-gray-200 dark:border-gray-700">
+            {/* Dark Mode Toggle */}
+            <button
+              onClick={toggleDarkMode}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
+                darkMode
+                  ? "bg-gray-700 hover:bg-gray-600 text-yellow-400"
+                  : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+              }`}
+            >
+              {darkMode ? (
+                <Sun size={20} weight="duotone" />
+              ) : (
+                <Moon size={20} weight="duotone" />
+              )}
+              <span className="text-sm">
+                {darkMode ? "Light Mode" : "Dark Mode"}
+              </span>
+            </button>
+
+            {/* Export */}
+            <button
+              onClick={() => {
+                exportData();
+                setMobileMenuOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
+                darkMode
+                  ? "bg-gray-700 hover:bg-gray-600 text-[#CE805C]"
+                  : "bg-[#CE805C]/10 hover:bg-[#CE805C]/20 text-[#740015]"
+              }`}
+            >
+              <DownloadSimple size={20} weight="bold" />
+              <span className="text-sm">Export Data</span>
+            </button>
+
+            {/* Import */}
+            <button
+              onClick={() => {
+                importData();
+                setMobileMenuOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
+                darkMode
+                  ? "bg-gray-700 hover:bg-gray-600 text-[#CE805C]"
+                  : "bg-[#CE805C]/10 hover:bg-[#CE805C]/20 text-[#740015]"
+              }`}
+            >
+              <UploadSimple size={20} weight="bold" />
+              <span className="text-sm">Import Data</span>
+            </button>
+
+            {/* Logout */}
+            <button
+              onClick={() => {
+                handleLogout();
+                setMobileMenuOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
+                darkMode
+                  ? "bg-gray-700 hover:bg-gray-600 text-gray-300"
+                  : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+              }`}
+            >
+              <SignOut size={20} weight="bold" />
+              <span className="text-sm">Logout</span>
+            </button>
+          </div>
+
+          {/* Navigation Sections */}
+          <div className="space-y-2">
+            {sections.map((section) => (
+              <button
+                key={section.id}
+                onClick={() => {
+                  setActiveSection(section.id);
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all ${
+                  activeSection === section.id
+                    ? "bg-gradient-to-r from-[#740015] to-[#531946] text-white shadow-lg"
+                    : darkMode
+                      ? "text-gray-300 hover:bg-gray-700"
+                      : "text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                {section.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
