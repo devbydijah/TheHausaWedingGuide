@@ -4,3 +4,4 @@ export { default as Input } from "./Input";
 export { default as Card } from "./Card";
 export { default as Modal } from "./Modal";
 export { default as Toast } from "./Toast";
+export { default as ProgressRing } from "./ProgressRing";

@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
+import {
+  SignOut,
+  Moon,
+  Sun,
+  DownloadSimple,
+  UploadSimple,
+  List,
+} from "@phosphor-icons/react";
 import { useSyncToCloud } from "../hooks/useSyncToCloud";
 import { Toast } from "./ui";
+import Modal from "./ui/Modal";
 import { DEFAULT_GUIDE } from "../lib/constants";
 import MobileNav from "./shared/MobileNav";
 
@@ -21,7 +30,7 @@ import FinalBlueprint from "../features/blueprint/FinalBlueprint";
  *
  * Refactored: Sprint 2 - Reduced from 3753 lines to ~400 lines
  */
-export default function InteractiveGuide({ auth }) {
+export default function InteractiveGuide({ auth, onLogout }) {
   // Cloud sync hook - replaces localStorage-only approach
   const {
     data,
@@ -38,6 +47,7 @@ export default function InteractiveGuide({ auth }) {
   });
   const [toasts, setToasts] = useState([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   // Toast notification system
   const showToast = (message, type = "success") => {
@@ -56,9 +66,11 @@ export default function InteractiveGuide({ auth }) {
 
   // Watch sync status and show toast
   useEffect(() => {
-    if (syncStatus === "success" && lastSynced) {
-      showToast("Changes saved", "success");
-    } else if (syncStatus === "error") {
+    // Disabled: Don't show toast for auto-save to reduce notification noise
+    // if (syncStatus === "success" && lastSynced) {
+    //   showToast("Changes saved", "success");
+    // } else if (syncStatus === "error") {
+    if (syncStatus === "error") {
       showToast("Failed to sync - saved locally", "error");
     }
   }, [syncStatus, lastSynced]);
@@ -70,7 +82,23 @@ export default function InteractiveGuide({ auth }) {
       localStorage.setItem("hwg:darkMode", newValue.toString());
       return newValue;
     });
-    showToast(darkMode ? "Light mode enabled" : "Dark mode enabled", "info");
+    // Removed toast notification for dark mode toggle to reduce noise
+  };
+
+  // Logout handler with confirmation
+  const handleLogout = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = () => {
+    setShowLogoutModal(false);
+    if (onLogout) {
+      onLogout();
+    }
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutModal(false);
   };
 
   // Export data to JSON file
@@ -319,46 +347,56 @@ export default function InteractiveGuide({ auth }) {
 
       {/* Header with navigation */}
       <header
-        className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-b"} sticky top-0 z-10`}
+        className={`${darkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"} sticky top-0 z-10 border-b shadow-sm`}
       >
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <h1
-              className={`font-playfair text-2xl font-semibold ${darkMode ? "text-white" : "text-gray-900"}`}
-            >
-              Hausa Wedding Guide
-            </h1>
-
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Top Bar */}
+          <div className="flex items-center justify-between h-16">
+            {/* Logo/Title */}
             <div className="flex items-center gap-3">
-              {/* Mobile Menu Toggle */}
-              <button
-                onClick={() => setMobileMenuOpen(true)}
-                className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                aria-label="Open navigation menu"
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              <img
+                src="/logowhite.svg"
+                alt="Hausa Room Logo"
+                className="w-10 h-10 sm:w-12 sm:h-12"
+              />
+              <div className="hidden sm:block">
+                <h1
+                  className={`font-playfair text-lg sm:text-xl font-bold ${darkMode ? "text-white" : "text-gray-900"}`}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              </button>
+                  Wedding Planner
+                </h1>
+                <p
+                  className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-500"}`}
+                >
+                  Your Planning Dashboard
+                </p>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2">
               {/* Sync Status */}
               {isCloudEnabled && (
-                <div className="flex items-center gap-2 text-sm">
+                <div
+                  className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg ${
+                    darkMode ? "bg-gray-800" : "bg-gray-100"
+                  }`}
+                >
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      syncStatus === "syncing"
+                        ? "bg-yellow-500 animate-pulse"
+                        : syncStatus === "success"
+                          ? "bg-green-500"
+                          : "bg-red-500"
+                    }`}
+                  />
                   <span
-                    className={darkMode ? "text-gray-400" : "text-gray-600"}
+                    className={`text-xs font-medium ${darkMode ? "text-gray-300" : "text-gray-700"}`}
                   >
-                    {syncStatus === "syncing" && "⏳ Syncing..."}
-                    {syncStatus === "success" && "✓ Saved"}
-                    {syncStatus === "error" && "✕ Error"}
+                    {syncStatus === "syncing" && "Syncing"}
+                    {syncStatus === "success" && "Saved"}
+                    {syncStatus === "error" && "Error"}
                   </span>
                 </div>
               )}
@@ -366,45 +404,100 @@ export default function InteractiveGuide({ auth }) {
               {/* Dark Mode Toggle */}
               <button
                 onClick={toggleDarkMode}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                aria-label="Toggle dark mode"
+                className={`p-2.5 rounded-lg transition-all ${
+                  darkMode
+                    ? "bg-gray-800 hover:bg-gray-700 text-yellow-400"
+                    : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                }`}
+                aria-label={
+                  darkMode ? "Switch to light mode" : "Switch to dark mode"
+                }
+                title={darkMode ? "Light mode" : "Dark mode"}
               >
-                <span className="text-xl">{darkMode ? "☀️" : "🌙"}</span>
+                {darkMode ? (
+                  <Sun size={20} weight="duotone" />
+                ) : (
+                  <Moon size={20} weight="duotone" />
+                )}
               </button>
 
-              {/* Export/Import */}
-              <div className="flex gap-2">
-                <button
-                  onClick={exportData}
-                  className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Export
-                </button>
-                <button
-                  onClick={importData}
-                  className="px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  Import
-                </button>
-              </div>
+              {/* Export */}
+              <button
+                onClick={exportData}
+                className={`hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all ${
+                  darkMode
+                    ? "bg-gray-800 hover:bg-gray-700 text-blue-400"
+                    : "bg-blue-50 hover:bg-blue-100 text-blue-700"
+                }`}
+                aria-label="Export wedding planning data to JSON file"
+              >
+                <DownloadSimple size={18} weight="bold" />
+                <span className="text-sm">Export</span>
+              </button>
+
+              {/* Import */}
+              <button
+                onClick={importData}
+                className={`hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all ${
+                  darkMode
+                    ? "bg-gray-800 hover:bg-gray-700 text-green-400"
+                    : "bg-green-50 hover:bg-green-100 text-green-700"
+                }`}
+                aria-label="Import wedding planning data from JSON file"
+              >
+                <UploadSimple size={18} weight="bold" />
+                <span className="text-sm">Import</span>
+              </button>
+
+              {/* Logout Button */}
+              <button
+                onClick={handleLogout}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                  darkMode
+                    ? "bg-gray-800 hover:bg-gray-700 text-gray-300"
+                    : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                }`}
+                aria-label="Logout from wedding planner"
+              >
+                <SignOut size={20} weight="bold" aria-hidden="true" />
+                <span className="hidden sm:inline text-sm">Logout</span>
+              </button>
+
+              {/* Mobile Menu Toggle */}
+              <button
+                onClick={() => setMobileMenuOpen(true)}
+                className={`md:hidden p-2.5 rounded-lg transition-all ${
+                  darkMode
+                    ? "bg-gray-800 hover:bg-gray-700"
+                    : "bg-gray-100 hover:bg-gray-200"
+                }`}
+                aria-label="Open navigation menu"
+              >
+                <List size={24} weight="bold" />
+              </button>
             </div>
           </div>
 
           {/* Navigation Tabs - Desktop Only */}
-          <nav className="hidden md:flex gap-2 overflow-x-auto pb-2">
+          <nav
+            className="hidden md:flex gap-2 pb-3 overflow-x-auto scrollbar-hide"
+            role="navigation"
+            aria-label="Main sections"
+          >
             {sections.map((section) => (
               <button
                 key={section.id}
                 onClick={() => setActiveSection(section.id)}
-                className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
+                className={`px-4 py-2.5 rounded-lg font-medium whitespace-nowrap transition-all ${
                   activeSection === section.id
-                    ? "bg-gradient-to-r from-[#990200] to-[#531946] text-white"
+                    ? "bg-gradient-to-r from-[#990200] to-[#531946] text-white shadow-md"
                     : darkMode
-                      ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      ? "text-gray-400 hover:bg-gray-800 hover:text-white"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                 }`}
+                aria-current={activeSection === section.id ? "page" : undefined}
               >
-                {section.name}
+                {section.name.replace(/[📊💎✨💰🏪📅📋]/g, "").trim()}
               </button>
             ))}
           </nav>
@@ -427,7 +520,11 @@ export default function InteractiveGuide({ auth }) {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
         {activeSection === "dashboard" && (
-          <Dashboard data={data} setActiveSection={setActiveSection} />
+          <Dashboard
+            data={data}
+            setActiveSection={setActiveSection}
+            darkMode={darkMode}
+          />
         )}
         {activeSection === "quiz" && (
           <VisionQuiz
@@ -478,6 +575,58 @@ export default function InteractiveGuide({ auth }) {
           <FinalBlueprint data={data} setActiveSection={setActiveSection} />
         )}
       </main>
+
+      {/* Logout Confirmation Modal */}
+      <Modal
+        isOpen={showLogoutModal}
+        onClose={cancelLogout}
+        title="Logout"
+        size="sm"
+      >
+        <div className="space-y-6">
+          {/* Icon */}
+          <div className="flex justify-center">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#990200] to-[#531946] flex items-center justify-center">
+              <SignOut size={32} weight="bold" className="text-white" />
+            </div>
+          </div>
+
+          {/* Message */}
+          <div className="text-center space-y-2">
+            <h3
+              className={`text-xl font-semibold ${darkMode ? "text-white" : "text-gray-900"}`}
+            >
+              Ready to go?
+            </h3>
+            <p
+              className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-600"}`}
+            >
+              Don't worry, all your wedding plans are safely saved and will be
+              here when you return.
+            </p>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-3">
+            <button
+              onClick={cancelLogout}
+              className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all ${
+                darkMode
+                  ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              Stay
+            </button>
+            <button
+              onClick={confirmLogout}
+              className="flex-1 px-6 py-3 bg-gradient-to-r from-[#990200] to-[#531946] text-white rounded-xl font-medium hover:shadow-lg transform hover:scale-105 transition-all"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -6,7 +6,11 @@ import QuickStats from "./QuickStats";
  *
  * Main landing page showing overview of wedding planning progress
  */
-export default function Dashboard({ data, setActiveSection }) {
+export default function Dashboard({
+  data,
+  setActiveSection,
+  darkMode = false,
+}) {
   // Calculate wedding countdown
   const weddingDate = data.weddingDate ? new Date(data.weddingDate) : null;
   const today = new Date();
@@ -141,7 +145,7 @@ export default function Dashboard({ data, setActiveSection }) {
       )}
 
       {/* Quick Stats Grid */}
-      <QuickStats data={data} />
+      <QuickStats data={data} darkMode={darkMode} />
 
       {/* Section Navigation */}
       <div>

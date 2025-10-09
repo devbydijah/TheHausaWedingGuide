@@ -108,11 +108,19 @@ function App() {
     setOpenFAQ(openFAQ === index ? null : index);
   };
 
+  // Handle logout - clear session and return to landing page
+  const handleLogout = () => {
+    // Clear authentication session
+    localStorage.removeItem("hwg_auth_session");
+    // Return to landing page
+    setShowGuide(false);
+  };
+
   // Show the interactive guide if authenticated
   if (showGuide) {
     return (
       <LoginGate>
-        <InteractiveGuide />
+        <InteractiveGuide onLogout={handleLogout} />
       </LoginGate>
     );
   }
