@@ -11,6 +11,10 @@ import {
   FloppyDisk,
   CheckCircle,
   ArrowRight,
+  EnvelopeSimple,
+  InstagramLogo,
+  FacebookLogo,
+  CaretDown,
 } from "@phosphor-icons/react";
 import "./index.css";
 import LoginGate from "./components/LoginGate";
@@ -23,6 +27,7 @@ function App() {
   const [activeSection, setActiveSection] = useState("hero");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [openFAQ, setOpenFAQ] = useState(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -50,6 +55,7 @@ function App() {
         "features",
         "why-choose",
         "how-it-works",
+        "faq",
         "pricing",
       ];
       for (const section of sections) {
@@ -96,6 +102,10 @@ function App() {
 
   const handleAccessGuide = () => {
     setShowGuide(true);
+  };
+
+  const toggleFAQ = (index) => {
+    setOpenFAQ(openFAQ === index ? null : index);
   };
 
   // Show the interactive guide if authenticated
@@ -252,6 +262,7 @@ function App() {
                 { id: "features", label: "Features" },
                 { id: "why-choose", label: "Why Choose" },
                 { id: "how-it-works", label: "How It Works" },
+                { id: "faq", label: "FAQ" },
                 { id: "pricing", label: "Pricing" },
               ].map((item) => (
                 <button
@@ -305,6 +316,7 @@ function App() {
             { id: "features", label: "Features" },
             { id: "why-choose", label: "Why Choose" },
             { id: "how-it-works", label: "How It Works" },
+            { id: "faq", label: "FAQ" },
             { id: "pricing", label: "Pricing" },
           ].map((item) => (
             <button
@@ -334,34 +346,37 @@ function App() {
         </div>
       </div>
 
-      {/* Hero Section - Dark Gradient */}
+      {/* Hero Section */}
       <section
         id="hero"
-        className="relative min-h-screen bg-gradient-to-br from-[#990200] via-[#740015] to-[#531946] overflow-hidden"
+        className="relative min-h-screen bg-gradient-to-br from-[#990200] via-[#740015] to-[#531946] overflow-hidden flex flex-col items-center justify-center pt-24"
       >
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-10 w-72 h-72 bg-[#CE805C]/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#D4A574]/10 rounded-full blur-3xl animate-pulse delay-700"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-white/5 rounded-full blur-3xl"></div>
+          <div
+            className="absolute bottom-20 right-10 w-96 h-96 bg-[#D4A574]/10 rounded-full blur-3xl animate-pulse"
+            style={{ animationDelay: "0.7s" }}
+          ></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-white/5 rounded-full blur-3xl animate-float"></div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-12">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* Hero Section with enhanced typography */}
           <section
-            className="text-center text-white mb-16 animate-slide-up"
+            className="text-center text-white mb-16"
             aria-labelledby="hero-heading"
           >
-            <div className="inline-block mb-6">
-              <span className="bg-gradient-to-r from-[#CE805C] to-[#D4A574] text-white px-6 py-3 rounded-full text-sm font-semibold shadow-lg flex items-center gap-2 justify-center">
-                <Sparkle size={20} weight="duotone" />
+            <div className="inline-block mb-6 animate-fade-in">
+              <span className="bg-gradient-to-r from-[#CE805C] to-[#D4A574] text-white px-6 py-3 rounded-full text-sm font-semibold shadow-lg flex items-center gap-2 justify-center hover:scale-105 transition-transform duration-300">
+                <Sparkle size={20} weight="duotone" className="animate-pulse" />
                 <span>Your Complete Wedding Planning Solution</span>
               </span>
             </div>
 
             <h1
               id="hero-heading"
-              className="font-playfair text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight"
+              className="font-playfair text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight animate-slide-up"
             >
               <span className="bg-gradient-to-r from-white via-[#D4A574] to-white bg-clip-text text-transparent animate-gradient">
                 Interactive
@@ -370,49 +385,64 @@ function App() {
               <span className="text-white">Wedding Guide</span>
             </h1>
 
-            <p className="font-inter text-xl sm:text-2xl md:text-3xl mb-4 text-white/90 max-w-3xl mx-auto leading-relaxed">
+            <p
+              className="font-inter text-xl sm:text-2xl md:text-3xl mb-4 text-white/90 max-w-3xl mx-auto leading-relaxed animate-fade-in-delay"
+              style={{ animationDelay: "0.2s" }}
+            >
               Your Complete Digital Wedding Planning Assistant
             </p>
 
-            <p className="font-inter text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
-              Plan your perfect Hausa wedding with our comprehensive interactive
-              tools and cultural guidance
+            <p
+              className="font-inter text-lg md:text-xl text-white/80 max-w-2xl mx-auto animate-fade-in-delay"
+              style={{ animationDelay: "0.4s" }}
+            >
+              Plan your perfect Northern Nigerian wedding with our comprehensive
+              interactive tools and cultural guidance
             </p>
           </section>
 
           {/* Hero Images Grid with responsive circular images */}
           <div
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20 animate-fade-in-delay"
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20"
             role="img"
-            aria-label="Traditional Hausa wedding photography gallery"
+            aria-label="Traditional Northern Nigerian wedding photography gallery"
           >
-            <div className="group mx-auto">
+            <div
+              className="group mx-auto animate-scale-in"
+              style={{ animationDelay: "0.5s" }}
+            >
               <div className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-72 md:h-72 lg:w-80 lg:h-80 rounded-full overflow-hidden shadow-2xl transform hover:scale-105 transition-all duration-500 hover:shadow-[#CE805C]/40">
                 <img
                   src="/assets/couple2.png"
-                  alt="Traditional Hausa wedding couple celebrating"
+                  alt="Traditional Northern Nigerian wedding couple celebrating"
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#740015]/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full"></div>
               </div>
             </div>
 
-            <div className="group mx-auto">
+            <div
+              className="group mx-auto animate-scale-in"
+              style={{ animationDelay: "0.7s" }}
+            >
               <div className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-72 md:h-72 lg:w-80 lg:h-80 rounded-full overflow-hidden shadow-2xl transform hover:scale-105 transition-all duration-500 hover:shadow-[#CE805C]/40">
                 <img
                   src="/assets/bride2.png"
-                  alt="Hausa bride in traditional wedding attire"
+                  alt="Northern Nigerian bride in traditional wedding attire"
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#740015]/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full"></div>
               </div>
             </div>
 
-            <div className="group mx-auto">
+            <div
+              className="group mx-auto animate-scale-in"
+              style={{ animationDelay: "0.9s" }}
+            >
               <div className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-72 md:h-72 lg:w-80 lg:h-80 rounded-full overflow-hidden shadow-2xl transform hover:scale-105 transition-all duration-500 hover:shadow-[#CE805C]/40">
                 <img
                   src="/assets/bride3.png"
-                  alt="Beautiful Hausa bride portrait"
+                  alt="Beautiful Northern Nigerian bride portrait"
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#740015]/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full"></div>
@@ -422,12 +452,11 @@ function App() {
         </div>
       </section>
 
-      {/* What's Included Section - Light Background */}
+      {/* Features Section */}
       <section id="features" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* What's Included Section */}
-          <div className="animate-slide-up">
-            <div className="text-center mb-12">
+          <div>
+            <div className="text-center mb-12 animate-fade-in">
               <h2 className="font-playfair text-4xl md:text-5xl font-bold text-[#740015] mb-4">
                 Everything You Need to Plan Your Perfect Day
               </h2>
@@ -438,7 +467,7 @@ function App() {
             </div>
 
             <div className="grid md:grid-cols-3 gap-6 mb-12">
-              <div className="group bg-gradient-to-br from-[#990200]/5 to-[#740015]/10 backdrop-blur-xl rounded-2xl p-8 border border-[#740015]/20 hover:border-[#CE805C]/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+              <div className="group bg-gradient-to-br from-[#990200]/5 to-[#740015]/10 backdrop-blur-xl rounded-2xl p-8 border border-[#740015]/20 hover:border-[#CE805C]/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 fade-in-up-delay-1">
                 <div className="mb-6 inline-block p-4 bg-gradient-to-br from-[#CE805C]/10 to-[#740015]/10 rounded-2xl group-hover:scale-110 transition-transform duration-300">
                   <Sparkle
                     size={40}
@@ -454,7 +483,7 @@ function App() {
                 </p>
               </div>
 
-              <div className="group bg-gradient-to-br from-[#990200]/5 to-[#740015]/10 backdrop-blur-xl rounded-2xl p-8 border border-[#740015]/20 hover:border-[#CE805C]/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+              <div className="group bg-gradient-to-br from-[#990200]/5 to-[#740015]/10 backdrop-blur-xl rounded-2xl p-8 border border-[#740015]/20 hover:border-[#CE805C]/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 fade-in-up-delay-2">
                 <div className="mb-6 inline-block p-4 bg-gradient-to-br from-[#CE805C]/10 to-[#740015]/10 rounded-2xl group-hover:scale-110 transition-transform duration-300">
                   <CurrencyCircleDollar
                     size={40}
@@ -470,7 +499,7 @@ function App() {
                 </p>
               </div>
 
-              <div className="group bg-gradient-to-br from-[#990200]/5 to-[#740015]/10 backdrop-blur-xl rounded-2xl p-8 border border-[#740015]/20 hover:border-[#CE805C]/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+              <div className="group bg-gradient-to-br from-[#990200]/5 to-[#740015]/10 backdrop-blur-xl rounded-2xl p-8 border border-[#740015]/20 hover:border-[#CE805C]/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 fade-in-up-delay-3">
                 <div className="mb-6 inline-block p-4 bg-gradient-to-br from-[#CE805C]/10 to-[#740015]/10 rounded-2xl group-hover:scale-110 transition-transform duration-300">
                   <ClipboardText
                     size={40}
@@ -488,7 +517,7 @@ function App() {
             </div>
 
             <div className="grid md:grid-cols-3 gap-6">
-              <div className="group bg-gradient-to-br from-[#990200]/5 to-[#740015]/10 backdrop-blur-xl rounded-2xl p-8 border border-[#740015]/20 hover:border-[#CE805C]/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+              <div className="group bg-gradient-to-br from-[#990200]/5 to-[#740015]/10 backdrop-blur-xl rounded-2xl p-8 border border-[#740015]/20 hover:border-[#CE805C]/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 fade-in-up-delay-4">
                 <div className="mb-6 inline-block p-4 bg-gradient-to-br from-[#CE805C]/10 to-[#740015]/10 rounded-2xl group-hover:scale-110 transition-transform duration-300">
                   <CalendarBlank
                     size={40}
@@ -504,7 +533,7 @@ function App() {
                 </p>
               </div>
 
-              <div className="group bg-gradient-to-br from-[#990200]/5 to-[#740015]/10 backdrop-blur-xl rounded-2xl p-8 border border-[#740015]/20 hover:border-[#CE805C]/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+              <div className="group bg-gradient-to-br from-[#990200]/5 to-[#740015]/10 backdrop-blur-xl rounded-2xl p-8 border border-[#740015]/20 hover:border-[#CE805C]/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 fade-in-up-delay-5">
                 <div className="mb-6 inline-block p-4 bg-gradient-to-br from-[#CE805C]/10 to-[#740015]/10 rounded-2xl group-hover:scale-110 transition-transform duration-300">
                   <Cloud
                     size={40}
@@ -520,7 +549,7 @@ function App() {
                 </p>
               </div>
 
-              <div className="group bg-gradient-to-br from-[#990200]/5 to-[#740015]/10 backdrop-blur-xl rounded-2xl p-8 border border-[#740015]/20 hover:border-[#CE805C]/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+              <div className="group bg-gradient-to-br from-[#990200]/5 to-[#740015]/10 backdrop-blur-xl rounded-2xl p-8 border border-[#740015]/20 hover:border-[#CE805C]/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 fade-in-up-delay-6">
                 <div className="mb-6 inline-block p-4 bg-gradient-to-br from-[#CE805C]/10 to-[#740015]/10 rounded-2xl group-hover:scale-110 transition-transform duration-300">
                   <FloppyDisk
                     size={40}
@@ -540,7 +569,7 @@ function App() {
         </div>
       </section>
 
-      {/* Why Choose Interactive Guide Section - Dark Gradient */}
+      {/* Why Choose Section */}
       <section
         id="why-choose"
         className="py-20 bg-gradient-to-r from-[#740015] via-[#8B0000] to-[#740015]"
@@ -707,6 +736,194 @@ function App() {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section
+        id="faq"
+        className="py-20 bg-gradient-to-br from-[#990200]/5 to-[#740015]/10"
+      >
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16 animate-fade-in">
+            <h2 className="font-playfair text-4xl md:text-5xl font-bold text-[#740015] mb-4">
+              Frequently Asked Questions
+            </h2>
+            <p className="font-inter text-lg text-gray-600 max-w-2xl mx-auto">
+              Everything you need to know about the Interactive Wedding Guide
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {/* FAQ Item 1 */}
+            <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl">
+              <button
+                onClick={() => toggleFAQ(0)}
+                className="flex justify-between items-center cursor-pointer p-6 font-inter font-semibold text-lg text-[#740015] hover:bg-[#740015]/5 transition-colors w-full text-left gap-4"
+              >
+                <span className="flex-1 text-left">
+                  How long do I have access to the interactive guide?
+                </span>
+                <CaretDown
+                  size={24}
+                  weight="bold"
+                  className={`text-[#CE805C] transition-transform duration-300 flex-shrink-0 ${openFAQ === 0 ? "rotate-180" : ""}`}
+                />
+              </button>
+              <div
+                className={`overflow-hidden transition-all duration-300 ${openFAQ === 0 ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
+              >
+                <div className="px-6 pb-6 text-gray-600 font-inter">
+                  You have access to the interactive guide for 20 days from
+                  purchase, or until you generate and download your personalized
+                  PDF wedding guide - whichever comes first. This gives you
+                  plenty of time to complete all the planning tools at your own
+                  pace.
+                </div>
+              </div>
+            </div>
+
+            {/* FAQ Item 2 */}
+            <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl">
+              <button
+                onClick={() => toggleFAQ(1)}
+                className="flex justify-between items-center cursor-pointer p-6 font-inter font-semibold text-lg text-[#740015] hover:bg-[#740015]/5 transition-colors w-full text-left gap-4"
+              >
+                <span className="flex-1 text-left">
+                  Can I access the guide on my phone and tablet?
+                </span>
+                <CaretDown
+                  size={24}
+                  weight="bold"
+                  className={`text-[#CE805C] transition-transform duration-300 flex-shrink-0 ${openFAQ === 1 ? "rotate-180" : ""}`}
+                />
+              </button>
+              <div
+                className={`overflow-hidden transition-all duration-300 ${openFAQ === 1 ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
+              >
+                <div className="px-6 pb-6 text-gray-600 font-inter">
+                  Yes! The interactive guide works seamlessly on all devices -
+                  smartphones, tablets, laptops, and desktops. Your progress is
+                  automatically saved to the cloud, so you can switch between
+                  devices and pick up right where you left off.
+                </div>
+              </div>
+            </div>
+
+            {/* FAQ Item 3 */}
+            <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl">
+              <button
+                onClick={() => toggleFAQ(2)}
+                className="flex justify-between items-center cursor-pointer p-6 font-inter font-semibold text-lg text-[#740015] hover:bg-[#740015]/5 transition-colors w-full text-left gap-4"
+              >
+                <span className="flex-1 text-left">
+                  What happens after I generate my PDF?
+                </span>
+                <CaretDown
+                  size={24}
+                  weight="bold"
+                  className={`text-[#CE805C] transition-transform duration-300 flex-shrink-0 ${openFAQ === 2 ? "rotate-180" : ""}`}
+                />
+              </button>
+              <div
+                className={`overflow-hidden transition-all duration-300 ${openFAQ === 2 ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
+              >
+                <div className="px-6 pb-6 text-gray-600 font-inter">
+                  Once you generate and download your personalized PDF, it's
+                  yours to keep forever! The PDF contains all your planning
+                  information, budget details, vendor lists, and timeline. You
+                  can print it, share it, and refer to it throughout your
+                  wedding journey and beyond.
+                </div>
+              </div>
+            </div>
+
+            {/* FAQ Item 4 */}
+            <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl">
+              <button
+                onClick={() => toggleFAQ(3)}
+                className="flex justify-between items-center cursor-pointer p-6 font-inter font-semibold text-lg text-[#740015] hover:bg-[#740015]/5 transition-colors w-full text-left gap-4"
+              >
+                <span className="flex-1 text-left">
+                  Does the guide include traditional Northern Nigerian wedding
+                  customs?
+                </span>
+                <CaretDown
+                  size={24}
+                  weight="bold"
+                  className={`text-[#CE805C] transition-transform duration-300 flex-shrink-0 ${openFAQ === 3 ? "rotate-180" : ""}`}
+                />
+              </button>
+              <div
+                className={`overflow-hidden transition-all duration-300 ${openFAQ === 3 ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
+              >
+                <div className="px-6 pb-6 text-gray-600 font-inter">
+                  Absolutely! The guide is specifically designed for Northern
+                  Nigerian weddings and includes comprehensive coverage of
+                  traditional customs, cultural protocols, and modern
+                  adaptations. From the Kamu to the Daurin Aure and reception,
+                  every aspect of your cultural heritage is honored and
+                  explained.
+                </div>
+              </div>
+            </div>
+
+            {/* FAQ Item 5 */}
+            <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl">
+              <button
+                onClick={() => toggleFAQ(4)}
+                className="flex justify-between items-center cursor-pointer p-6 font-inter font-semibold text-lg text-[#740015] hover:bg-[#740015]/5 transition-colors w-full text-left gap-4"
+              >
+                <span className="flex-1 text-left">
+                  Is my data saved automatically?
+                </span>
+                <CaretDown
+                  size={24}
+                  weight="bold"
+                  className={`text-[#CE805C] transition-transform duration-300 flex-shrink-0 ${openFAQ === 4 ? "rotate-180" : ""}`}
+                />
+              </button>
+              <div
+                className={`overflow-hidden transition-all duration-300 ${openFAQ === 4 ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
+              >
+                <div className="px-6 pb-6 text-gray-600 font-inter">
+                  Yes! All your information is automatically saved to the cloud
+                  as you work. You never have to worry about losing your
+                  progress - whether you close your browser, switch devices, or
+                  take a break for days, everything will be right where you left
+                  it.
+                </div>
+              </div>
+            </div>
+
+            {/* FAQ Item 6 */}
+            <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl">
+              <button
+                onClick={() => toggleFAQ(5)}
+                className="flex justify-between items-center cursor-pointer p-6 font-inter font-semibold text-lg text-[#740015] hover:bg-[#740015]/5 transition-colors w-full text-left gap-4"
+              >
+                <span className="flex-1 text-left">
+                  Can I customize everything to match my vision?
+                </span>
+                <CaretDown
+                  size={24}
+                  weight="bold"
+                  className={`text-[#CE805C] transition-transform duration-300 flex-shrink-0 ${openFAQ === 5 ? "rotate-180" : ""}`}
+                />
+              </button>
+              <div
+                className={`overflow-hidden transition-all duration-300 ${openFAQ === 5 ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
+              >
+                <div className="px-6 pb-6 text-gray-600 font-inter">
+                  Completely! The interactive guide starts with the Vision &
+                  Values Quiz to understand your unique style, then adapts to
+                  your specific needs. Every budget item, vendor, timeline
+                  event, and detail can be customized to create a wedding plan
+                  that's uniquely yours.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Pricing Section - White Background */}
       <section id="pricing" className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -730,7 +947,7 @@ function App() {
 
             <button
               onClick={handlePurchase}
-              className="group relative bg-gradient-to-r from-[#CE805C] to-[#B87050] hover:from-[#B87050] hover:to-[#740015] text-white px-16 py-6 rounded-2xl text-2xl font-bold font-inter transition-all shadow-2xl hover:shadow-[#CE805C]/50 transform hover:scale-105 hover:-translate-y-1 duration-300 mb-6"
+              className="group relative bg-gradient-to-r from-[#CE805C] to-[#B87050] hover:from-[#B87050] hover:to-[#740015] text-white w-full sm:w-auto px-16 py-6 rounded-2xl text-2xl font-bold font-inter transition-all shadow-2xl hover:shadow-[#CE805C]/50 transform hover:scale-105 hover:-translate-y-1 duration-300 mb-6"
               aria-label="Purchase Interactive Wedding Guide for 100 Naira"
             >
               <span className="relative z-10 flex items-center justify-center gap-3">
@@ -781,6 +998,109 @@ function App() {
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="bg-gradient-to-br from-[#990200] via-[#740015] to-[#531946] text-white py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Main Footer Content - Three Columns */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 items-start mb-6">
+            {/* Left Column - Brand */}
+            <div className="text-center md:text-left">
+              <h3 className="font-playfair text-xl md:text-2xl font-bold bg-gradient-to-r from-[#D4A574] to-white bg-clip-text text-transparent mb-1">
+                Hausa Room
+              </h3>
+              <p className="font-inter text-white/70 text-xs">
+                Your complete Northern Nigerian wedding planning companion
+              </p>
+            </div>
+
+            {/* Center Column - Navigation */}
+            <nav className="flex flex-wrap justify-center items-center gap-3 md:gap-4 font-inter text-xs">
+              <a
+                href="#hero"
+                className="text-white/80 hover:text-[#D4A574] transition-all duration-300 hover:scale-110 transform"
+              >
+                Home
+              </a>
+              <a
+                href="#features"
+                className="text-white/80 hover:text-[#D4A574] transition-all duration-300 hover:scale-110 transform"
+              >
+                Features
+              </a>
+              <a
+                href="#how-it-works"
+                className="text-white/80 hover:text-[#D4A574] transition-all duration-300 hover:scale-110 transform"
+              >
+                How It Works
+              </a>
+              <a
+                href="#faq"
+                className="text-white/80 hover:text-[#D4A574] transition-all duration-300 hover:scale-110 transform"
+              >
+                FAQ
+              </a>
+              <a
+                href="#pricing"
+                className="text-white/80 hover:text-[#D4A574] transition-all duration-300 hover:scale-110 transform"
+              >
+                Pricing
+              </a>
+            </nav>
+
+            {/* Right Column - Social Media */}
+            <div className="flex items-center justify-center md:justify-end gap-4">
+              <a
+                href="mailto:hausaroom1@gmail.com"
+                className="group text-white/80 hover:text-[#D4A574] transition-all duration-300 transform hover:scale-125 hover:-translate-y-1"
+                aria-label="Email us"
+              >
+                <EnvelopeSimple
+                  size={24}
+                  weight="fill"
+                  className="drop-shadow-lg"
+                />
+              </a>
+              <a
+                href="https://www.instagram.com/hausaroom/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group text-white/80 hover:text-[#D4A574] transition-all duration-300 transform hover:scale-125 hover:-translate-y-1"
+                aria-label="Follow us on Instagram"
+              >
+                <InstagramLogo
+                  size={24}
+                  weight="fill"
+                  className="drop-shadow-lg"
+                />
+              </a>
+              <a
+                href="https://www.facebook.com/profile.php?id=100070178342524"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group text-white/80 hover:text-[#D4A574] transition-all duration-300 transform hover:scale-125 hover:-translate-y-1"
+                aria-label="Follow us on Facebook"
+              >
+                <FacebookLogo
+                  size={24}
+                  weight="fill"
+                  className="drop-shadow-lg"
+                />
+              </a>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="w-full h-px bg-gradient-to-r from-transparent via-white/30 to-transparent mb-4"></div>
+
+          {/* Copyright - Centered */}
+          <div className="text-center">
+            <p className="font-inter text-white/50 text-xs">
+              © {new Date().getFullYear()} Hausa Room. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
 
       {/* Back to Top Button */}
       {showBackToTop && (
