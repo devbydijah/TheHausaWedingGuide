@@ -30,6 +30,8 @@ export default function LoginGate({ children, onAuthenticated }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [accessStatus, setAccessStatus] = useState(null); // { hasAccess, daysRemaining, expiresAt }
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmailSent, setResetEmailSent] = useState(false);
 
   // Check for existing session on mount
   useEffect(() => {
@@ -64,17 +66,30 @@ export default function LoginGate({ children, onAuthenticated }) {
       if (error) throw error;
 
       if (data.has_access) {
+        // Get current session to pass user object
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
         setIsAuthenticated(true);
         setUserEmail(userEmail);
-        setAccessStatus({
+
+        const statusData = {
           hasAccess: true,
           daysRemaining: data.days_remaining,
           expiresAt: data.expires_at,
           isOnboarded: data.is_onboarded,
-        });
+          user: session?.user || null,
+          userData: {
+            brideName: data.bride_name,
+            weddingDate: data.wedding_date,
+          },
+        };
+
+        setAccessStatus(statusData);
 
         if (onAuthenticated) {
-          onAuthenticated(userEmail, data);
+          onAuthenticated(userEmail, statusData);
         }
       } else {
         // Access expired
@@ -153,6 +168,30 @@ export default function LoginGate({ children, onAuthenticated }) {
       setAccessStatus(null);
     } catch (err) {
       console.error("Logout error:", err);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email.trim() || !email.includes("@")) {
+      setError("Please enter your email address first");
+      return;
+    }
+
+    try {
+      setError("");
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/?guide=1&reset=1`,
+      });
+
+      if (error) throw error;
+
+      setResetEmailSent(true);
+      setTimeout(() => {
+        setResetEmailSent(false);
+        setShowForgotPassword(false);
+      }, 5000);
+    } catch (err) {
+      setError(err.message || "Failed to send password reset email");
     }
   };
 
@@ -287,6 +326,15 @@ export default function LoginGate({ children, onAuthenticated }) {
               </div>
             )}
 
+            {/* Success Message for Password Reset */}
+            {resetEmailSent && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                <p className="text-sm text-green-700">
+                  ✅ Password reset email sent! Check your inbox.
+                </p>
+              </div>
+            )}
+
             {/* Submit Button */}
             <button
               type="submit"
@@ -306,8 +354,35 @@ export default function LoginGate({ children, onAuthenticated }) {
 
           {/* Help Text */}
           <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-xs text-gray-600 text-center">
-              Can't find your password?{" "}
+            <p className="text-xs text-gray-600 text-center mb-3">
+              Forgot your password?{" "}
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(!showForgotPassword)}
+                className="text-[#CE805C] hover:underline font-medium"
+              >
+                Reset it here
+              </button>
+            </p>
+
+            {/* Password Reset Form */}
+            {showForgotPassword && (
+              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                <p className="text-xs text-gray-700 mb-3">
+                  Enter your email and we'll send you a password reset link.
+                </p>
+                <button
+                  onClick={handleForgotPassword}
+                  disabled={!email || resetEmailSent}
+                  className="w-full px-4 py-2 bg-[#CE805C] text-white rounded-lg text-sm font-medium hover:bg-[#B87050] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Send Reset Link
+                </button>
+              </div>
+            )}
+
+            <p className="text-xs text-gray-600 text-center mt-3">
+              Need help?{" "}
               <a
                 href="mailto:support@hausaroom.com"
                 className="text-[#CE805C] hover:underline font-medium"

@@ -22,7 +22,13 @@ import FinalBlueprint from "../features/blueprint/FinalBlueprint";
  *
  * Refactored: Sprint 2 - Reduced from 3753 lines to ~400 lines
  */
-export default function InteractiveGuide({ auth, onLogout }) {
+export default function InteractiveGuide({
+  onLogout,
+  accessStatus,
+  userEmail,
+  user,
+  userData,
+}) {
   // Cloud sync hook - replaces localStorage-only approach
   const {
     data,
@@ -30,7 +36,7 @@ export default function InteractiveGuide({ auth, onLogout }) {
     syncStatus,
     lastSynced,
     isCloudEnabled,
-  } = useSyncToCloud(auth, DEFAULT_GUIDE);
+  } = useSyncToCloud(user?.email || userEmail, DEFAULT_GUIDE);
 
   const [activeSection, setActiveSection] = useState("dashboard");
   const [darkMode, setDarkMode] = useState(() => {
@@ -546,7 +552,13 @@ export default function InteractiveGuide({ auth, onLogout }) {
           />
         )}
         {activeSection === "blueprint" && (
-          <FinalBlueprint data={data} setActiveSection={setActiveSection} />
+          <FinalBlueprint
+            data={data}
+            setActiveSection={setActiveSection}
+            userData={userData}
+            userEmail={user?.email || userEmail}
+            darkMode={darkMode}
+          />
         )}
       </main>
 

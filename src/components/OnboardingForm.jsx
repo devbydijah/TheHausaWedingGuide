@@ -22,7 +22,7 @@ import { Favorite, CalendarToday, Person } from "@mui/icons-material";
  * - This creates accountability and personalization
  */
 
-export default function OnboardingForm({ userEmail, onComplete }) {
+export default function OnboardingForm({ userEmail, user, onComplete }) {
   const [brideName, setBrideName] = useState("");
   const [weddingDate, setWeddingDate] = useState("");
   const [error, setError] = useState("");
@@ -61,7 +61,7 @@ export default function OnboardingForm({ userEmail, onComplete }) {
       const { data, error: rpcError } = await supabase.rpc(
         "complete_onboarding",
         {
-          user_email: userEmail,
+          user_email: userEmail || user?.email,
           bride_name: brideName.trim(),
           wedding_date: weddingDate || null,
         }

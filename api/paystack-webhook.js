@@ -13,12 +13,13 @@ const PAYSTACK_TEST_SECRET = process.env.PAYSTACK_TEST_SECRET_KEY || null;
 const PAYSTACK_LIVE_SECRET = process.env.PAYSTACK_SECRET_KEY || null;
 
 // Supabase Admin Client (for creating users)
-const supabaseAdmin = process.env.SUPABASE_SERVICE_ROLE_KEY
-  ? createClient(
-      process.env.VITE_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    )
-  : null;
+const supabaseAdmin =
+  process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.VITE_SUPABASE_URL
+    ? createClient(
+        process.env.VITE_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY
+      )
+    : null;
 
 // Product-specific URLs
 const PDF_BASE_URL = "https://the-hausa-weding-guide.vercel.app";
@@ -199,11 +200,15 @@ export default async function handler(req, res) {
         // ============================================
         let authUserId = null;
         let tempPassword = null;
+        let hasExistingAccount = false;
 
         if (supabaseAdmin) {
           try {
             // Generate temporary password (user will change on first login)
-            tempPassword = crypto.randomBytes(12).toString("hex");
+            tempPassword = crypto
+              .randomBytes(12)
+              .toString("base64")
+              .slice(0, 16);
 
             // Create Supabase Auth user
             const { data: authData, error: authError } =
@@ -220,17 +225,25 @@ export default async function handler(req, res) {
 
             if (authError) {
               // User might already exist
-              if (authError.message.includes("already registered")) {
+              if (
+                authError.message.includes("already registered") ||
+                authError.message.includes("already been registered")
+              ) {
                 console.log(
-                  `User ${verifiedEmail} already exists, skipping auth creation`
+                  `User ${verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")} already exists, skipping auth creation`
                 );
+                hasExistingAccount = true;
+
                 // Get existing user
-                const { data: existingUser } =
+                const { data: existingUsers } =
                   await supabaseAdmin.auth.admin.listUsers();
-                const user = existingUser.users.find(
+                const user = existingUsers.users?.find(
                   (u) => u.email === verifiedEmail
                 );
                 authUserId = user?.id || null;
+
+                // Don't send password for existing users
+                tempPassword = null;
               } else {
                 console.error(
                   "Failed to create Supabase auth user:",
@@ -240,20 +253,25 @@ export default async function handler(req, res) {
             } else {
               authUserId = authData.user.id;
               console.log(
-                `Supabase auth account created for ${verifiedEmail}, ID: ${authUserId}`
+                `Supabase auth account created for ${verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")}, ID: ${authUserId}`
               );
 
               // Create/update web_app_users record
               const { error: dbError } = await supabaseAdmin
                 .from("web_app_users")
-                .upsert({
-                  email: verifiedEmail,
-                  auth_user_id: authUserId,
-                  paystack_reference: reference,
-                  purchased_at: new Date().toISOString(),
-                  access_days: 20,
-                  is_onboarded: false,
-                })
+                .upsert(
+                  {
+                    email: verifiedEmail,
+                    auth_user_id: authUserId,
+                    paystack_reference: reference,
+                    purchased_at: new Date().toISOString(),
+                    access_days: 20,
+                    is_onboarded: false,
+                  },
+                  {
+                    onConflict: "email",
+                  }
+                )
                 .select();
 
               if (dbError) {
@@ -262,7 +280,9 @@ export default async function handler(req, res) {
                   dbError
                 );
               } else {
-                console.log(`Database record created for ${verifiedEmail}`);
+                console.log(
+                  `Database record created for ${verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")}`
+                );
               }
             }
           } catch (err) {
@@ -271,7 +291,7 @@ export default async function handler(req, res) {
           }
         } else {
           console.warn(
-            "Supabase admin client not configured - skipping auth account creation"
+            "Supabase admin client not configured - skipping auth account creation. Check SUPABASE_SERVICE_ROLE_KEY and VITE_SUPABASE_URL environment variables."
           );
         }
 
@@ -281,15 +301,22 @@ export default async function handler(req, res) {
 
         if (productType === "webapp") {
           // Web App Only - send access credentials
-          await sendWebAppAccessEmail(
-            verifiedEmail,
-            tempPassword,
-            authUserId !== null
-          );
-          console.log(
-            "Web app access email sent successfully to:",
-            verifiedEmail
-          );
+          if (tempPassword) {
+            await sendWebAppAccessEmail(
+              verifiedEmail,
+              tempPassword,
+              hasExistingAccount
+            );
+            console.log(
+              "Web app access email sent successfully to:",
+              verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")
+            );
+          } else {
+            console.log(
+              "Skipping email - user already has account:",
+              verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")
+            );
+          }
         } else if (productType === "bundle") {
           // Bundle - send both PDF download + web app access
           // Generate download token for PDF
@@ -323,9 +350,12 @@ export default async function handler(req, res) {
             verifiedEmail,
             downloadLink,
             tempPassword,
-            authUserId !== null
+            hasExistingAccount
           );
-          console.log("Bundle email sent successfully to:", verifiedEmail);
+          console.log(
+            "Bundle email sent successfully to:",
+            verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")
+          );
         } else {
           // PDF Only (default) - send download link
           const token = crypto.randomBytes(32).toString("hex");

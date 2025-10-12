@@ -34,6 +34,8 @@ function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [accessStatus, setAccessStatus] = useState(null);
   const [userEmail, setUserEmail] = useState("");
+  const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -128,6 +130,16 @@ function App() {
     setUserEmail(email);
     setAccessStatus(status);
 
+    // Store user object from status
+    if (status.user) {
+      setUser(status.user);
+    }
+
+    // Store user data (bride_name, wedding_date, etc.)
+    if (status.userData) {
+      setUserData(status.userData);
+    }
+
     // Check if onboarding is needed
     if (!status.isOnboarded) {
       setShowOnboarding(true);
@@ -136,8 +148,9 @@ function App() {
 
   const handleOnboardingComplete = (data) => {
     setShowOnboarding(false);
-    // Update access status to reflect onboarding completion
+    // Update access status and userData to reflect onboarding completion
     setAccessStatus((prev) => ({ ...prev, isOnboarded: true }));
+    setUserData(data); // Store bride_name, wedding_date
   };
 
   // Show the interactive guide if authenticated
@@ -147,6 +160,7 @@ function App() {
         {showOnboarding ? (
           <OnboardingForm
             userEmail={userEmail}
+            user={user}
             onComplete={handleOnboardingComplete}
           />
         ) : (
@@ -154,6 +168,8 @@ function App() {
             onLogout={handleLogout}
             accessStatus={accessStatus}
             userEmail={userEmail}
+            user={user}
+            userData={userData}
           />
         )}
       </LoginGate>

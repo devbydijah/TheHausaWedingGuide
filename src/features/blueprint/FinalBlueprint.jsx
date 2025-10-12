@@ -35,13 +35,20 @@ import {
   VENDOR_STATUS,
   TASK_STATUS,
 } from "../../lib/constants";
+import { generatePersonalizedPDF } from "../../components/PersonalizedPDFExport";
 
 /**
  * FinalBlueprint Component
  *
  * Comprehensive overview of all wedding plans with export capabilities
  */
-export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
+export default function FinalBlueprint({
+  data,
+  setActiveSection,
+  darkMode,
+  userData,
+  userEmail,
+}) {
   const [activeTab, setActiveTab] = useState("overview");
   const [showPrintView, setShowPrintView] = useState(false);
 
@@ -125,11 +132,13 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
     window.print();
   };
 
-  // Handle export (placeholder - would integrate with PDF generation)
+  // Handle PDF export with personalized data
   const handleExport = () => {
-    alert(
-      "Export feature coming soon! This will generate a downloadable PDF of your complete wedding blueprint."
-    );
+    generatePersonalizedPDF(data, {
+      brideName: userData?.brideName || "Bride",
+      email: userEmail || "your-email@example.com",
+      weddingDate: userData?.weddingDate || data?.weddingDate || "TBD",
+    });
   };
 
   // Get vision result details
