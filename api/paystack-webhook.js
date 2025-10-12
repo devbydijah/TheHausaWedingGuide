@@ -6,10 +6,19 @@ import {
   sendBundleEmail,
 } from "../lib/email.js";
 import { tokenDB } from "../lib/database.cjs";
+import { createClient } from "@supabase/supabase-js";
 
 // Environment variables (support both test and live secrets)
 const PAYSTACK_TEST_SECRET = process.env.PAYSTACK_TEST_SECRET_KEY || null;
 const PAYSTACK_LIVE_SECRET = process.env.PAYSTACK_SECRET_KEY || null;
+
+// Supabase Admin Client (for creating users)
+const supabaseAdmin = process.env.SUPABASE_SERVICE_ROLE_KEY
+  ? createClient(
+      process.env.VITE_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    )
+  : null;
 
 // Product-specific URLs
 const PDF_BASE_URL = "https://the-hausa-weding-guide.vercel.app";
@@ -186,14 +195,97 @@ export default async function handler(req, res) {
         );
 
         // ============================================
+        // CREATE SUPABASE AUTH ACCOUNT
+        // ============================================
+        let authUserId = null;
+        let tempPassword = null;
+
+        if (supabaseAdmin) {
+          try {
+            // Generate temporary password (user will change on first login)
+            tempPassword = crypto.randomBytes(12).toString("hex");
+
+            // Create Supabase Auth user
+            const { data: authData, error: authError } =
+              await supabaseAdmin.auth.admin.createUser({
+                email: verifiedEmail,
+                password: tempPassword,
+                email_confirm: true, // Auto-confirm email
+                user_metadata: {
+                  paystack_reference: reference,
+                  purchased_at: new Date().toISOString(),
+                  product_type: productType,
+                },
+              });
+
+            if (authError) {
+              // User might already exist
+              if (authError.message.includes("already registered")) {
+                console.log(
+                  `User ${verifiedEmail} already exists, skipping auth creation`
+                );
+                // Get existing user
+                const { data: existingUser } =
+                  await supabaseAdmin.auth.admin.listUsers();
+                const user = existingUser.users.find(
+                  (u) => u.email === verifiedEmail
+                );
+                authUserId = user?.id || null;
+              } else {
+                console.error(
+                  "Failed to create Supabase auth user:",
+                  authError
+                );
+              }
+            } else {
+              authUserId = authData.user.id;
+              console.log(
+                `Supabase auth account created for ${verifiedEmail}, ID: ${authUserId}`
+              );
+
+              // Create/update web_app_users record
+              const { error: dbError } = await supabaseAdmin
+                .from("web_app_users")
+                .upsert({
+                  email: verifiedEmail,
+                  auth_user_id: authUserId,
+                  paystack_reference: reference,
+                  purchased_at: new Date().toISOString(),
+                  access_days: 20,
+                  is_onboarded: false,
+                })
+                .select();
+
+              if (dbError) {
+                console.error(
+                  "Failed to create web_app_users record:",
+                  dbError
+                );
+              } else {
+                console.log(`Database record created for ${verifiedEmail}`);
+              }
+            }
+          } catch (err) {
+            console.error("Supabase account creation error:", err);
+            // Continue even if Supabase fails - user can still download PDF
+          }
+        } else {
+          console.warn(
+            "Supabase admin client not configured - skipping auth account creation"
+          );
+        }
+
+        // ============================================
         // HANDLE DIFFERENT PRODUCT TYPES
         // ============================================
 
         if (productType === "webapp") {
-          // Web App Only - redirect to claim page for interactive guide
-          const claimUrl = `${WEBAPP_BASE_URL}/?claim=1`;
-
-          await sendWebAppAccessEmail(verifiedEmail, claimUrl);
+          // Web App Only - send access credentials
+          await sendWebAppAccessEmail(
+            verifiedEmail,
+            tempPassword,
+            authUserId !== null
+          );
           console.log(
             "Web app access email sent successfully to:",
             verifiedEmail
@@ -226,11 +318,13 @@ export default async function handler(req, res) {
             verifiedEmail
           )}&sig=${sig}`;
 
-          // Create claim URL for webapp
-          const claimUrl = `${WEBAPP_BASE_URL}/?claim=1`;
-
           // Send bundle email with both PDF + web app access
-          await sendBundleEmail(verifiedEmail, downloadLink, claimUrl);
+          await sendBundleEmail(
+            verifiedEmail,
+            downloadLink,
+            tempPassword,
+            authUserId !== null
+          );
           console.log("Bundle email sent successfully to:", verifiedEmail);
         } else {
           // PDF Only (default) - send download link

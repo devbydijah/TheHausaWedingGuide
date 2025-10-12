@@ -17,8 +17,9 @@ import {
   CaretDown,
 } from "@phosphor-icons/react";
 import "./index.css";
-import LoginGate from "./components/LoginGate";
+import LoginGate from "./components/LoginGate_NEW"; // Updated to new auth system
 import InteractiveGuide from "./components/InteractiveGuide";
+import OnboardingForm from "./components/OnboardingForm";
 
 function App() {
   const [showGuide, setShowGuide] = useState(false);
@@ -28,6 +29,11 @@ function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [openFAQ, setOpenFAQ] = useState(null);
+
+  // New auth states
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [accessStatus, setAccessStatus] = useState(null);
+  const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -110,17 +116,46 @@ function App() {
 
   // Handle logout - clear session and return to landing page
   const handleLogout = () => {
-    // Clear authentication session
-    localStorage.removeItem("hwg_auth_session");
+    // No need to manually clear localStorage - Supabase handles session cleanup
     // Return to landing page
     setShowGuide(false);
+    setShowOnboarding(false);
+    setAccessStatus(null);
+    setUserEmail("");
+  };
+
+  const handleAuthenticated = (email, status) => {
+    setUserEmail(email);
+    setAccessStatus(status);
+
+    // Check if onboarding is needed
+    if (!status.isOnboarded) {
+      setShowOnboarding(true);
+    }
+  };
+
+  const handleOnboardingComplete = (data) => {
+    setShowOnboarding(false);
+    // Update access status to reflect onboarding completion
+    setAccessStatus((prev) => ({ ...prev, isOnboarded: true }));
   };
 
   // Show the interactive guide if authenticated
   if (showGuide) {
     return (
-      <LoginGate>
-        <InteractiveGuide onLogout={handleLogout} />
+      <LoginGate onAuthenticated={handleAuthenticated}>
+        {showOnboarding ? (
+          <OnboardingForm
+            userEmail={userEmail}
+            onComplete={handleOnboardingComplete}
+          />
+        ) : (
+          <InteractiveGuide
+            onLogout={handleLogout}
+            accessStatus={accessStatus}
+            userEmail={userEmail}
+          />
+        )}
       </LoginGate>
     );
   }
