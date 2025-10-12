@@ -381,12 +381,16 @@ export default function PersonalizedPDFExport({ userEmail }) {
 /**
  * Standalone function to generate personalized PDF
  * Can be called directly from other components
- * 
+ *
  * @param {Object} data - User's wedding planning data
  * @param {Object} userInfo - { brideName, email, weddingDate }
  */
 export const generatePersonalizedPDF = (data, userInfo) => {
-  const { brideName = "Bride", email = "", weddingDate = null } = userInfo || {};
+  const {
+    brideName = "Bride",
+    email = "",
+    weddingDate = null,
+  } = userInfo || {};
 
   // Initialize PDF
   const doc = new jsPDF();
@@ -493,7 +497,11 @@ export const generatePersonalizedPDF = (data, userInfo) => {
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.text(`Total Budget: ${formatCurrency(data.totalBudget)}`, 10, yPosition);
+    doc.text(
+      `Total Budget: ${formatCurrency(data.totalBudget)}`,
+      10,
+      yPosition
+    );
 
     yPosition += 10;
 
