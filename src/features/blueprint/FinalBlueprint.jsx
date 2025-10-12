@@ -218,7 +218,7 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
             onClick={() => setActiveSection("vision")}
             className={`p-4 rounded-xl border-2 transition-all hover:scale-105 text-center ${
               completionStats.hasVisionResult
-                ? "border-green-500 bg-green-50 dark:bg-green-900/20"
+                ? "border-[#57886C] bg-[#57886C]/10 dark:bg-[#57886C]/20"
                 : "border-gray-300 dark:border-gray-600 hover:border-[#CE805C]"
             }`}
           >
@@ -227,7 +227,7 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
               weight="bold"
               className={`mx-auto mb-2 ${
                 completionStats.hasVisionResult
-                  ? "text-green-600 dark:text-green-400"
+                  ? "text-[#57886C] dark:text-[#57886C]"
                   : darkMode
                     ? "text-gray-400"
                     : "text-gray-500"
@@ -236,7 +236,7 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
             <p
               className={`text-sm font-semibold ${
                 completionStats.hasVisionResult
-                  ? "text-green-700 dark:text-green-400"
+                  ? "text-[#57886C] dark:text-[#57886C]"
                   : darkMode
                     ? "text-gray-400"
                     : "text-gray-600"
@@ -247,7 +247,7 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
             {completionStats.hasVisionResult && (
               <VerifiedUser
                 sx={{ fontSize: 16 }}
-                className="text-green-600 dark:text-green-400 mx-auto mt-1"
+                className="text-[#57886C] dark:text-[#57886C] mx-auto mt-1"
               />
             )}
           </button>
@@ -256,7 +256,7 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
             onClick={() => setActiveSection("budget")}
             className={`p-4 rounded-xl border-2 transition-all hover:scale-105 text-center ${
               completionStats.hasBudget
-                ? "border-green-500 bg-green-50 dark:bg-green-900/20"
+                ? "border-[#57886C] bg-[#57886C]/10 dark:bg-[#57886C]/20"
                 : "border-gray-300 dark:border-gray-600 hover:border-[#CE805C]"
             }`}
           >
@@ -265,7 +265,7 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
               weight="bold"
               className={`mx-auto mb-2 ${
                 completionStats.hasBudget
-                  ? "text-green-600 dark:text-green-400"
+                  ? "text-[#57886C] dark:text-[#57886C]"
                   : darkMode
                     ? "text-gray-400"
                     : "text-gray-500"
@@ -274,7 +274,7 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
             <p
               className={`text-sm font-semibold ${
                 completionStats.hasBudget
-                  ? "text-green-700 dark:text-green-400"
+                  ? "text-[#57886C] dark:text-[#57886C]"
                   : darkMode
                     ? "text-gray-400"
                     : "text-gray-600"
@@ -285,7 +285,7 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
             {completionStats.hasBudget && (
               <VerifiedUser
                 sx={{ fontSize: 16 }}
-                className="text-green-600 dark:text-green-400 mx-auto mt-1"
+                className="text-[#57886C] dark:text-[#57886C] mx-auto mt-1"
               />
             )}
           </button>
@@ -294,7 +294,7 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
             onClick={() => setActiveSection("vendors")}
             className={`p-4 rounded-xl border-2 transition-all hover:scale-105 text-center ${
               completionStats.hasVendors
-                ? "border-green-500 bg-green-50 dark:bg-green-900/20"
+                ? "border-[#57886C] bg-[#57886C]/10 dark:bg-[#57886C]/20"
                 : "border-gray-300 dark:border-gray-600 hover:border-[#CE805C]"
             }`}
           >
@@ -303,7 +303,7 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
               weight="bold"
               className={`mx-auto mb-2 ${
                 completionStats.hasVendors
-                  ? "text-green-600 dark:text-green-400"
+                  ? "text-[#57886C] dark:text-[#57886C]"
                   : darkMode
                     ? "text-gray-400"
                     : "text-gray-500"
@@ -312,7 +312,7 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
             <p
               className={`text-sm font-semibold ${
                 completionStats.hasVendors
-                  ? "text-green-700 dark:text-green-400"
+                  ? "text-[#57886C] dark:text-[#57886C]"
                   : darkMode
                     ? "text-gray-400"
                     : "text-gray-600"
@@ -323,7 +323,7 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
             {completionStats.hasVendors && (
               <VerifiedUser
                 sx={{ fontSize: 16 }}
-                className="text-green-600 dark:text-green-400 mx-auto mt-1"
+                className="text-[#57886C] dark:text-[#57886C] mx-auto mt-1"
               />
             )}
           </button>
@@ -332,7 +332,7 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
             onClick={() => setActiveSection("timeline")}
             className={`p-4 rounded-xl border-2 transition-all hover:scale-105 text-center ${
               completionStats.hasTasks && completionStats.weddingDate
-                ? "border-green-500 bg-green-50 dark:bg-green-900/20"
+                ? "border-[#57886C] bg-[#57886C]/10 dark:bg-[#57886C]/20"
                 : "border-gray-300 dark:border-gray-600 hover:border-[#CE805C]"
             }`}
           >
@@ -341,7 +341,7 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
               weight="bold"
               className={`mx-auto mb-2 ${
                 completionStats.hasTasks && completionStats.weddingDate
-                  ? "text-green-600 dark:text-green-400"
+                  ? "text-[#57886C] dark:text-[#57886C]"
                   : darkMode
                     ? "text-gray-400"
                     : "text-gray-500"
@@ -350,7 +350,7 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
             <p
               className={`text-sm font-semibold ${
                 completionStats.hasTasks && completionStats.weddingDate
-                  ? "text-green-700 dark:text-green-400"
+                  ? "text-[#57886C] dark:text-[#57886C]"
                   : darkMode
                     ? "text-gray-400"
                     : "text-gray-600"
@@ -361,7 +361,7 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
             {completionStats.hasTasks && completionStats.weddingDate && (
               <VerifiedUser
                 sx={{ fontSize: 16 }}
-                className="text-green-600 dark:text-green-400 mx-auto mt-1"
+                className="text-[#57886C] dark:text-[#57886C] mx-auto mt-1"
               />
             )}
           </button>
@@ -488,11 +488,11 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="!p-4">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                <div className="p-3 bg-[#531946]/10 dark:bg-[#531946]/30 rounded-lg">
                   <Sparkle
                     size={24}
                     weight="bold"
-                    className="text-purple-600 dark:text-purple-400"
+                    className="text-[#531946] dark:text-[#CE805C]"
                   />
                 </div>
                 <div className="flex-1">
@@ -519,11 +519,11 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
 
             <Card className="!p-4">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                <div className="p-3 bg-[#57886C]/10 dark:bg-[#57886C]/30 rounded-lg">
                   <CurrencyCircleDollar
                     size={24}
                     weight="bold"
-                    className="text-green-600 dark:text-green-400"
+                    className="text-[#57886C] dark:text-[#57886C]"
                   />
                 </div>
                 <div className="flex-1">
@@ -549,11 +549,11 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
 
             <Card className="!p-4">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                <div className="p-3 bg-[#740015]/10 dark:bg-[#740015]/30 rounded-lg">
                   <Storefront
                     size={24}
                     weight="bold"
-                    className="text-blue-600 dark:text-blue-400"
+                    className="text-[#740015] dark:text-[#CE805C]"
                   />
                 </div>
                 <div className="flex-1">
@@ -578,11 +578,11 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
 
             <Card className="!p-4">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                <div className="p-3 bg-[#CE805C]/10 dark:bg-[#CE805C]/30 rounded-lg">
                   <CalendarCheck
                     size={24}
                     weight="bold"
-                    className="text-orange-600 dark:text-orange-400"
+                    className="text-[#CE805C] dark:text-[#B87050]"
                   />
                 </div>
                 <div className="flex-1">
@@ -609,18 +609,18 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
           {/* Alerts */}
           <div className="space-y-3">
             {!completionStats.weddingDate && (
-              <div className="bg-yellow-50 border-2 border-yellow-300 dark:bg-yellow-900/20 dark:border-yellow-700 rounded-xl p-4">
+              <div className="bg-[#CE805C]/10 border-2 border-[#CE805C] dark:bg-[#CE805C]/20 dark:border-[#B87050] rounded-xl p-4">
                 <div className="flex items-start gap-3">
                   <Warning
                     size={24}
                     weight="bold"
-                    className="text-yellow-600 dark:text-yellow-400 flex-shrink-0"
+                    className="text-[#CE805C] dark:text-[#B87050] flex-shrink-0"
                   />
                   <div>
-                    <p className="font-semibold text-yellow-700 dark:text-yellow-400 mb-1">
+                    <p className="font-semibold text-[#740015] dark:text-[#CE805C] mb-1">
                       Wedding Date Not Set
                     </p>
-                    <p className="text-sm text-yellow-600 dark:text-yellow-300">
+                    <p className="text-sm text-[#B87050] dark:text-[#CE805C]">
                       Set your wedding date in the Timeline section to unlock
                       countdown and task scheduling features.
                     </p>
@@ -630,18 +630,18 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
             )}
 
             {!completionStats.hasBudget && (
-              <div className="bg-blue-50 border-2 border-blue-300 dark:bg-blue-900/20 dark:border-blue-700 rounded-xl p-4">
+              <div className="bg-[#531946]/10 border-2 border-[#531946] dark:bg-[#531946]/20 dark:border-[#740015] rounded-xl p-4">
                 <div className="flex items-start gap-3">
                   <Info
                     size={24}
                     weight="bold"
-                    className="text-blue-600 dark:text-blue-400 flex-shrink-0"
+                    className="text-[#531946] dark:text-[#CE805C] flex-shrink-0"
                   />
                   <div>
-                    <p className="font-semibold text-blue-700 dark:text-blue-400 mb-1">
+                    <p className="font-semibold text-[#740015] dark:text-[#CE805C] mb-1">
                       Budget Planning Needed
                     </p>
-                    <p className="text-sm text-blue-600 dark:text-blue-300">
+                    <p className="text-sm text-[#531946] dark:text-[#B87050]">
                       Start your budget planning to track expenses and stay on
                       target.
                     </p>
@@ -652,18 +652,18 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
 
             {completionStats.vendors.length > 0 &&
               completionStats.bookedVendors === 0 && (
-                <div className="bg-purple-50 border-2 border-purple-300 dark:bg-purple-900/20 dark:border-purple-700 rounded-xl p-4">
+                <div className="bg-[#740015]/10 border-2 border-[#740015] dark:bg-[#740015]/20 dark:border-[#531946] rounded-xl p-4">
                   <div className="flex items-start gap-3">
                     <Info
                       size={24}
                       weight="bold"
-                      className="text-purple-600 dark:text-purple-400 flex-shrink-0"
+                      className="text-[#740015] dark:text-[#CE805C] flex-shrink-0"
                     />
                     <div>
-                      <p className="font-semibold text-purple-700 dark:text-purple-400 mb-1">
+                      <p className="font-semibold text-[#740015] dark:text-[#CE805C] mb-1">
                         No Vendors Booked Yet
                       </p>
-                      <p className="text-sm text-purple-600 dark:text-purple-300">
+                      <p className="text-sm text-[#531946] dark:text-[#B87050]">
                         You have {completionStats.vendors.length} vendor(s)
                         tracked but none are booked yet.
                       </p>
@@ -878,7 +878,7 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
                         </p>
                       )}
                       {vendor.price && (
-                        <p className="text-sm font-semibold text-green-600 dark:text-green-400 mt-2">
+                        <p className="text-sm font-semibold text-[#57886C] dark:text-[#57886C] mt-2">
                           ₦{parseFloat(vendor.price).toLocaleString()}
                         </p>
                       )}
@@ -887,9 +887,9 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
                       className={`px-3 py-1 rounded-lg text-sm font-medium ${
                         vendor.status === "Booked" ||
                         vendor.status === "Confirmed"
-                          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                          ? "bg-[#57886C]/10 text-[#57886C] dark:bg-[#57886C]/30 dark:text-[#57886C]"
                           : vendor.status === "Deposit Paid"
-                            ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
+                            ? "bg-[#CE805C]/10 text-[#B87050] dark:bg-[#CE805C]/30 dark:text-[#CE805C]"
                             : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
                       }`}
                     >
@@ -946,7 +946,7 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
                         sx={{ fontSize: 20 }}
                         className={
                           task.status === "Completed"
-                            ? "text-green-600 dark:text-green-400"
+                            ? "text-[#57886C] dark:text-[#57886C]"
                             : "text-gray-400 dark:text-gray-600"
                         }
                       />
@@ -972,8 +972,8 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
                             <span
                               className={`px-2 py-0.5 rounded flex items-center gap-1 ${
                                 darkMode
-                                  ? "bg-orange-900/30 text-orange-400"
-                                  : "bg-orange-100 text-orange-700"
+                                  ? "bg-[#CE805C]/30 text-[#CE805C]"
+                                  : "bg-[#CE805C]/10 text-[#B87050]"
                               }`}
                             >
                               <CalendarBlank size={14} weight="bold" />
@@ -983,9 +983,9 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
                           <span
                             className={`px-2 py-0.5 rounded ${
                               task.priority === "urgent"
-                                ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                ? "bg-[#740015]/10 text-[#740015] dark:bg-[#740015]/30 dark:text-[#CE805C]"
                                 : task.priority === "high"
-                                  ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
+                                  ? "bg-[#CE805C]/10 text-[#B87050] dark:bg-[#CE805C]/30 dark:text-[#CE805C]"
                                   : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
                             }`}
                           >
