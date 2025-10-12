@@ -1,18 +1,28 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { SignOut, Moon, Sun, List, X } from "@phosphor-icons/react";
 import { useSyncToCloud } from "../hooks/useSyncToCloud";
 import { Toast } from "./ui";
 import Modal from "./ui/Modal";
 import { DEFAULT_GUIDE } from "../lib/constants";
 
-// Feature Components
+// Feature Components - Lazy loaded for better code splitting
 import { Dashboard } from "../features/dashboard";
-import VisionQuiz from "../features/vision-quiz/VisionQuiz";
-import VisionPlanner from "../features/vision/VisionPlanner";
-import BudgetBuilder from "../features/budget/BudgetBuilder";
-import VendorTracker from "../features/vendors/VendorTracker";
-import TimelineManager from "../features/timeline/TimelineManager";
-import FinalBlueprint from "../features/blueprint/FinalBlueprint";
+const VisionQuiz = lazy(() => import("../features/vision-quiz/VisionQuiz"));
+const VisionPlanner = lazy(() => import("../features/vision/VisionPlanner"));
+const BudgetBuilder = lazy(() => import("../features/budget/BudgetBuilder"));
+const VendorTracker = lazy(() => import("../features/vendors/VendorTracker"));
+const TimelineManager = lazy(() => import("../features/timeline/TimelineManager"));
+const FinalBlueprint = lazy(() => import("../features/blueprint/FinalBlueprint"));
+
+// Loading component
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="text-center">
+      <div className="w-16 h-16 border-4 border-[#CE805C] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+      <p className="text-gray-600">Loading...</p>
+    </div>
+  </div>
+);
 
 /**
  * InteractiveGuide Component
@@ -505,61 +515,79 @@ export default function InteractiveGuide({
             darkMode={darkMode}
           />
         )}
-        {activeSection === "quiz" && (
-          <VisionQuiz
-            data={data}
-            updateQuizAnswer={updateQuizAnswer}
-            submitQuiz={submitQuiz}
-            resetQuiz={resetQuiz}
-            setActiveSection={setActiveSection}
-            darkMode={darkMode}
-          />
-        )}
-        {activeSection === "vision" && (
-          <VisionPlanner
-            data={data}
-            updatePriorities={updatePriorities}
-            updateField={updateField}
-            setActiveSection={setActiveSection}
-          />
-        )}
-        {activeSection === "budget" && (
-          <BudgetBuilder
-            data={data}
-            updateTotalBudget={updateTotalBudget}
-            updateCategoryField={updateCategoryField}
-            setActiveSection={setActiveSection}
-          />
-        )}
-        {activeSection === "vendors" && (
-          <VendorTracker
-            data={data}
-            addVendor={addVendor}
-            updateVendor={updateVendor}
-            deleteVendor={deleteVendor}
-            setActiveSection={setActiveSection}
-          />
-        )}
-        {activeSection === "timeline" && (
-          <TimelineManager
-            data={data}
-            addTask={addTask}
-            updateTask={updateTask}
-            deleteTask={deleteTask}
-            updateWeddingDate={updateWeddingDate}
-            toggleShowCompleted={toggleShowCompleted}
-            setActiveSection={setActiveSection}
-          />
-        )}
-        {activeSection === "blueprint" && (
-          <FinalBlueprint
-            data={data}
-            setActiveSection={setActiveSection}
-            userData={userData}
-            userEmail={user?.email || userEmail}
-            darkMode={darkMode}
-          />
-        )}
+        
+        <Suspense fallback={<LoadingSpinner />}>
+          {activeSection === "quiz" && (
+            <VisionQuiz
+              data={data}
+              updateQuizAnswer={updateQuizAnswer}
+              submitQuiz={submitQuiz}
+              resetQuiz={resetQuiz}
+              setActiveSection={setActiveSection}
+              darkMode={darkMode}
+            />
+          )}
+        </Suspense>
+
+        <Suspense fallback={<LoadingSpinner />}>
+          {activeSection === "vision" && (
+            <VisionPlanner
+              data={data}
+              updatePriorities={updatePriorities}
+              updateField={updateField}
+              setActiveSection={setActiveSection}
+            />
+          )}
+        </Suspense>
+
+        <Suspense fallback={<LoadingSpinner />}>
+          {activeSection === "budget" && (
+            <BudgetBuilder
+              data={data}
+              updateTotalBudget={updateTotalBudget}
+              updateCategoryField={updateCategoryField}
+              setActiveSection={setActiveSection}
+            />
+          )}
+        </Suspense>
+
+        <Suspense fallback={<LoadingSpinner />}>
+          {activeSection === "vendors" && (
+            <VendorTracker
+              data={data}
+              addVendor={addVendor}
+              updateVendor={updateVendor}
+              deleteVendor={deleteVendor}
+              setActiveSection={setActiveSection}
+            />
+          )}
+        </Suspense>
+
+        <Suspense fallback={<LoadingSpinner />}>
+          {activeSection === "timeline" && (
+            <TimelineManager
+              data={data}
+              addTask={addTask}
+              updateTask={updateTask}
+              deleteTask={deleteTask}
+              updateWeddingDate={updateWeddingDate}
+              toggleShowCompleted={toggleShowCompleted}
+              setActiveSection={setActiveSection}
+            />
+          )}
+        </Suspense>
+
+        <Suspense fallback={<LoadingSpinner />}>
+          {activeSection === "blueprint" && (
+            <FinalBlueprint
+              data={data}
+              setActiveSection={setActiveSection}
+              userData={userData}
+              userEmail={user?.email || userEmail}
+              darkMode={darkMode}
+            />
+          )}
+        </Suspense>
       </main>
 
       {/* Logout Confirmation Modal */}
