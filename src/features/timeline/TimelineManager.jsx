@@ -15,6 +15,15 @@ import {
   CaretDown,
   Warning,
 } from "@phosphor-icons/react";
+// Material UI Icons for enhanced timeline
+import {
+  EventAvailable,
+  PriorityHigh,
+  CheckCircle as MuiCheckCircle,
+  RadioButtonUnchecked,
+  MoreTime,
+  CalendarToday,
+} from "@mui/icons-material";
 import { Card } from "../../components/ui";
 import {
   TASK_CATEGORIES,

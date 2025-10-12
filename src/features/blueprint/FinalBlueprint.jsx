@@ -18,6 +18,17 @@ import {
   Crown,
   CalendarBlank,
 } from "@phosphor-icons/react";
+// Material UI Icons for enhanced blueprint
+import {
+  VerifiedUser,
+  Assessment,
+  TrendingUp,
+  Download,
+  Print,
+  EmojiEvents,
+  AutoAwesome,
+  Diamond as MuiDiamond,
+} from "@mui/icons-material";
 import { Card } from "../../components/ui";
 import {
   BUDGET_CATEGORIES,
@@ -131,21 +142,21 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
         title: "Traditional Hausa Wedding",
         description:
           "Your wedding will honor authentic Hausa customs with full traditional ceremonies, attire, and cultural elements.",
-        icon: <Crown size={64} weight="duotone" />,
+        icon: <EmojiEvents sx={{ fontSize: 64 }} />,
         color: "from-[#CE805C] to-[#B87050]",
       },
       fusion: {
         title: "Fusion Wedding Style",
         description:
           "You'll blend cherished Hausa traditions with modern elements for a unique celebration that honors both heritage and contemporary style.",
-        icon: <Sparkle size={64} weight="duotone" />,
+        icon: <AutoAwesome sx={{ fontSize: 64 }} />,
         color: "from-[#531946] to-[#740015]",
       },
       modern: {
         title: "Modern Contemporary Wedding",
         description:
           "Your wedding will feature a contemporary approach with minimalist elegance and Western influences while respecting cultural significance.",
-        icon: <Diamond size={64} weight="duotone" />,
+        icon: <MuiDiamond sx={{ fontSize: 64 }} />,
         color: "from-[#740015] to-[#531946]",
       },
     };
@@ -234,9 +245,8 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
               Vision
             </p>
             {completionStats.hasVisionResult && (
-              <CheckCircle
-                size={16}
-                weight="fill"
+              <VerifiedUser
+                sx={{ fontSize: 16 }}
                 className="text-green-600 dark:text-green-400 mx-auto mt-1"
               />
             )}
@@ -273,9 +283,8 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
               Budget
             </p>
             {completionStats.hasBudget && (
-              <CheckCircle
-                size={16}
-                weight="fill"
+              <VerifiedUser
+                sx={{ fontSize: 16 }}
                 className="text-green-600 dark:text-green-400 mx-auto mt-1"
               />
             )}
@@ -312,9 +321,8 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
               Vendors
             </p>
             {completionStats.hasVendors && (
-              <CheckCircle
-                size={16}
-                weight="fill"
+              <VerifiedUser
+                sx={{ fontSize: 16 }}
                 className="text-green-600 dark:text-green-400 mx-auto mt-1"
               />
             )}
@@ -351,9 +359,8 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
               Timeline
             </p>
             {completionStats.hasTasks && completionStats.weddingDate && (
-              <CheckCircle
-                size={16}
-                weight="fill"
+              <VerifiedUser
+                sx={{ fontSize: 16 }}
                 className="text-green-600 dark:text-green-400 mx-auto mt-1"
               />
             )}
@@ -367,7 +374,7 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
           onClick={handleExport}
           className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#CE805C] to-[#B87050] text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[#CE805C]/50"
         >
-          <DownloadSimple size={20} weight="bold" />
+          <Download sx={{ fontSize: 20 }} />
           Export PDF
         </button>
 
@@ -379,7 +386,7 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
               : "border-gray-300 text-gray-700 hover:bg-gray-50"
           }`}
         >
-          <Printer size={20} weight="bold" />
+          <Print sx={{ fontSize: 20 }} />
           Print
         </button>
       </div>
@@ -935,9 +942,8 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      <CheckCircle
-                        size={20}
-                        weight={task.status === "Completed" ? "fill" : "bold"}
+                      <VerifiedUser
+                        sx={{ fontSize: 20 }}
                         className={
                           task.status === "Completed"
                             ? "text-green-600 dark:text-green-400"

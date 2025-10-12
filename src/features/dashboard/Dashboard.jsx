@@ -11,6 +11,16 @@ import {
   CheckCircle,
   Wallet,
 } from "@phosphor-icons/react";
+// Material UI Icons for enhanced dashboard
+import {
+  Dashboard as DashboardIcon,
+  CalendarMonth,
+  Store,
+  AttachMoney,
+  Assignment,
+  TrendingUp,
+  AutoAwesome,
+} from "@mui/icons-material";
 
 /**
  * Dashboard Component

@@ -18,6 +18,20 @@ import {
   Wallet,
   Handshake,
 } from "@phosphor-icons/react";
+// Material UI Icons - Enhanced features
+import {
+  Star,
+  StarBorder,
+  Favorite,
+  FavoriteBorder,
+  Verified,
+  CheckCircle as MuiCheckCircle,
+  Phone as MuiPhone,
+  Email as MuiEmail,
+  TrendingUp,
+  TrendingDown,
+  WorkspacePremium,
+} from "@mui/icons-material";
 import { Card } from "../../components/ui";
 import { VENDOR_CATEGORIES, VENDOR_STATUS } from "../../lib/constants";
 
@@ -69,7 +83,7 @@ export default function VendorTracker({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [showModal]);
 
-  // Get status display info with icons
+  // Get status display info with icons (Hybrid: Phosphor + Material UI)
   const getStatusInfo = (status) => {
     const config = {
       Researching: {
@@ -93,7 +107,7 @@ export default function VendorTracker({
         label: "Booked",
         color:
           "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-        icon: <CheckCircle size={16} weight="fill" />,
+        icon: <MuiCheckCircle sx={{ fontSize: 16 }} />, // Material UI for polished checkmark
       },
       "Deposit Paid": {
         label: "Deposit Paid",
@@ -105,7 +119,7 @@ export default function VendorTracker({
         label: "Confirmed",
         color:
           "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-        icon: <Handshake size={16} weight="bold" />,
+        icon: <Verified sx={{ fontSize: 16 }} />, // Material UI verified badge
       },
     };
     return config[status] || config.Researching;
@@ -565,23 +579,94 @@ export default function VendorTracker({
             return (
               <article
                 key={vendor.id}
-                className={`${
+                className={`relative ${
                   darkMode
                     ? "bg-gray-800 border-gray-700"
                     : "bg-white border-gray-200"
                 } border-2 rounded-xl p-5 transition-all hover:shadow-lg hover:border-[#CE805C]/50`}
                 role="listitem"
               >
+                {/* Premium Badge (Material UI) */}
+                {vendor.isPremium && (
+                  <div className="absolute top-3 right-3 z-10">
+                    <WorkspacePremium
+                      sx={{
+                        fontSize: 28,
+                        color: "#CE805C",
+                        filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))",
+                      }}
+                      aria-label="Premium vendor"
+                    />
+                  </div>
+                )}
+
                 {/* Vendor Header */}
                 <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 pr-2">
                     <h3
-                      className={`font-playfair text-xl font-bold mb-1 truncate ${
+                      className={`font-playfair text-xl font-bold mb-2 truncate ${
                         darkMode ? "text-white" : "text-gray-900"
                       }`}
                     >
                       {vendor.name}
                     </h3>
+
+                    {/* Rating & Favorite (Material UI) */}
+                    <div className="flex items-center gap-2 mb-2">
+                      {/* 5-star rating */}
+                      <div className="flex items-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateVendor(vendor.id, { rating: star });
+                            }}
+                            className="focus:outline-none focus:ring-2 focus:ring-[#CE805C] rounded transition-transform hover:scale-110"
+                            aria-label={`Rate ${star} stars`}
+                          >
+                            {(vendor.rating || 0) >= star ? (
+                              <Star sx={{ fontSize: 18, color: "#CE805C" }} />
+                            ) : (
+                              <StarBorder
+                                sx={{
+                                  fontSize: 18,
+                                  color: darkMode ? "#555" : "#ccc",
+                                }}
+                              />
+                            )}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Favorite toggle */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateVendor(vendor.id, {
+                            favorite: !vendor.favorite,
+                          });
+                        }}
+                        className="focus:outline-none focus:ring-2 focus:ring-[#CE805C] rounded transition-transform hover:scale-110"
+                        aria-label={
+                          vendor.favorite
+                            ? "Remove from favorites"
+                            : "Add to favorites"
+                        }
+                      >
+                        {vendor.favorite ? (
+                          <Favorite sx={{ fontSize: 20, color: "#740015" }} />
+                        ) : (
+                          <FavoriteBorder
+                            sx={{
+                              fontSize: 20,
+                              color: darkMode ? "#666" : "#999",
+                            }}
+                          />
+                        )}
+                      </button>
+                    </div>
+
                     <span
                       className={`inline-block px-2.5 py-1 rounded-lg text-sm font-medium ${
                         darkMode
@@ -627,14 +712,12 @@ export default function VendorTracker({
                   </div>
                 </div>
 
-                {/* Contact Info */}
+                {/* Contact Info - Material UI Icons */}
                 <div className="space-y-2 mb-3">
                   {vendor.phone && (
                     <div className="flex items-center gap-2 text-sm">
-                      <Phone
-                        size={16}
-                        weight="bold"
-                        className="flex-shrink-0 text-[#CE805C]"
+                      <MuiPhone
+                        sx={{ fontSize: 16, color: "#CE805C" }}
                         aria-hidden="true"
                       />
                       <a
@@ -649,10 +732,8 @@ export default function VendorTracker({
                   )}
                   {vendor.email && (
                     <div className="flex items-center gap-2 text-sm">
-                      <EnvelopeSimple
-                        size={16}
-                        weight="bold"
-                        className="flex-shrink-0 text-[#CE805C]"
+                      <MuiEmail
+                        sx={{ fontSize: 16, color: "#CE805C" }}
                         aria-hidden="true"
                       />
                       <a
@@ -687,22 +768,59 @@ export default function VendorTracker({
                   )}
                 </div>
 
-                {/* Price */}
+                {/* Price with trend indicator (Material UI) */}
                 {vendor.price && (
-                  <div className="flex items-center gap-2 mb-3">
-                    <CurrencyDollar
-                      size={20}
-                      weight="bold"
-                      className="text-green-600 dark:text-green-400"
-                      aria-hidden="true"
-                    />
-                    <span
-                      className={`font-semibold text-lg ${
-                        darkMode ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      ₦{parseFloat(vendor.price).toLocaleString()}
-                    </span>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <CurrencyDollar
+                        size={20}
+                        weight="bold"
+                        className="text-green-600 dark:text-green-400"
+                        aria-hidden="true"
+                      />
+                      <span
+                        className={`font-semibold text-lg ${
+                          darkMode ? "text-white" : "text-gray-900"
+                        }`}
+                      >
+                        ₦{parseFloat(vendor.price).toLocaleString()}
+                      </span>
+                    </div>
+
+                    {/* Price trend indicator (if price changed) */}
+                    {vendor.previousPrice &&
+                      vendor.previousPrice !== vendor.price && (
+                        <div className="flex items-center gap-1">
+                          {parseFloat(vendor.price) >
+                          parseFloat(vendor.previousPrice) ? (
+                            <>
+                              <TrendingUp
+                                sx={{ fontSize: 16, color: "#ef4444" }}
+                              />
+                              <span className="text-xs text-red-600 dark:text-red-400">
+                                +₦
+                                {(
+                                  parseFloat(vendor.price) -
+                                  parseFloat(vendor.previousPrice)
+                                ).toLocaleString()}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <TrendingDown
+                                sx={{ fontSize: 16, color: "#10b981" }}
+                              />
+                              <span className="text-xs text-green-600 dark:text-green-400">
+                                -₦
+                                {(
+                                  parseFloat(vendor.previousPrice) -
+                                  parseFloat(vendor.price)
+                                ).toLocaleString()}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      )}
                   </div>
                 )}
 

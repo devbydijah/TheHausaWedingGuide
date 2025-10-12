@@ -1,5 +1,13 @@
 import { useState, useEffect } from "react";
 import { Heart, LockKey } from "@phosphor-icons/react";
+// Material UI Icons for enhanced login experience
+import {
+  Favorite,
+  Lock,
+  Email,
+  Visibility,
+  VisibilityOff,
+} from "@mui/icons-material";
 
 /**
  * LoginGate Component
@@ -21,6 +29,7 @@ const SESSION_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
 export default function LoginGate({ children, onAuthenticated }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // NEW: password visibility toggle
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -123,7 +132,7 @@ export default function LoginGate({ children, onAuthenticated }) {
         {/* Logo/Brand */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#740015] to-[#531946] rounded-full mb-4 shadow-lg">
-            <Heart size={40} weight="fill" className="text-white" />
+            <Favorite sx={{ fontSize: 40, color: "white" }} />
           </div>
           <h1 className="font-playfair text-3xl font-bold bg-gradient-to-r from-[#740015] to-[#531946] bg-clip-text text-transparent mb-2">
             Hausa Wedding Guide
@@ -136,7 +145,7 @@ export default function LoginGate({ children, onAuthenticated }) {
         {/* Login Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
           <div className="flex items-center gap-3 mb-6">
-            <LockKey size={28} weight="duotone" className="text-[#CE805C]" />
+            <Lock sx={{ fontSize: 28, color: "#CE805C" }} />
             <div>
               <h2 className="font-playfair text-2xl font-semibold text-gray-900">
                 Welcome Back
@@ -172,7 +181,7 @@ export default function LoginGate({ children, onAuthenticated }) {
               </p>
             </div>
 
-            {/* Password Input */}
+            {/* Password Input with visibility toggle */}
             <div>
               <label
                 htmlFor="password"
@@ -180,16 +189,30 @@ export default function LoginGate({ children, onAuthenticated }) {
               >
                 Access Password
               </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CE805C] focus:border-transparent transition-all"
-                placeholder="Enter password from email"
-                disabled={isLoading}
-                autoComplete="current-password"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CE805C] focus:border-transparent transition-all"
+                  placeholder="Enter password from email"
+                  disabled={isLoading}
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <VisibilityOff sx={{ fontSize: 20 }} />
+                  ) : (
+                    <Visibility sx={{ fontSize: 20 }} />
+                  )}
+                </button>
+              </div>
               <p className="text-xs text-gray-500 mt-1">
                 Check your purchase confirmation email for the password
               </p>
@@ -234,10 +257,9 @@ export default function LoginGate({ children, onAuthenticated }) {
           {/* Security Note */}
           <div className="mt-4 bg-gradient-to-br from-[#CE805C]/10 to-[#B87050]/10 rounded-lg p-3 border border-[#CE805C]/20">
             <p className="text-xs text-gray-700 flex items-center gap-2">
-              <LockKey
-                size={14}
-                weight="bold"
-                className="text-[#CE805C] flex-shrink-0"
+              <Lock
+                sx={{ fontSize: 14, color: "#CE805C" }}
+                className="flex-shrink-0"
               />
               Your data is encrypted and secure. Your wedding plans are saved
               automatically and accessible from any device.

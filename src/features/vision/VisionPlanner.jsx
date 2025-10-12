@@ -17,6 +17,15 @@ import {
   Diamond,
   X,
 } from "@phosphor-icons/react";
+// Material UI Icons for vision styles and enhancements
+import {
+  EmojiEvents,
+  AutoAwesome,
+  Diamond as MuiDiamond,
+  Favorite,
+  CheckCircle as MuiCheckCircle,
+  StarRate,
+} from "@mui/icons-material";
 import { Card, AnimatedCard, GradientHeader, Modal } from "../../components/ui";
 
 /**

@@ -17,6 +17,16 @@ import {
   SquaresFour,
   ArrowsClockwise,
 } from "@phosphor-icons/react";
+// Material UI Icons for enhanced budget features
+import {
+  TrendingUp,
+  TrendingDown,
+  AttachMoney,
+  PieChart,
+  BarChart,
+  Assessment,
+  Savings,
+} from "@mui/icons-material";
 import { Gauge } from "@mui/x-charts/Gauge";
 import { Card, AnimatedCard, GradientHeader } from "../../components/ui";
 import { BUDGET_CATEGORIES } from "../../lib/constants";
