@@ -331,13 +331,13 @@ export default function InteractiveGuide({ auth, onLogout }) {
 
   // Navigation sections
   const sections = [
-    { id: "dashboard", name: "📊 Dashboard" },
-    { id: "quiz", name: "💎 Vision Quiz" },
-    { id: "vision", name: "✨ Vision & Values" },
-    { id: "budget", name: "💰 Budget Builder" },
-    { id: "vendors", name: "🏪 Vendor Tracker" },
-    { id: "timeline", name: "📅 Timeline & Tasks" },
-    { id: "blueprint", name: "📋 Final Blueprint" },
+    { id: "dashboard", name: "Dashboard" },
+    { id: "quiz", name: "Vision Quiz" },
+    { id: "vision", name: "Vision & Values" },
+    { id: "budget", name: "Budget Builder" },
+    { id: "vendors", name: "Vendor Tracker" },
+    { id: "timeline", name: "Timeline & Tasks" },
+    { id: "blueprint", name: "Final Blueprint" },
   ];
 
   return (
@@ -502,7 +502,7 @@ export default function InteractiveGuide({ auth, onLogout }) {
                 }`}
                 aria-current={activeSection === section.id ? "page" : undefined}
               >
-                {section.name.replace(/[📊💎✨💰🏪📅📋]/g, "").trim()}
+                {section.name}
               </button>
             ))}
           </nav>

@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import {
   Calendar,
+  CalendarBlank,
   Plus,
   FunnelSimple,
   X,
@@ -12,6 +13,7 @@ import {
   Clock,
   SortAscending,
   CaretDown,
+  Warning,
 } from "@phosphor-icons/react";
 import { Card } from "../../components/ui";
 import {
@@ -283,27 +285,23 @@ export default function TimelineManager({
         label: "Urgent",
         color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
         dot: "bg-red-500",
-        icon: "🔴",
       },
       high: {
         label: "High",
         color:
           "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
         dot: "bg-orange-500",
-        icon: "🟠",
       },
       medium: {
         label: "Medium",
         color:
           "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
         dot: "bg-yellow-500",
-        icon: "🟡",
       },
       low: {
         label: "Low",
         color: "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400",
         dot: "bg-gray-400",
-        icon: "⚪",
       },
     };
     return config[priority] || config.low;
@@ -425,14 +423,17 @@ export default function TimelineManager({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden">
+      <div className="bg-gradient-to-r from-[#CE805C] to-[#B87050] rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
 
         <div className="relative z-10 text-center">
-          <div className="text-6xl sm:text-7xl mb-4" aria-hidden="true">
-            📅
-          </div>
+          <Calendar
+            size={72}
+            weight="duotone"
+            className="mx-auto mb-4"
+            aria-hidden="true"
+          />
           <h1 className="font-playfair text-3xl sm:text-4xl font-bold mb-3">
             Timeline & Tasks
           </h1>
@@ -442,35 +443,99 @@ export default function TimelineManager({
         </div>
       </div>
 
+      {/* Wedding Date Selector */}
+      {!weddingDate && (
+        <Card className="!p-6 border-2 border-[#CE805C] bg-gradient-to-br from-[#CE805C]/5 to-[#B87050]/5">
+          <div className="flex items-start gap-4">
+            <Warning
+              size={32}
+              weight="duotone"
+              className="text-[#CE805C] flex-shrink-0"
+            />
+            <div className="flex-1">
+              <h3 className="font-playfair text-xl font-bold mb-2 bg-gradient-to-r from-[#740015] to-[#531946] bg-clip-text text-transparent">
+                Set Your Wedding Date
+              </h3>
+              <p
+                className={`text-sm mb-4 ${darkMode ? "text-gray-300" : "text-gray-600"}`}
+              >
+                Choose your wedding date to enable countdown, task scheduling,
+                and timeline features.
+              </p>
+              <div className="flex gap-3 items-center flex-wrap">
+                <input
+                  type="date"
+                  id="wedding-date-picker"
+                  className={`px-4 py-2.5 rounded-lg border-2 border-[#CE805C] focus:outline-none focus:ring-2 focus:ring-[#CE805C] ${
+                    darkMode
+                      ? "bg-gray-700 text-white"
+                      : "bg-white text-gray-900"
+                  }`}
+                  min={new Date().toISOString().split("T")[0]}
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      updateWeddingDate(e.target.value);
+                    }
+                  }}
+                />
+                <span
+                  className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-500"}`}
+                >
+                  Select your special day
+                </span>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Wedding Countdown */}
       {countdown && (
-        <Card className="!p-6 sm:!p-8 text-center bg-gradient-to-br from-orange-50 to-red-50 dark:from-gray-800 dark:to-gray-850 border-orange-200 dark:border-gray-700">
-          <div className="text-5xl sm:text-6xl font-bold mb-2">
-            {countdown.isToday ? (
-              <span className="text-orange-600 dark:text-orange-400">
-                Today! 🎉
-              </span>
-            ) : countdown.isPast ? (
-              <span className="text-gray-600 dark:text-gray-400">
-                {countdown.days} days ago
-              </span>
-            ) : (
-              <span className="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-                {countdown.days}
-              </span>
-            )}
+        <Card className="!p-6 sm:!p-8 text-center bg-gradient-to-br from-[#CE805C]/10 to-[#B87050]/10 border-2 border-[#CE805C]/30">
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <CalendarBlank
+              size={40}
+              weight="duotone"
+              className="text-[#CE805C]"
+            />
+            <div className="text-5xl sm:text-6xl font-bold">
+              {countdown.isToday ? (
+                <span className="bg-gradient-to-r from-[#740015] to-[#531946] bg-clip-text text-transparent">
+                  Today!
+                </span>
+              ) : countdown.isPast ? (
+                <span className={darkMode ? "text-gray-400" : "text-gray-600"}>
+                  {countdown.days} days ago
+                </span>
+              ) : (
+                <span className="bg-gradient-to-r from-[#CE805C] to-[#B87050] bg-clip-text text-transparent">
+                  {countdown.days}
+                </span>
+              )}
+            </div>
           </div>
           <p
-            className={`font-inter text-sm sm:text-base ${
-              darkMode ? "text-gray-300" : "text-gray-700"
-            }`}
+            className={`font-inter text-sm sm:text-base font-medium ${darkMode ? "text-gray-300" : "text-gray-700"}`}
           >
             {countdown.isToday
-              ? "Your wedding day is here!"
+              ? "Your wedding day is here! Alhamdulillah! 🎉"
               : countdown.isPast
-                ? "since your wedding"
-                : "days until your wedding"}
+                ? "since your beautiful wedding"
+                : "days until your special day"}
           </p>
+          {weddingDate && (
+            <p
+              className={`text-xs mt-2 ${darkMode ? "text-gray-400" : "text-gray-500"}`}
+            >
+              Wedding Date:{" "}
+              {new Date(weddingDate).toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
+          )}
         </Card>
       )}
 
@@ -480,14 +545,14 @@ export default function TimelineManager({
           <h2 className="font-playfair text-xl sm:text-2xl font-bold bg-gradient-to-r from-[#740015] to-[#531946] bg-clip-text text-transparent">
             Overall Progress
           </h2>
-          <span className="font-inter text-2xl sm:text-3xl font-bold text-orange-600 dark:text-orange-400">
+          <span className="font-inter text-2xl sm:text-3xl font-bold text-[#CE805C]">
             {taskStats.progressPercent}%
           </span>
         </div>
 
         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-4 overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-orange-500 to-red-500 transition-all duration-500 rounded-full"
+            className="h-full bg-gradient-to-r from-[#CE805C] to-[#B87050] transition-all duration-500 rounded-full"
             style={{ width: `${taskStats.progressPercent}%` }}
             role="progressbar"
             aria-valuenow={taskStats.progressPercent}
@@ -547,16 +612,16 @@ export default function TimelineManager({
             setEditingTask(null);
             setShowModal(true);
           }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#CE805C] to-[#B87050] text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-orange-500/50"
+          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#CE805C] to-[#B87050] text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[#CE805C]/50"
         >
           <Plus size={20} weight="bold" />
           Add Task
         </button>
 
-        {tasks.length === 0 && (
+        {tasks.length === 0 && weddingDate && (
           <button
             onClick={handleAddCommonTasks}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold border-2 transition-all hover:scale-105 focus:outline-none focus:ring-4 focus:ring-orange-500/50 ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold border-2 transition-all hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[#CE805C]/50 ${
               darkMode
                 ? "border-gray-600 text-gray-300 hover:bg-gray-700"
                 : "border-gray-300 text-gray-700 hover:bg-gray-50"
@@ -569,9 +634,9 @@ export default function TimelineManager({
 
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold border-2 transition-all focus:outline-none focus:ring-4 focus:ring-orange-500/50 ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold border-2 transition-all focus:outline-none focus:ring-4 focus:ring-[#CE805C]/50 ${
             showFilters || hasActiveFilters
-              ? "border-orange-500 bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
+              ? "border-[#CE805C] bg-[#CE805C]/10 text-[#CE805C] dark:bg-[#CE805C]/20"
               : darkMode
                 ? "border-gray-600 text-gray-300 hover:bg-gray-700"
                 : "border-gray-300 text-gray-700 hover:bg-gray-50"
@@ -580,7 +645,7 @@ export default function TimelineManager({
           <FunnelSimple size={20} weight="bold" />
           Filters
           {hasActiveFilters && (
-            <span className="ml-1 px-2 py-0.5 bg-orange-500 text-white text-xs rounded-full">
+            <span className="ml-1 px-2 py-0.5 bg-[#CE805C] text-white text-xs rounded-full">
               {
                 [filterCategory, filterStatus, filterPriority].filter(
                   (f) => f !== "all"
@@ -746,7 +811,11 @@ export default function TimelineManager({
       {/* Task List */}
       {filteredTasks.length === 0 ? (
         <Card className="!p-12 text-center">
-          <div className="text-6xl mb-4">📋</div>
+          <CheckCircle
+            size={72}
+            weight="duotone"
+            className={`mx-auto mb-4 ${darkMode ? "text-gray-600" : "text-gray-400"}`}
+          />
           <h3
             className={`font-playfair text-2xl font-bold mb-2 ${
               darkMode ? "text-white" : "text-gray-900"
@@ -911,7 +980,12 @@ export default function TimelineManager({
                                 : "bg-gray-100 text-gray-700"
                           }`}
                         >
-                          📅 {new Date(task.dueDate).toLocaleDateString()}
+                          <CalendarBlank
+                            size={14}
+                            weight="bold"
+                            className="inline mr-1"
+                          />
+                          {new Date(task.dueDate).toLocaleDateString()}
                           {isOverdue && " (Overdue)"}
                         </span>
                       )}

@@ -7,6 +7,9 @@ import {
   Storefront,
   CalendarCheck,
   ClipboardText,
+  Calendar,
+  CheckCircle,
+  Wallet,
 } from "@phosphor-icons/react";
 
 /**
@@ -404,7 +407,8 @@ export default function Dashboard({
                 variant="primary"
                 size="sm"
               >
-                📅 Set Wedding Date
+                <Calendar size={16} weight="bold" className="inline mr-1" />
+                Set Wedding Date
               </Button>
             )}
             {totalVendors === 0 && (
@@ -413,7 +417,8 @@ export default function Dashboard({
                 variant="secondary"
                 size="sm"
               >
-                🏪 Add First Vendor
+                <Storefront size={16} weight="bold" className="inline mr-1" />
+                Add First Vendor
               </Button>
             )}
             {totalTasks === 0 && (
@@ -422,7 +427,8 @@ export default function Dashboard({
                 variant="secondary"
                 size="sm"
               >
-                ✅ Create First Task
+                <CheckCircle size={16} weight="bold" className="inline mr-1" />
+                Create First Task
               </Button>
             )}
             {budgetTotal === 0 && (
@@ -431,7 +437,8 @@ export default function Dashboard({
                 variant="secondary"
                 size="sm"
               >
-                💰 Set Budget
+                <Wallet size={16} weight="bold" className="inline mr-1" />
+                Set Budget
               </Button>
             )}
           </div>

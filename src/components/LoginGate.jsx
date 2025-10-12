@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Heart, LockKey } from "@phosphor-icons/react";
 
 /**
  * LoginGate Component
@@ -117,27 +118,34 @@ export default function LoginGate({ children, onAuthenticated }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#740015]/10 via-[#531946]/10 to-[#CE805C]/10 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         {/* Logo/Brand */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full mb-4">
-            <span className="text-3xl">💍</span>
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#740015] to-[#531946] rounded-full mb-4 shadow-lg">
+            <Heart size={40} weight="fill" className="text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="font-playfair text-3xl font-bold bg-gradient-to-r from-[#740015] to-[#531946] bg-clip-text text-transparent mb-2">
             Hausa Wedding Guide
           </h1>
-          <p className="text-gray-600">Interactive Wedding Planner</p>
+          <p className="text-gray-600 font-inter">
+            Interactive Wedding Planner
+          </p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-            Welcome Back
-          </h2>
-          <p className="text-gray-600 mb-6">
-            Enter your details to access your wedding planner
-          </p>
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+          <div className="flex items-center gap-3 mb-6">
+            <LockKey size={28} weight="duotone" className="text-[#CE805C]" />
+            <div>
+              <h2 className="font-playfair text-2xl font-semibold text-gray-900">
+                Welcome Back
+              </h2>
+              <p className="text-sm text-gray-600">
+                Access your wedding planner
+              </p>
+            </div>
+          </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
             {/* Email Input */}
@@ -153,7 +161,7 @@ export default function LoginGate({ children, onAuthenticated }) {
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CE805C] focus:border-transparent transition-all"
                 placeholder="bride@example.com"
                 disabled={isLoading}
                 autoComplete="email"
@@ -177,7 +185,7 @@ export default function LoginGate({ children, onAuthenticated }) {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CE805C] focus:border-transparent transition-all"
                 placeholder="Enter password from email"
                 disabled={isLoading}
                 autoComplete="current-password"
@@ -198,7 +206,7 @@ export default function LoginGate({ children, onAuthenticated }) {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 px-6 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+              className="w-full bg-gradient-to-r from-[#740015] to-[#531946] text-white py-3 px-6 rounded-lg font-medium hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Logging in..." : "Access Planner"}
             </button>
@@ -215,7 +223,7 @@ export default function LoginGate({ children, onAuthenticated }) {
             </p>
             <a
               href="https://hausaroom.com"
-              className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+              className="text-sm font-medium bg-gradient-to-r from-[#740015] to-[#531946] bg-clip-text text-transparent hover:opacity-80"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -224,9 +232,14 @@ export default function LoginGate({ children, onAuthenticated }) {
           </div>
 
           {/* Security Note */}
-          <div className="mt-4 bg-gray-50 rounded-lg p-3">
-            <p className="text-xs text-gray-600">
-              🔒 Your data is encrypted and secure. Your wedding plans are saved
+          <div className="mt-4 bg-gradient-to-br from-[#CE805C]/10 to-[#B87050]/10 rounded-lg p-3 border border-[#CE805C]/20">
+            <p className="text-xs text-gray-700 flex items-center gap-2">
+              <LockKey
+                size={14}
+                weight="bold"
+                className="text-[#CE805C] flex-shrink-0"
+              />
+              Your data is encrypted and secure. Your wedding plans are saved
               automatically and accessible from any device.
             </p>
           </div>
@@ -238,7 +251,7 @@ export default function LoginGate({ children, onAuthenticated }) {
             Need help? Email{" "}
             <a
               href="mailto:support@hausaroom.com"
-              className="text-purple-600 hover:underline"
+              className="bg-gradient-to-r from-[#740015] to-[#531946] bg-clip-text text-transparent font-medium hover:opacity-80"
             >
               support@hausaroom.com
             </a>

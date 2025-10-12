@@ -76,42 +76,36 @@ export default function VendorTracker({
         label: "Researching",
         color: "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300",
         icon: <Clock size={16} weight="bold" />,
-        iconEmoji: "🔍",
       },
       Contacted: {
         label: "Contacted",
         color:
           "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
         icon: <ChatCircleDots size={16} weight="bold" />,
-        iconEmoji: "📧",
       },
       "Quote Received": {
         label: "Quote Received",
         color:
           "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
         icon: <FileText size={16} weight="bold" />,
-        iconEmoji: "📄",
       },
       Booked: {
         label: "Booked",
         color:
           "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
         icon: <CheckCircle size={16} weight="fill" />,
-        iconEmoji: "✅",
       },
       "Deposit Paid": {
         label: "Deposit Paid",
         color:
           "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
         icon: <Wallet size={16} weight="bold" />,
-        iconEmoji: "💰",
       },
       Confirmed: {
         label: "Confirmed",
         color:
           "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
         icon: <Handshake size={16} weight="bold" />,
-        iconEmoji: "🤝",
       },
     };
     return config[status] || config.Researching;
@@ -249,14 +243,17 @@ export default function VendorTracker({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#CE805C] to-[#B87050] rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden">
+      <div className="bg-gradient-to-r from-[#740015] to-[#531946] rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
 
         <div className="relative z-10 text-center">
-          <div className="text-6xl sm:text-7xl mb-4" aria-hidden="true">
-            🏪
-          </div>
+          <Storefront
+            size={72}
+            weight="duotone"
+            className="mx-auto mb-4"
+            aria-hidden="true"
+          />
           <h1 className="font-playfair text-3xl sm:text-4xl font-bold mb-3">
             Vendor Tracker
           </h1>
@@ -515,7 +512,11 @@ export default function VendorTracker({
       {/* Vendor Grid */}
       {filteredVendors.length === 0 ? (
         <Card className="!p-12 text-center">
-          <div className="text-6xl mb-4">🏪</div>
+          <Storefront
+            size={72}
+            weight="duotone"
+            className={`mx-auto mb-4 ${darkMode ? "text-gray-600" : "text-gray-400"}`}
+          />
           <h3
             className={`font-playfair text-2xl font-bold mb-2 ${
               darkMode ? "text-white" : "text-gray-900"

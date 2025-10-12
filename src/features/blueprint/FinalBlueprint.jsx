@@ -14,6 +14,9 @@ import {
   ChartPieSlice,
   ListChecks,
   Clock,
+  Diamond,
+  Crown,
+  CalendarBlank,
 } from "@phosphor-icons/react";
 import { Card } from "../../components/ui";
 import {
@@ -128,22 +131,22 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
         title: "Traditional Hausa Wedding",
         description:
           "Your wedding will honor authentic Hausa customs with full traditional ceremonies, attire, and cultural elements.",
-        icon: "🏛️",
-        color: "from-amber-500 to-orange-500",
+        icon: <Crown size={64} weight="duotone" />,
+        color: "from-[#CE805C] to-[#B87050]",
       },
       fusion: {
         title: "Fusion Wedding Style",
         description:
           "You'll blend cherished Hausa traditions with modern elements for a unique celebration that honors both heritage and contemporary style.",
-        icon: "✨",
-        color: "from-purple-500 to-pink-500",
+        icon: <Sparkle size={64} weight="duotone" />,
+        color: "from-[#531946] to-[#740015]",
       },
       modern: {
         title: "Modern Contemporary Wedding",
         description:
           "Your wedding will feature a contemporary approach with minimalist elegance and Western influences while respecting cultural significance.",
-        icon: "💎",
-        color: "from-blue-500 to-cyan-500",
+        icon: <Diamond size={64} weight="duotone" />,
+        color: "from-[#740015] to-[#531946]",
       },
     };
 
@@ -160,9 +163,12 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
 
         <div className="relative z-10 text-center">
-          <div className="text-6xl sm:text-7xl mb-4" aria-hidden="true">
-            📋
-          </div>
+          <ClipboardText
+            size={72}
+            weight="duotone"
+            className="mx-auto mb-4"
+            aria-hidden="true"
+          />
           <h1 className="font-playfair text-3xl sm:text-4xl font-bold mb-3">
             Final Blueprint
           </h1>
@@ -417,29 +423,38 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
         <div className="space-y-6">
           {/* Wedding Date & Countdown */}
           {countdown && (
-            <Card className="!p-6 sm:!p-8 text-center bg-gradient-to-br from-orange-50 to-red-50 dark:from-gray-800 dark:to-gray-850 border-orange-200 dark:border-gray-700">
-              <div className="text-5xl sm:text-6xl font-bold mb-2">
-                {countdown.isToday ? (
-                  <span className="text-orange-600 dark:text-orange-400">
-                    Today! 🎉
-                  </span>
-                ) : countdown.isPast ? (
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {countdown.days} days ago
-                  </span>
-                ) : (
-                  <span className="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-                    {countdown.days}
-                  </span>
-                )}
+            <Card className="!p-6 sm:!p-8 text-center bg-gradient-to-br from-[#CE805C]/10 to-[#B87050]/10 border-2 border-[#CE805C]/30">
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <CalendarBlank
+                  size={40}
+                  weight="duotone"
+                  className="text-[#CE805C]"
+                />
+                <div className="text-5xl sm:text-6xl font-bold">
+                  {countdown.isToday ? (
+                    <span className="bg-gradient-to-r from-[#740015] to-[#531946] bg-clip-text text-transparent">
+                      Today!
+                    </span>
+                  ) : countdown.isPast ? (
+                    <span
+                      className={darkMode ? "text-gray-400" : "text-gray-600"}
+                    >
+                      {countdown.days} days ago
+                    </span>
+                  ) : (
+                    <span className="bg-gradient-to-r from-[#CE805C] to-[#B87050] bg-clip-text text-transparent">
+                      {countdown.days}
+                    </span>
+                  )}
+                </div>
               </div>
               <p
-                className={`font-inter text-base sm:text-lg mb-2 ${
+                className={`font-inter text-base sm:text-lg mb-2 font-medium ${
                   darkMode ? "text-gray-300" : "text-gray-700"
                 }`}
               >
                 {countdown.isToday
-                  ? "Your wedding day is here!"
+                  ? "Your wedding day is here! Alhamdulillah!"
                   : countdown.isPast
                     ? "since your wedding"
                     : "days until your wedding"}
@@ -949,13 +964,14 @@ export default function FinalBlueprint({ data, setActiveSection, darkMode }) {
                           </span>
                           {task.dueDate && (
                             <span
-                              className={`px-2 py-0.5 rounded ${
+                              className={`px-2 py-0.5 rounded flex items-center gap-1 ${
                                 darkMode
                                   ? "bg-orange-900/30 text-orange-400"
                                   : "bg-orange-100 text-orange-700"
                               }`}
                             >
-                              📅 {new Date(task.dueDate).toLocaleDateString()}
+                              <CalendarBlank size={14} weight="bold" />
+                              {new Date(task.dueDate).toLocaleDateString()}
                             </span>
                           )}
                           <span
