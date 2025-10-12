@@ -1,13 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  SignOut,
-  Moon,
-  Sun,
-  DownloadSimple,
-  UploadSimple,
-  List,
-  X,
-} from "@phosphor-icons/react";
+import { SignOut, Moon, Sun, List, X } from "@phosphor-icons/react";
 import { useSyncToCloud } from "../hooks/useSyncToCloud";
 import { Toast } from "./ui";
 import Modal from "./ui/Modal";
@@ -99,58 +91,6 @@ export default function InteractiveGuide({ auth, onLogout }) {
 
   const cancelLogout = () => {
     setShowLogoutModal(false);
-  };
-
-  // Export data to JSON file
-  const exportData = () => {
-    try {
-      const dataStr = JSON.stringify(data, null, 2);
-      const blob = new Blob([dataStr], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `hausa-wedding-guide-backup-${new Date().toISOString().split("T")[0]}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      showToast("Data exported successfully!", "success");
-    } catch (error) {
-      console.error("Export failed:", error);
-      showToast("Failed to export data", "error");
-    }
-  };
-
-  // Import data from JSON file
-  const importData = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".json";
-
-    input.onchange = (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          const importedData = JSON.parse(event.target.result);
-
-          if (typeof importedData === "object" && importedData !== null) {
-            setData(importedData);
-            showToast("Data imported successfully!", "success");
-          } else {
-            showToast("Invalid data format", "error");
-          }
-        } catch (error) {
-          console.error("Import failed:", error);
-          showToast("Failed to import data - invalid JSON", "error");
-        }
-      };
-      reader.readAsText(file);
-    };
-
-    input.click();
   };
 
   // Wrapper to update data
@@ -421,34 +361,6 @@ export default function InteractiveGuide({ auth, onLogout }) {
                 )}
               </button>
 
-              {/* Export - Desktop Only (≥1024px) */}
-              <button
-                onClick={exportData}
-                className={`!hidden lg:!flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all ${
-                  darkMode
-                    ? "bg-gray-800 hover:bg-gray-700 text-[#CE805C]"
-                    : "bg-[#CE805C]/10 hover:bg-[#CE805C]/20 text-[#740015]"
-                }`}
-                aria-label="Export wedding planning data to JSON file"
-              >
-                <DownloadSimple size={18} weight="bold" />
-                <span className="text-sm">Export</span>
-              </button>
-
-              {/* Import - Desktop Only (≥1024px) */}
-              <button
-                onClick={importData}
-                className={`!hidden lg:!flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all ${
-                  darkMode
-                    ? "bg-gray-800 hover:bg-gray-700 text-[#CE805C]"
-                    : "bg-[#CE805C]/10 hover:bg-[#CE805C]/20 text-[#740015]"
-                }`}
-                aria-label="Import wedding planning data from JSON file"
-              >
-                <UploadSimple size={18} weight="bold" />
-                <span className="text-sm">Import</span>
-              </button>
-
               {/* Logout Button - Desktop Only (≥1024px) */}
               <button
                 onClick={handleLogout}
@@ -535,38 +447,6 @@ export default function InteractiveGuide({ auth, onLogout }) {
               <span className="text-sm">
                 {darkMode ? "Light Mode" : "Dark Mode"}
               </span>
-            </button>
-
-            {/* Export */}
-            <button
-              onClick={() => {
-                exportData();
-                setMobileMenuOpen(false);
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
-                darkMode
-                  ? "bg-gray-700 hover:bg-gray-600 text-[#CE805C]"
-                  : "bg-[#CE805C]/10 hover:bg-[#CE805C]/20 text-[#740015]"
-              }`}
-            >
-              <DownloadSimple size={20} weight="bold" />
-              <span className="text-sm">Export Data</span>
-            </button>
-
-            {/* Import */}
-            <button
-              onClick={() => {
-                importData();
-                setMobileMenuOpen(false);
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
-                darkMode
-                  ? "bg-gray-700 hover:bg-gray-600 text-[#CE805C]"
-                  : "bg-[#CE805C]/10 hover:bg-[#CE805C]/20 text-[#740015]"
-              }`}
-            >
-              <UploadSimple size={20} weight="bold" />
-              <span className="text-sm">Import Data</span>
             </button>
 
             {/* Logout */}
