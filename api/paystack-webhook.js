@@ -141,174 +141,109 @@ export default async function handler(req, res) {
         }
 
         // ============================================
-        // PRODUCT DETECTION
+        // PRODUCT DETECTION - AMOUNT-BASED
         // ============================================
-        // Check metadata for product_type, fallback to checking reference/amount
-        const metadata = verifyJson?.data?.metadata || data?.metadata || {};
-        const productName = (
-          verifyJson?.data?.plan?.name ||
-          verifyJson?.data?.product_name ||
-          data?.plan?.name ||
-          data?.product_name ||
-          ""
-        ).toLowerCase();
-        const reference = (
-          verifyJson?.data?.reference ||
-          data?.reference ||
-          ""
-        ).toLowerCase();
+        // Detect product type primarily by amount (in kobo)
         const amount = verifyJson?.data?.amount || data?.amount || 0;
-
-        let productType = (metadata.product_type || "").toLowerCase();
-
-        // Fallback: detect from reference first, then amount, then product name
-        if (!productType) {
-          if (
-            reference.includes("webapp") ||
-            reference.includes("interactive")
-          ) {
+        const txReference = verifyJson?.data?.reference || data?.reference || "";
+        
+        // Amount-based detection (primary method)
+        const isPdfGuide = amount === 500000;  // ₦5,000 = 500,000 kobo (main branch)
+        const isWebGuide = amount === 10000;   // ₦100 = 10,000 kobo (interactive-guide branch)
+        const isBundle = amount === 550000;    // ₦5,500 = 550,000 kobo (both products)
+        
+        let productType;
+        if (isPdfGuide) {
+          productType = "pdf";
+        } else if (isWebGuide) {
+          productType = "webapp";
+        } else if (isBundle) {
+          productType = "bundle";
+        } else {
+          // Fallback: try to detect from metadata or reference
+          const metadata = verifyJson?.data?.metadata || data?.metadata || {};
+          const metadataType = (metadata.product_type || "").toLowerCase();
+          
+          if (metadataType === "webapp" || metadataType === "interactive") {
             productType = "webapp";
-          } else if (reference.includes("pdf")) {
-            productType = "pdf";
-          } else if (
-            reference.includes("bundle") ||
-            reference.includes("complete")
-          ) {
+          } else if (metadataType === "bundle" || metadataType === "complete") {
             productType = "bundle";
-          } else if (
-            productName.includes("interactive") ||
-            productName.includes("webapp") ||
-            productName.includes("web app")
-          ) {
+          } else if (txReference.toLowerCase().includes("webapp") || txReference.toLowerCase().includes("interactive")) {
             productType = "webapp";
-          } else if (
-            productName.includes("bundle") ||
-            productName.includes("complete")
-          ) {
-            productType = "bundle";
           } else {
+            console.warn(`Unknown product amount: ₦${(amount / 100).toFixed(2)} (${amount} kobo). Defaulting to PDF.`);
             productType = "pdf"; // Default to PDF for backward compatibility
           }
         }
 
         console.log(
-          `Product type detected: ${productType} (reference: '${reference}', amount: ₦${(amount / 100).toFixed(2)}, product name: '${productName}')`
+          `Product detected: ${productType} | Amount: ₦${(amount / 100).toFixed(2)} (${amount} kobo) | Reference: ${txReference}`
         );
 
         // ============================================
-        // CREATE SUPABASE AUTH ACCOUNT
+        // SAVE TO DATABASE (Web Guide Only)
         // ============================================
-        let authUserId = null;
-        let tempPassword = null;
-        let hasExistingAccount = false;
+        // For Web Guide purchases, save to web_app_users table WITHOUT creating auth account
+        // Users will sign up themselves using the email link
+        
+        if (productType === "webapp" || productType === "bundle") {
+          if (supabaseAdmin) {
+            try {
+              // Check if user already exists in web_app_users
+              const { data: existingUser } = await supabaseAdmin
+                .from("web_app_users")
+                .select("email, paystack_reference")
+                .eq("email", verifiedEmail)
+                .single();
 
-        if (supabaseAdmin) {
-          try {
-            // Generate temporary password (user will change on first login)
-            tempPassword = crypto
-              .randomBytes(12)
-              .toString("base64")
-              .slice(0, 16);
-
-            // Create Supabase Auth user
-            const { data: authData, error: authError } =
-              await supabaseAdmin.auth.admin.createUser({
-                email: verifiedEmail,
-                password: tempPassword,
-                email_confirm: true, // Auto-confirm email
-                user_metadata: {
-                  paystack_reference: reference,
-                  purchased_at: new Date().toISOString(),
-                  product_type: productType,
-                },
-              });
-
-            if (authError) {
-              // User might already exist
-              if (
-                authError.message.includes("already registered") ||
-                authError.message.includes("already been registered")
-              ) {
+              if (existingUser) {
                 console.log(
-                  `User ${verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")} already exists, skipping auth creation`
+                  `User ${verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")} already exists in database with reference: ${existingUser.paystack_reference}`
                 );
                 hasExistingAccount = true;
-
-                // Get existing user
-                const { data: existingUsers } =
-                  await supabaseAdmin.auth.admin.listUsers();
-                const user = existingUsers.users?.find(
-                  (u) => u.email === verifiedEmail
-                );
-                authUserId = user?.id || null;
-
-                // Don't send password for existing users
-                tempPassword = null;
               } else {
-                console.error(
-                  "Failed to create Supabase auth user:",
-                  authError
-                );
-              }
-            } else {
-              authUserId = authData.user.id;
-              console.log(
-                `Supabase auth account created for ${verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")}, ID: ${authUserId}`
-              );
-
-              // Create/update web_app_users record
-              const { error: dbError } = await supabaseAdmin
-                .from("web_app_users")
-                .upsert(
-                  {
+                // Create new web_app_users record (NO auth account yet)
+                const { error: dbError } = await supabaseAdmin
+                  .from("web_app_users")
+                  .insert({
                     email: verifiedEmail,
-                    auth_user_id: authUserId,
-                    paystack_reference: reference,
+                    paystack_reference: txReference,
                     purchased_at: new Date().toISOString(),
                     access_days: 20,
                     is_onboarded: false,
-                  },
-                  {
-                    onConflict: "email",
-                  }
-                )
-                .select();
+                  });
 
-              if (dbError) {
-                console.error(
-                  "Failed to create web_app_users record:",
-                  dbError
-                );
-              } else {
-                console.log(
-                  `Database record created for ${verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")}`
-                );
+                if (dbError) {
+                  console.error(
+                    "Failed to create web_app_users record:",
+                    dbError
+                  );
+                } else {
+                  console.log(
+                    `Database record created for ${verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")} - user will create account during signup`
+                  );
+                }
               }
+            } catch (err) {
+              console.error("Database operation error:", err);
             }
-          } catch (err) {
-            console.error("Supabase account creation error:", err);
-            // Continue even if Supabase fails - user can still download PDF
+          } else {
+            console.warn(
+              "Supabase admin client not configured - skipping database save. Check SUPABASE_SERVICE_ROLE_KEY and VITE_SUPABASE_URL."
+            );
           }
-        } else {
-          console.warn(
-            "Supabase admin client not configured - skipping auth account creation. Check SUPABASE_SERVICE_ROLE_KEY and VITE_SUPABASE_URL environment variables."
-          );
         }
 
         // ============================================
-        // HANDLE DIFFERENT PRODUCT TYPES
+        // SEND APPROPRIATE EMAIL BASED ON PRODUCT TYPE
         // ============================================
 
         if (productType === "webapp") {
-          // Web App Only - send access credentials
-          if (tempPassword) {
-            await sendWebAppAccessEmail(
-              verifiedEmail,
-              tempPassword,
-              hasExistingAccount
-            );
+          // Web App Only - send signup instructions (NO temporary password)
+          if (!hasExistingAccount) {
+            await sendWebAppAccessEmail(verifiedEmail, txReference);
             console.log(
-              "Web app access email sent successfully to:",
+              "Web app signup email sent successfully to:",
               verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")
             );
           } else {
@@ -318,7 +253,7 @@ export default async function handler(req, res) {
             );
           }
         } else if (productType === "bundle") {
-          // Bundle - send both PDF download + web app access
+          // Bundle - send both PDF download + web app signup instructions
           // Generate download token for PDF
           const token = crypto.randomBytes(32).toString("hex");
           const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
@@ -345,11 +280,11 @@ export default async function handler(req, res) {
             verifiedEmail
           )}&sig=${sig}`;
 
-          // Send bundle email with both PDF + web app access
+          // Send bundle email with both PDF + web app access (NO temporary password)
           await sendBundleEmail(
             verifiedEmail,
             downloadLink,
-            tempPassword,
+            txReference,
             hasExistingAccount
           );
           console.log(
@@ -387,7 +322,7 @@ export default async function handler(req, res) {
           await sendDownloadEmail(verifiedEmail, downloadLink);
           console.log(
             "PDF download email sent successfully to:",
-            verifiedEmail
+            verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")
           );
         }
       } catch (e) {
