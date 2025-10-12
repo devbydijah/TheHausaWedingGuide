@@ -35,6 +35,7 @@ import {
   GaugeValueText,
   useGaugeState,
 } from "@mui/x-charts/Gauge";
+import { Tooltip } from "@mui/material";
 import { Card, AnimatedCard, GradientHeader } from "../../components/ui";
 import { BUDGET_CATEGORIES } from "../../lib/constants";
 
@@ -1042,52 +1043,54 @@ export default function BudgetBuilder({
                 darkMode ? "bg-gray-700" : "bg-gray-100"
               }`}
             >
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-md transition-all ${
-                  viewMode === "grid"
-                    ? "text-white"
-                    : darkMode
-                      ? "text-gray-400 hover:text-gray-300"
-                      : "text-gray-600 hover:text-gray-900"
-                }`}
-                style={
-                  viewMode === "grid"
-                    ? {
-                        background:
-                          "linear-gradient(135deg, #740015 0%, #531946 100%)",
-                      }
-                    : {}
-                }
-                title="Grid view"
-              >
-                <SquaresFour size={20} weight="bold" />
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setViewMode("list")}
-                className={`p-2 rounded-md transition-all ${
-                  viewMode === "list"
-                    ? "text-white"
-                    : darkMode
-                      ? "text-gray-400 hover:text-gray-300"
-                      : "text-gray-600 hover:text-gray-900"
-                }`}
-                style={
-                  viewMode === "list"
-                    ? {
-                        background:
-                          "linear-gradient(135deg, #740015 0%, #531946 100%)",
-                      }
-                    : {}
-                }
-                title="List view"
-              >
-                <List size={20} weight="bold" />
-              </motion.button>
+              <Tooltip title="Grid view" arrow placement="top">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setViewMode("grid")}
+                  className={`p-2 rounded-md transition-all ${
+                    viewMode === "grid"
+                      ? "text-white"
+                      : darkMode
+                        ? "text-gray-400 hover:text-gray-300"
+                        : "text-gray-600 hover:text-gray-900"
+                  }`}
+                  style={
+                    viewMode === "grid"
+                      ? {
+                          background:
+                            "linear-gradient(135deg, #740015 0%, #531946 100%)",
+                        }
+                      : {}
+                  }
+                >
+                  <SquaresFour size={20} weight="bold" />
+                </motion.button>
+              </Tooltip>
+              <Tooltip title="List view" arrow placement="top">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setViewMode("list")}
+                  className={`p-2 rounded-md transition-all ${
+                    viewMode === "list"
+                      ? "text-white"
+                      : darkMode
+                        ? "text-gray-400 hover:text-gray-300"
+                        : "text-gray-600 hover:text-gray-900"
+                  }`}
+                  style={
+                    viewMode === "list"
+                      ? {
+                          background:
+                            "linear-gradient(135deg, #740015 0%, #531946 100%)",
+                        }
+                      : {}
+                  }
+                >
+                  <List size={20} weight="bold" />
+                </motion.button>
+              </Tooltip>
             </div>
           </div>
 
