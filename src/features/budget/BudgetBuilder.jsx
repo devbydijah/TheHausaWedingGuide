@@ -26,8 +26,15 @@ import {
   BarChart,
   Assessment,
   Savings,
+  Warning as WarningIcon,
 } from "@mui/icons-material";
-import { Gauge } from "@mui/x-charts/Gauge";
+import {
+  GaugeContainer,
+  GaugeReferenceArc,
+  GaugeValueArc,
+  GaugeValueText,
+  useGaugeState,
+} from "@mui/x-charts/Gauge";
 import { Card, AnimatedCard, GradientHeader } from "../../components/ui";
 import { BUDGET_CATEGORIES } from "../../lib/constants";
 
@@ -41,55 +48,175 @@ const ICON_MAP = {
   Dots: DotsThree,
 };
 
-// MUI Gauge Wrapper Component
-const MUIGaugeWrapper = ({ percentage, darkMode, index }) => {
+const formatNaira = (amount) => {
+  return new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
+// Budget Status Indicator Component
+const BudgetStatusIndicator = ({ percentage, remaining, darkMode }) => {
+  const getStatus = () => {
+    if (percentage < 75) {
+      return {
+        icon: <Savings sx={{ fontSize: 24 }} />,
+        label: "Healthy Budget",
+        color: "#57886C",
+        bgColor: darkMode
+          ? "rgba(87, 136, 108, 0.1)"
+          : "rgba(87, 136, 108, 0.1)",
+      };
+    } else if (percentage < 90) {
+      return {
+        icon: <TrendingUp sx={{ fontSize: 24 }} />,
+        label: "Approaching Limit",
+        color: "#CE805C",
+        bgColor: darkMode
+          ? "rgba(206, 128, 92, 0.1)"
+          : "rgba(206, 128, 92, 0.1)",
+      };
+    } else {
+      return {
+        icon: <WarningIcon sx={{ fontSize: 24 }} />,
+        label: "Budget Warning",
+        color: "#740015",
+        bgColor: darkMode ? "rgba(116, 0, 21, 0.1)" : "rgba(116, 0, 21, 0.1)",
+      };
+    }
+  };
+
+  const status = getStatus();
+
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
-      className="flex items-center justify-center"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="flex items-center gap-3 p-3 rounded-xl"
+      style={{ backgroundColor: status.bgColor }}
     >
-      <Gauge
-        width={140}
-        height={140}
-        value={percentage}
-        valueMin={0}
-        valueMax={100}
-        startAngle={-110}
-        endAngle={110}
-        innerRadius="70%"
-        outerRadius="100%"
-        cornerRadius="50%"
-        text={({ value }) => `${value}%`}
-        sx={{
-          [`& .MuiGauge-valueArc`]: {
-            fill: "url(#gauge-gradient)",
-          },
-          [`& .MuiGauge-referenceArc`]: {
-            fill: darkMode ? "#1F2937" : "#F3F4F6",
-          },
-          [`& .MuiGauge-valueText`]: {
-            fontSize: 20,
-            fontWeight: "bold",
-            fill: darkMode ? "#FFFFFF" : "#111827",
-          },
-        }}
+      <div
+        className="flex items-center justify-center w-10 h-10 rounded-full"
+        style={{ backgroundColor: `${status.color}20` }}
       >
-        <defs>
-          <linearGradient
-            id="gauge-gradient"
-            x1="0%"
-            y1="0%"
-            x2="100%"
-            y2="100%"
+        <span style={{ color: status.color }}>{status.icon}</span>
+      </div>
+      <div className="flex-1">
+        <p
+          className={`text-sm font-bold ${darkMode ? "text-white" : "text-gray-900"}`}
+        >
+          {status.label}
+        </p>
+        <p
+          className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-600"}`}
+        >
+          {formatNaira(remaining)} remaining
+        </p>
+      </div>
+    </motion.div>
+  );
+};
+
+// Custom Gauge Pointer using useGaugeState
+function GaugePointer({ darkMode }) {
+  const { valueAngle, outerRadius, cx, cy } = useGaugeState();
+
+  if (valueAngle === null) {
+    return null;
+  }
+
+  const target = {
+    x: cx + outerRadius * Math.sin(valueAngle),
+    y: cy - outerRadius * Math.cos(valueAngle),
+  };
+
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r="8" fill="#740015" />
+      <path
+        d={`M ${cx} ${cy} L ${target.x} ${target.y}`}
+        stroke="#740015"
+        strokeWidth="3"
+      />
+    </g>
+  );
+}
+
+// Enhanced MUI Gauge Wrapper Component - Balanced information display
+const MUIGaugeWrapper = ({
+  percentage,
+  darkMode,
+  index,
+  categoryAmount = 0,
+  categoryLabel = "",
+  totalBudget = 0,
+}) => {
+  const clampedPercentage = Math.min(Math.max(percentage, 0), 100);
+
+  // Determine color based on INDIVIDUAL category percentage (not total budget)
+  const getGaugeColor = () => {
+    if (clampedPercentage === 0) return darkMode ? "#4B5563" : "#9CA3AF"; // Gray for empty
+    if (clampedPercentage < 20) return "#57886C"; // Low allocation - Sage Green
+    if (clampedPercentage < 35) return "#B87050"; // Moderate - Dark Terracotta
+    if (clampedPercentage < 50) return "#CE805C"; // High - Terracotta
+    return "#740015"; // Very High - Burgundy
+  };
+
+  const gaugeColor = getGaugeColor();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4, delay: 0.05 + index * 0.03, type: "spring" }}
+      className="flex flex-col items-center w-full"
+    >
+      {/* Gauge Visualization */}
+      <div className="relative">
+        <GaugeContainer
+          width={130}
+          height={130}
+          startAngle={-110}
+          endAngle={110}
+          value={clampedPercentage}
+          aria-label={`${categoryLabel} allocation: ${clampedPercentage}%`}
+        >
+          <GaugeReferenceArc
+            style={{
+              fill: darkMode
+                ? "rgba(255, 255, 255, 0.08)"
+                : "rgba(0, 0, 0, 0.08)",
+            }}
+          />
+          <GaugeValueArc
+            style={{
+              fill: gaugeColor,
+            }}
+          />
+          <GaugeValueText
+            style={{
+              fontSize: 28,
+              fontWeight: "bold",
+              fontFamily: "'Playfair Display', serif",
+              fill: darkMode ? "#ffffff" : "#1f2937",
+            }}
+          />
+        </GaugeContainer>
+      </div>
+
+      {/* Percentage and budget info */}
+      {totalBudget > 0 && (
+        <div className="text-center mt-2">
+          <p
+            className={`text-xs ${darkMode ? "text-gray-500" : "text-gray-500"}`}
           >
-            <stop offset="0%" style={{ stopColor: "#740015" }} />
-            <stop offset="50%" style={{ stopColor: "#CE805C" }} />
-            <stop offset="100%" style={{ stopColor: "#531946" }} />
-          </linearGradient>
-        </defs>
-      </Gauge>
+            of ₦{totalBudget.toLocaleString()} total
+          </p>
+        </div>
+      )}
     </motion.div>
   );
 };
@@ -979,47 +1106,73 @@ export default function BudgetBuilder({
 
                   const IconComponent = ICON_MAP[cat.icon] || DotsThree;
 
+                  // Get color for this category
+                  const categoryColor =
+                    cat.percentage === 0
+                      ? darkMode
+                        ? "#4B5563"
+                        : "#9CA3AF"
+                      : cat.percentage < 20
+                        ? "#57886C"
+                        : cat.percentage < 35
+                          ? "#B87050"
+                          : cat.percentage < 50
+                            ? "#CE805C"
+                            : "#740015";
+
                   return (
                     <motion.div
                       key={cat.key}
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.1 }}
-                      className={`p-6 rounded-2xl border-2 transition-all hover:shadow-lg ${
+                      transition={{ delay: index * 0.08 }}
+                      className={`aspect-square p-6 rounded-2xl border-2 transition-all hover:shadow-lg flex flex-col ${
                         darkMode
                           ? "bg-gray-800/50 border-gray-700 hover:border-[#CE805C]"
                           : "bg-white border-gray-200 hover:border-[#CE805C] shadow-sm"
                       }`}
                     >
+                      {/* Icon Badge */}
+                      <div className="flex justify-center mb-2">
+                        <div
+                          className="w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-md"
+                          style={{
+                            background: `linear-gradient(135deg, ${categoryColor} 0%, ${categoryColor}dd 100%)`,
+                          }}
+                        >
+                          <IconComponent size={24} weight="duotone" />
+                        </div>
+                      </div>
+
                       {/* Chart Display */}
-                      <div className="flex items-center justify-center mb-5">
+                      <div className="flex items-center justify-center flex-1">
                         <MUIGaugeWrapper
                           percentage={cat.percentage}
                           darkMode={darkMode}
                           index={index}
+                          categoryAmount={cat.amount}
+                          categoryLabel={cat.label}
+                          totalBudget={totalBudget}
                         />
                       </div>
 
                       {/* Category Info */}
-                      <div className="text-center space-y-2">
+                      <div className="text-center space-y-1.5 mt-3">
                         <h3
-                          className={`font-bold text-base ${
+                          className={`font-bold text-lg ${
                             darkMode ? "text-white" : "text-gray-900"
                           }`}
                         >
                           {cat.label}
                         </h3>
                         <p
-                          className={`text-3xl font-bold ${getPercentageColor(
-                            cat.percentage
-                          )}`}
+                          className="text-2xl font-bold"
+                          style={{ color: categoryColor }}
                         >
                           {cat.percentage.toFixed(1)}%
                         </p>
                         <div
-                          className={`pt-3 border-t ${
-                            darkMode ? "border-gray-700" : "border-gray-200"
-                          }`}
+                          className={`pt-2 border-t ${darkMode ? "border-gray-700" : "border-gray-200"}`}
                         >
                           <p
                             className={`text-xs font-medium mb-1 ${
@@ -1029,7 +1182,7 @@ export default function BudgetBuilder({
                             Allocated Amount
                           </p>
                           <p
-                            className={`text-xl font-bold ${
+                            className={`text-lg font-bold ${
                               darkMode ? "text-white" : "text-gray-900"
                             }`}
                           >
@@ -1327,138 +1480,6 @@ export default function BudgetBuilder({
           })}
         </div>
       </Card>
-
-      {/* Budget Summary Table */}
-      {totalBudget > 0 && budgetStats.totalPercentage > 0 && (
-        <Card className="!p-6 w-full">
-          <h2
-            className={`font-playfair text-xl sm:text-2xl font-bold mb-6 ${
-              darkMode ? "text-white" : "text-gray-900"
-            }`}
-          >
-            Budget Summary
-          </h2>
-
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr
-                  className={`border-b-2 ${
-                    darkMode ? "border-gray-700" : "border-gray-200"
-                  }`}
-                >
-                  <th
-                    className={`text-left py-3 px-2 font-semibold ${
-                      darkMode ? "text-gray-300" : "text-gray-700"
-                    }`}
-                  >
-                    Category
-                  </th>
-                  <th
-                    className={`text-right py-3 px-2 font-semibold ${
-                      darkMode ? "text-gray-300" : "text-gray-700"
-                    }`}
-                  >
-                    %
-                  </th>
-                  <th
-                    className={`text-right py-3 px-2 font-semibold ${
-                      darkMode ? "text-gray-300" : "text-gray-700"
-                    }`}
-                  >
-                    Amount
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {budgetStats.categoryStats.map((cat, index) => {
-                  if (cat.percentage === 0) return null;
-
-                  const IconComponent = ICON_MAP[cat.icon] || DotsThree;
-
-                  return (
-                    <motion.tr
-                      key={cat.key}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className={`border-b ${
-                        darkMode ? "border-gray-700" : "border-gray-100"
-                      }`}
-                    >
-                      <td className="py-3 px-2">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-8 h-8 rounded-lg flex items-center justify-center text-white"
-                            style={{
-                              background:
-                                "linear-gradient(135deg, #740015 0%, #531946 100%)",
-                            }}
-                          >
-                            <IconComponent size={16} weight="bold" />
-                          </div>
-                          <span
-                            className={`font-medium ${
-                              darkMode ? "text-white" : "text-gray-900"
-                            }`}
-                          >
-                            {cat.label}
-                          </span>
-                        </div>
-                      </td>
-                      <td
-                        className={`text-right py-3 px-2 font-semibold ${getPercentageColor(
-                          cat.percentage
-                        )}`}
-                      >
-                        {cat.percentage.toFixed(1)}%
-                      </td>
-                      <td
-                        className={`text-right py-3 px-2 font-semibold ${
-                          darkMode ? "text-white" : "text-gray-900"
-                        }`}
-                      >
-                        ₦{cat.amount.toLocaleString()}
-                      </td>
-                    </motion.tr>
-                  );
-                })}
-                <tr
-                  className={`border-t-2 font-bold ${
-                    darkMode ? "border-gray-600" : "border-gray-300"
-                  }`}
-                >
-                  <td
-                    className={`py-3 px-2 ${
-                      darkMode ? "text-white" : "text-gray-900"
-                    }`}
-                  >
-                    Total Allocated
-                  </td>
-                  <td
-                    className={`text-right py-3 px-2 ${
-                      budgetStats.isOverBudget
-                        ? "text-red-600 dark:text-red-400"
-                        : budgetStats.isFullyAllocated
-                          ? "text-[#740015] dark:text-[#CE805C]"
-                          : "text-blue-600 dark:text-blue-400"
-                    }`}
-                  >
-                    {budgetStats.totalPercentage.toFixed(1)}%
-                  </td>
-                  <td
-                    className={`text-right py-3 px-2 ${
-                      darkMode ? "text-white" : "text-gray-900"
-                    }`}
-                  >
-                    ₦{budgetStats.totalAllocated.toLocaleString()}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </Card>
-      )}
 
       {/* Custom Slider Styles */}
       <style>{`

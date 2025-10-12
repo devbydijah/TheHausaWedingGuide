@@ -230,6 +230,7 @@ export default function QuickStats({ data, darkMode = false }) {
                         strokeWidth={10}
                         color={stat.color}
                         darkMode={darkMode}
+                        showStatus={true}
                       />
                       {/* Animated pulse ring */}
                       <div
