@@ -276,7 +276,7 @@ export default function LoginGate({ children, onAuthenticated }) {
                 </button>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                Check your purchase email for your password
+                Use the temporary password from your welcome email
               </p>
             </div>
 
@@ -322,7 +322,7 @@ export default function LoginGate({ children, onAuthenticated }) {
         <div className="mt-6 text-center text-xs text-gray-500">
           <p>🔒 Secure authentication powered by Supabase</p>
           <p className="mt-1">
-            Your credentials were sent to your email after purchase
+            First time? Use the temporary password from your welcome email
           </p>
         </div>
       </div>
