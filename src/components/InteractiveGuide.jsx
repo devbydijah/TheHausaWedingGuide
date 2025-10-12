@@ -11,8 +11,12 @@ const VisionQuiz = lazy(() => import("../features/vision-quiz/VisionQuiz"));
 const VisionPlanner = lazy(() => import("../features/vision/VisionPlanner"));
 const BudgetBuilder = lazy(() => import("../features/budget/BudgetBuilder"));
 const VendorTracker = lazy(() => import("../features/vendors/VendorTracker"));
-const TimelineManager = lazy(() => import("../features/timeline/TimelineManager"));
-const FinalBlueprint = lazy(() => import("../features/blueprint/FinalBlueprint"));
+const TimelineManager = lazy(
+  () => import("../features/timeline/TimelineManager")
+);
+const FinalBlueprint = lazy(
+  () => import("../features/blueprint/FinalBlueprint")
+);
 
 // Loading component
 const LoadingSpinner = () => (
@@ -515,7 +519,7 @@ export default function InteractiveGuide({
             darkMode={darkMode}
           />
         )}
-        
+
         <Suspense fallback={<LoadingSpinner />}>
           {activeSection === "quiz" && (
             <VisionQuiz
