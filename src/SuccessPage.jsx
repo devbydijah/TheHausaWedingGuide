@@ -1,94 +1,169 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
+import {
+  CheckCircle,
+  Sparkle,
+  Cloud,
+  LockKey,
+  EnvelopeSimple,
+} from "@phosphor-icons/react";
 
 function SuccessPage() {
-  const [downloadUrl, setDownloadUrl] = useState(null);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const finalizePurchase = async () => {
-      try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const tx_ref = urlParams.get("reference");
-
-        if (!tx_ref) {
-          throw new Error("No transaction reference found.");
-        }
-
-        const response = await fetch("/api/finalize-purchase", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ tx_ref }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Failed to finalize purchase.");
-        }
-
-        const data = await response.json();
-        setDownloadUrl(data.downloadUrl);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    finalizePurchase();
-  }, []);
-
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center text-center p-4">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-        <h1 className="text-3xl font-bold text-green-600 mb-4">
-          Payment Successful!
-        </h1>
-        <p className="text-gray-700 mb-6">
-          Thank you for your purchase. Your transaction has been confirmed.
-        </p>
+    <div className="min-h-screen bg-gradient-to-br from-[#740015]/5 via-[#531946]/5 to-[#CE805C]/5 flex items-center justify-center p-4">
+      <div className="max-w-2xl w-full">
+        {/* Success Icon */}
+        <div className="text-center mb-8 animate-fade-in">
+          <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full mb-6 shadow-2xl animate-bounce-slow">
+            <CheckCircle size={60} weight="bold" className="text-white" />
+          </div>
+          <h1 className="font-playfair text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#740015] via-[#531946] to-[#CE805C] bg-clip-text text-transparent mb-3">
+            Thank You for Your Purchase!
+          </h1>
+          <p className="text-xl text-gray-700 font-inter">
+            Your Interactive Wedding Guide is ready to use.
+          </p>
+        </div>
 
-        {loading && (
-          <div>
-            <p className="text-lg font-semibold animate-pulse">
-              Verifying your purchase and generating your secure download
-              link...
+        {/* Main Card */}
+        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
+          {/* Header Section */}
+          <div className="bg-gradient-to-br from-[#740015] to-[#531946] p-8 text-white">
+            <h2 className="font-playfair text-2xl font-bold mb-2">
+              What's Included:
+            </h2>
+            <p className="text-white/90 text-sm">
+              Everything you need to plan your perfect Hausa wedding
             </p>
           </div>
-        )}
 
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-            <strong className="font-bold">Error:</strong>
-            <span className="block sm:inline"> {error}</span>
-            <p className="text-sm mt-2">
-              Please contact support with your transaction reference if this
-              issue persists.
-            </p>
+          {/* Features Grid */}
+          <div className="p-8 bg-gradient-to-br from-purple-50/50 to-pink-50/50">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+              {[
+                {
+                  icon: Sparkle,
+                  text: "Vision & Values Quiz to discover your wedding style",
+                  color: "from-purple-500 to-pink-500",
+                },
+                {
+                  icon: Cloud,
+                  text: "Smart Budget Builder with real-time calculations",
+                  color: "from-yellow-500 to-orange-500",
+                },
+                {
+                  icon: LockKey,
+                  text: "Vendor Tracker to organize all your contacts",
+                  color: "from-green-500 to-teal-500",
+                },
+                {
+                  icon: CheckCircle,
+                  text: "Timeline & Task Manager with priority sorting",
+                  color: "from-blue-500 to-indigo-500",
+                },
+                {
+                  icon: Cloud,
+                  text: "Cloud sync across all your devices",
+                  color: "from-cyan-500 to-blue-500",
+                },
+                {
+                  icon: CheckCircle,
+                  text: "Automatic progress saving",
+                  color: "from-red-500 to-pink-500",
+                },
+              ].map((feature, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-start gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div
+                    className={`flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br ${feature.color} flex items-center justify-center`}
+                  >
+                    <feature.icon
+                      size={20}
+                      weight="bold"
+                      className="text-white"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-700 leading-relaxed pt-1">
+                    {feature.text}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Email Notification Box */}
+            <div className="bg-gradient-to-br from-[#CE805C]/10 to-[#531946]/10 border-2 border-[#CE805C]/30 rounded-2xl p-6 mb-6">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-[#CE805C] to-[#740015] rounded-full flex items-center justify-center">
+                  <EnvelopeSimple
+                    size={24}
+                    weight="bold"
+                    className="text-white"
+                  />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-playfair text-xl font-bold text-gray-900 mb-2">
+                    📧 Check Your Email
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed mb-3">
+                    We've sent you an email with your{" "}
+                    <strong>login credentials</strong> and{" "}
+                    <strong>access instructions</strong>.
+                  </p>
+                  <p className="text-sm text-gray-600 italic">
+                    If you don't see it, check your spam folder.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* CTA Button */}
+            <div className="text-center">
+              <a
+                href="/?guide=1"
+                className="inline-flex items-center gap-3 bg-gradient-to-r from-[#CE805C] to-[#740015] text-white font-bold py-4 px-8 rounded-full text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+              >
+                <LockKey size={24} weight="bold" />
+                Access Your Interactive Guide
+              </a>
+              <p className="text-sm text-gray-500 mt-4">
+                Use the credentials from your email to log in
+              </p>
+            </div>
           </div>
-        )}
 
-        {downloadUrl && (
-          <div>
-            <p className="text-gray-800 mb-4">
-              Click the button below to download your guide. A copy has also
-              been sent to your email.
-            </p>
+          {/* Footer Info */}
+          <div className="bg-gradient-to-br from-green-50 to-teal-50 border-t-2 border-green-200 p-6">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                <CheckCircle size={20} weight="bold" className="text-white" />
+              </div>
+              <div>
+                <h4 className="font-bold text-gray-900 mb-2">
+                  ⏰ 20-Day Access Period
+                </h4>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  Your access begins from your <strong>first login</strong> and
+                  lasts for 20 days. This gives you dedicated time to plan your
+                  wedding with full access to all features. Make the most of it!
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Help Section */}
+        <div className="text-center mt-8">
+          <p className="text-gray-600">
+            Need help? Email{" "}
             <a
-              href={downloadUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300 ease-in-out inline-block"
+              href="mailto:support@hausaroom.ng"
+              className="text-[#CE805C] font-semibold hover:underline"
             >
-              Download PDF
+              support@hausaroom.ng
             </a>
-            <p className="text-xs text-gray-500 mt-4">
-              This link will expire in 24 hours.
-            </p>
-          </div>
-        )}
+          </p>
+        </div>
       </div>
     </div>
   );

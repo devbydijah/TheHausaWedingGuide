@@ -4,3 +4,7 @@ export { default as Input } from "./Input";
 export { default as Card } from "./Card";
 export { default as Modal } from "./Modal";
 export { default as Toast } from "./Toast";
+export { default as ProgressRing } from "./ProgressRing";
+export { default as AnimatedCard } from "./AnimatedCard";
+export { default as GradientHeader } from "./GradientHeader";
+export { default as AnimatedButton } from "./AnimatedButton";

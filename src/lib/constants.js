@@ -287,14 +287,14 @@ export const VISION_QUIZ_QUESTIONS = [
   },
 ];
 
-// Budget Category Icons and Labels
+// Budget Category Icons and Labels (using Phosphor icon names)
 export const BUDGET_CATEGORIES = {
-  venue: { label: "Venue", icon: "🏛️", defaultPercentage: 30 },
-  catering: { label: "Catering", icon: "🍽️", defaultPercentage: 25 },
-  attire: { label: "Attire", icon: "👗", defaultPercentage: 15 },
-  photography: { label: "Photography", icon: "📸", defaultPercentage: 10 },
-  decor: { label: "Decor", icon: "💐", defaultPercentage: 10 },
-  misc: { label: "Miscellaneous", icon: "✨", defaultPercentage: 10 },
+  venue: { label: "Venue", icon: "MapPin", defaultPercentage: 30 },
+  catering: { label: "Catering", icon: "ForkKnife", defaultPercentage: 25 },
+  attire: { label: "Attire", icon: "Dress", defaultPercentage: 15 },
+  photography: { label: "Photography", icon: "Camera", defaultPercentage: 10 },
+  decor: { label: "Decor", icon: "Sparkle", defaultPercentage: 10 },
+  misc: { label: "Miscellaneous", icon: "Dots", defaultPercentage: 10 },
 };
 
 // Vendor Categories
