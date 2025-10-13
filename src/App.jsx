@@ -1238,7 +1238,7 @@ function App() {
                 className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
                 aria-label="Close modal"
               >
-                <X size={24} weight="bold" />
+                <XIcon size={24} weight="bold" />
               </button>
               <div className="flex justify-center mb-4">
                 <div className="bg-white/20 rounded-full p-4">
