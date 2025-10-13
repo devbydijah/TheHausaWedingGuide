@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   ListIcon,
-  X,
+  XIcon,
   ArrowUpIcon,
   SparkleIcon,
   CurrencyCircleDollarIcon,
@@ -398,9 +398,9 @@ function App() {
               aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? (
-                <X size={28} weight="bold" />
+                <XIcon size={28} weight="bold" />
               ) : (
-                <List size={28} weight="bold" />
+                <ListIcon size={28} weight="bold" />
               )}
             </button>
           </div>
