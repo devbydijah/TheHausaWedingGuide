@@ -151,15 +151,12 @@ export default async function handler(req, res) {
         // Amount-based detection (primary method)
         const isPdfGuide = amount === 11000; // ₦110 = 11,000 kobo (main branch)
         const isWebGuide = amount === 10000; // ₦100 = 10,000 kobo (interactive-guide branch)
-        const isBundle = amount === 12100; // ₦121 = 12,100 kobo (both products - ₦110 + ₦11 = ₦121)
 
         let productType;
         if (isPdfGuide) {
           productType = "pdf";
         } else if (isWebGuide) {
           productType = "webapp";
-        } else if (isBundle) {
-          productType = "bundle";
         } else {
           // Fallback: try to detect from metadata or reference
           const metadata = verifyJson?.data?.metadata || data?.metadata || {};
@@ -167,8 +164,6 @@ export default async function handler(req, res) {
 
           if (metadataType === "webapp" || metadataType === "interactive") {
             productType = "webapp";
-          } else if (metadataType === "bundle" || metadataType === "complete") {
-            productType = "bundle";
           } else if (
             txReference.toLowerCase().includes("webapp") ||
             txReference.toLowerCase().includes("interactive")
@@ -187,12 +182,51 @@ export default async function handler(req, res) {
         );
 
         // ============================================
-        // SAVE TO DATABASE (Web Guide Only)
+        // CHECK FOR EXISTING PURCHASES (BUNDLE DETECTION)
         // ============================================
-        // For Web Guide purchases, save to web_app_users table WITHOUT creating auth account
-        // Users will sign up themselves using the email link
+        // Check if user has already purchased the other product
+        let hasPdfPurchase = false;
+        let hasWebappPurchase = false;
+        let shouldSendBundleEmail = false;
 
-        if (productType === "webapp" || productType === "bundle") {
+        if (supabaseAdmin) {
+          try {
+            // Check for PDF purchase (stored in sales table or downloads.db)
+            const pdfToken = tokenDB.getTokensByEmail(verifiedEmail);
+            hasPdfPurchase = pdfToken && pdfToken.length > 0;
+
+            // Check for webapp purchase (stored in web_app_users table)
+            const { data: webappUser } = await supabaseAdmin
+              .from("web_app_users")
+              .select("email")
+              .eq("email", verifiedEmail)
+              .single();
+            hasWebappPurchase = !!webappUser;
+
+            // Determine if we should send bundle email
+            if (productType === "pdf" && hasWebappPurchase) {
+              shouldSendBundleEmail = true;
+              console.log(
+                `User ${verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")} already has webapp - sending bundle email`
+              );
+            } else if (productType === "webapp" && hasPdfPurchase) {
+              shouldSendBundleEmail = true;
+              console.log(
+                `User ${verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")} already has PDF - sending bundle email`
+              );
+            }
+          } catch (err) {
+            console.error("Error checking existing purchases:", err);
+          }
+        };
+
+        // ============================================
+        // SAVE TO DATABASE
+        // ============================================
+        // Save to appropriate database table based on product type
+        let hasExistingAccount = false;
+
+        if (productType === "webapp") {
           if (supabaseAdmin) {
             try {
               // Check if user already exists in web_app_users
@@ -244,7 +278,73 @@ export default async function handler(req, res) {
         // SEND APPROPRIATE EMAIL BASED ON PRODUCT TYPE
         // ============================================
 
-        if (productType === "webapp") {
+        // If user has purchased both products, send bundle email
+        if (shouldSendBundleEmail) {
+          // Generate download token for PDF (if this is a PDF purchase, token is new; if webapp purchase, retrieve existing)
+          let downloadLink;
+          
+          if (productType === "pdf") {
+            // Just purchased PDF, create new token
+            const token = crypto.randomBytes(32).toString("hex");
+            const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+
+            const SECRET =
+              process.env.DOWNLOAD_TOKEN_SECRET ||
+              process.env.PAYSTACK_SECRET_KEY;
+            const hmac = crypto.createHmac("sha256", SECRET);
+            hmac.update(`${token}|${verifiedEmail}|${expires}`);
+            const sig = hmac.digest("hex");
+
+            const stored = tokenDB.storeToken(verifiedEmail, token, expires, 3);
+            if (!stored) {
+              console.error("Failed to store token in database");
+              return res
+                .status(500)
+                .json({ error: "Failed to create download token" });
+            }
+
+            downloadLink = `${PDF_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
+              verifiedEmail
+            )}&sig=${sig}`;
+          } else {
+            // Just purchased webapp, retrieve existing PDF token
+            const existingTokens = tokenDB.getTokensByEmail(verifiedEmail);
+            if (existingTokens && existingTokens.length > 0) {
+              const existingToken = existingTokens[0];
+              const SECRET =
+                process.env.DOWNLOAD_TOKEN_SECRET ||
+                process.env.PAYSTACK_SECRET_KEY;
+              const hmac = crypto.createHmac("sha256", SECRET);
+              hmac.update(`${existingToken.token}|${verifiedEmail}|${existingToken.expires_at}`);
+              const sig = hmac.digest("hex");
+
+              downloadLink = `${PDF_BASE_URL}?download=${existingToken.token}&expires=${existingToken.expires_at}&email=${encodeURIComponent(
+                verifiedEmail
+              )}&sig=${sig}`;
+            } else {
+              console.error("No existing PDF token found for bundle email");
+              // Fallback: send webapp-only email
+              await sendWebAppAccessEmail(verifiedEmail, txReference);
+              console.log(
+                "Fallback: Web app email sent (no PDF token found) to:",
+                verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")
+              );
+              return res.status(200).json({ received: true });
+            }
+          }
+
+          // Send bundle email with both PDF + web app access
+          await sendBundleEmail(
+            verifiedEmail,
+            downloadLink,
+            txReference,
+            hasExistingAccount
+          );
+          console.log(
+            "Bundle email sent (user has both products) to:",
+            verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")
+          );
+        } else if (productType === "webapp") {
           // Web App Only - send signup instructions (NO temporary password)
           if (!hasExistingAccount) {
             await sendWebAppAccessEmail(verifiedEmail, txReference);
@@ -258,51 +358,11 @@ export default async function handler(req, res) {
               verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")
             );
           }
-        } else if (productType === "bundle") {
-          // Bundle - send both PDF download + web app signup instructions
-          // Generate download token for PDF
-          const token = crypto.randomBytes(32).toString("hex");
-          const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-
-          // Create HMAC signature for token verification
-          const SECRET =
-            process.env.DOWNLOAD_TOKEN_SECRET ||
-            process.env.PAYSTACK_SECRET_KEY;
-          const hmac = crypto.createHmac("sha256", SECRET);
-          hmac.update(`${token}|${verifiedEmail}|${expires}`);
-          const sig = hmac.digest("hex");
-
-          // Store token in database
-          const stored = tokenDB.storeToken(verifiedEmail, token, expires, 3);
-          if (!stored) {
-            console.error("Failed to store token in database");
-            return res
-              .status(500)
-              .json({ error: "Failed to create download token" });
-          }
-
-          // Create download URL for PDF
-          const downloadLink = `${PDF_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
-            verifiedEmail
-          )}&sig=${sig}`;
-
-          // Send bundle email with both PDF + web app access (NO temporary password)
-          await sendBundleEmail(
-            verifiedEmail,
-            downloadLink,
-            txReference,
-            hasExistingAccount
-          );
-          console.log(
-            "Bundle email sent successfully to:",
-            verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")
-          );
         } else {
-          // PDF Only (default) - send download link
+          // PDF Only - send download link
           const token = crypto.randomBytes(32).toString("hex");
           const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
-          // Create HMAC signature for token verification
           const SECRET =
             process.env.DOWNLOAD_TOKEN_SECRET ||
             process.env.PAYSTACK_SECRET_KEY;
@@ -310,7 +370,6 @@ export default async function handler(req, res) {
           hmac.update(`${token}|${verifiedEmail}|${expires}`);
           const sig = hmac.digest("hex");
 
-          // Store token in database
           const stored = tokenDB.storeToken(verifiedEmail, token, expires, 3);
           if (!stored) {
             console.error("Failed to store token in database");
@@ -319,12 +378,10 @@ export default async function handler(req, res) {
               .json({ error: "Failed to create download token" });
           }
 
-          // Create download URL
           const downloadLink = `${PDF_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
             verifiedEmail
           )}&sig=${sig}`;
 
-          // Send PDF download email
           await sendDownloadEmail(verifiedEmail, downloadLink);
           console.log(
             "PDF download email sent successfully to:",
