@@ -24,6 +24,7 @@ import { Favorite, Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 export default function LoginGate({ children, onAuthenticated }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -32,9 +33,19 @@ export default function LoginGate({ children, onAuthenticated }) {
   const [accessStatus, setAccessStatus] = useState(null); // { hasAccess, daysRemaining, expiresAt }
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [isSignupMode, setIsSignupMode] = useState(false); // NEW: Toggle between login/signup
 
-  // Check for existing session on mount
+  // Check for existing session on mount + check for email parameter
   useEffect(() => {
+    // Check if email parameter is in URL (from purchase email)
+    const params = new URLSearchParams(window.location.search);
+    const emailParam = params.get("email");
+
+    if (emailParam) {
+      setEmail(emailParam);
+      setIsSignupMode(true); // Show signup form for new users
+    }
+
     checkSession();
   }, []);
 
@@ -142,7 +153,7 @@ export default function LoginGate({ children, onAuthenticated }) {
       if (signInError) {
         if (signInError.message.includes("Invalid login credentials")) {
           setError(
-            "Incorrect email or password. Please check your purchase email for the correct credentials."
+            "Incorrect email or password. Please check your credentials or create an account if you haven't already."
           );
         } else {
           setError(signInError.message);
@@ -156,6 +167,94 @@ export default function LoginGate({ children, onAuthenticated }) {
     } catch (err) {
       console.error("Login error:", err);
       setError("An unexpected error occurred. Please try again.");
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    // Validate inputs
+    if (!email.trim() || !email.includes("@")) {
+      setError("Please enter a valid email address");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!password.trim()) {
+      setError("Please enter a password");
+      setIsLoading(false);
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long");
+      setIsLoading(false);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      // First, check if user has purchased (exists in web_app_users)
+      const { data: purchaseData, error: purchaseError } = await supabase
+        .from("web_app_users")
+        .select("email, paystack_reference")
+        .eq("email", email.trim().toLowerCase())
+        .single();
+
+      if (purchaseError || !purchaseData) {
+        setError(
+          "No purchase found for this email. Please complete payment first or use the email from your purchase confirmation."
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      // Create Supabase auth account
+      const { data: signupData, error: signupError } =
+        await supabase.auth.signUp({
+          email: email.trim().toLowerCase(),
+          password: password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/?guide=1`,
+          },
+        });
+
+      if (signupError) {
+        if (signupError.message.includes("already registered")) {
+          setError(
+            "An account with this email already exists. Please login instead."
+          );
+          setIsSignupMode(false); // Switch to login mode
+        } else {
+          setError(signupError.message);
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      // Link auth account to web_app_users
+      const { error: updateError } = await supabase
+        .from("web_app_users")
+        .update({ auth_user_id: signupData.user.id })
+        .eq("email", email.trim().toLowerCase());
+
+      if (updateError) {
+        console.error("Failed to link accounts:", updateError);
+      }
+
+      // Verify access and log in
+      await verifyUserAccess(signupData.user.email);
+    } catch (err) {
+      console.error("Signup error:", err);
+      setError("Failed to create account. Please try again.");
       setIsLoading(false);
     }
   };
@@ -243,21 +342,26 @@ export default function LoginGate({ children, onAuthenticated }) {
           </p>
         </div>
 
-        {/* Login Card */}
+        {/* Login/Signup Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
           <div className="flex items-center gap-3 mb-6">
             <Lock sx={{ fontSize: 28, color: "#CE805C" }} />
             <div>
               <h2 className="font-playfair text-2xl font-semibold text-gray-900">
-                Welcome Back
+                {isSignupMode ? "Create Your Account" : "Welcome Back"}
               </h2>
               <p className="text-sm text-gray-600">
-                Access your wedding planner
+                {isSignupMode
+                  ? "Set up your wedding planner account"
+                  : "Access your wedding planner"}
               </p>
             </div>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form
+            onSubmit={isSignupMode ? handleSignup : handleLogin}
+            className="space-y-4"
+          >
             {/* Email Input */}
             <div>
               <label
@@ -273,12 +377,18 @@ export default function LoginGate({ children, onAuthenticated }) {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CE805C] focus:border-transparent transition-all"
                 placeholder="bride@example.com"
-                disabled={isLoading}
+                disabled={
+                  isLoading ||
+                  (isSignupMode &&
+                    new URLSearchParams(window.location.search).get("email"))
+                }
                 autoComplete="email"
-                autoFocus
+                autoFocus={!isSignupMode}
               />
               <p className="text-xs text-gray-500 mt-1">
-                Use the email from your purchase confirmation
+                {isSignupMode
+                  ? "Use the email from your purchase confirmation"
+                  : "Use your registered email address"}
               </p>
             </div>
 
@@ -288,7 +398,7 @@ export default function LoginGate({ children, onAuthenticated }) {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Password
+                {isSignupMode ? "Create Password" : "Password"}
               </label>
               <div className="relative">
                 <input
@@ -297,9 +407,16 @@ export default function LoginGate({ children, onAuthenticated }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CE805C] focus:border-transparent transition-all"
-                  placeholder="Enter password from email"
+                  placeholder={
+                    isSignupMode
+                      ? "At least 8 characters"
+                      : "Enter your password"
+                  }
                   disabled={isLoading}
-                  autoComplete="current-password"
+                  autoComplete={
+                    isSignupMode ? "new-password" : "current-password"
+                  }
+                  autoFocus={isSignupMode}
                 />
                 <button
                   type="button"
@@ -314,10 +431,37 @@ export default function LoginGate({ children, onAuthenticated }) {
                   )}
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                Use the temporary password from your welcome email
-              </p>
+              {!isSignupMode && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Enter your password
+                </p>
+              )}
             </div>
+
+            {/* Confirm Password (Signup only) */}
+            {isSignupMode && (
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CE805C] focus:border-transparent transition-all"
+                  placeholder="Re-enter your password"
+                  disabled={isLoading}
+                  autoComplete="new-password"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Must match the password above
+                </p>
+              </div>
+            )}
 
             {/* Error Message */}
             {error && (
@@ -344,41 +488,83 @@ export default function LoginGate({ children, onAuthenticated }) {
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Signing in...
+                  {isSignupMode ? "Creating Account..." : "Signing in..."}
                 </span>
+              ) : isSignupMode ? (
+                "Create Account & Continue"
               ) : (
                 "Sign In"
               )}
             </button>
           </form>
 
-          {/* Help Text */}
+          {/* Toggle between Login/Signup */}
           <div className="mt-6 pt-6 border-t border-gray-200">
             <p className="text-xs text-gray-600 text-center mb-3">
-              Forgot your password?{" "}
-              <button
-                type="button"
-                onClick={() => setShowForgotPassword(!showForgotPassword)}
-                className="text-[#CE805C] hover:underline font-medium"
-              >
-                Reset it here
-              </button>
+              {isSignupMode ? (
+                <>
+                  Already have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSignupMode(false);
+                      setError("");
+                      setPassword("");
+                      setConfirmPassword("");
+                    }}
+                    className="text-[#CE805C] hover:underline font-medium"
+                  >
+                    Login instead
+                  </button>
+                </>
+              ) : (
+                <>
+                  Don't have an account yet?{" "}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSignupMode(true);
+                      setError("");
+                      setPassword("");
+                    }}
+                    className="text-[#CE805C] hover:underline font-medium"
+                  >
+                    Create account
+                  </button>
+                </>
+              )}
             </p>
 
-            {/* Password Reset Form */}
-            {showForgotPassword && (
-              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                <p className="text-xs text-gray-700 mb-3">
-                  Enter your email and we'll send you a password reset link.
+            {/* Forgot Password (Login mode only) */}
+            {!isSignupMode && (
+              <>
+                <p className="text-xs text-gray-600 text-center mb-3">
+                  Forgot your password?{" "}
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(!showForgotPassword)}
+                    className="text-[#CE805C] hover:underline font-medium"
+                  >
+                    Reset it here
+                  </button>
                 </p>
-                <button
-                  onClick={handleForgotPassword}
-                  disabled={!email || resetEmailSent}
-                  className="w-full px-4 py-2 bg-[#CE805C] text-white rounded-lg text-sm font-medium hover:bg-[#B87050] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Send Reset Link
-                </button>
-              </div>
+
+                {/* Password Reset Form */}
+                {showForgotPassword && (
+                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <p className="text-xs text-gray-700 mb-3">
+                      Enter your email and we'll send you a password reset link.
+                    </p>
+                    <button
+                      onClick={handleForgotPassword}
+                      disabled={!email || resetEmailSent}
+                      className="w-full px-4 py-2 bg-[#CE805C] text-white rounded-lg text-sm font-medium hover:bg-[#B87050] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Send Reset Link
+                    </button>
+                  </div>
+                )}
+              </>
             )}
 
             <p className="text-xs text-gray-600 text-center mt-3">
@@ -396,9 +582,15 @@ export default function LoginGate({ children, onAuthenticated }) {
         {/* Info Footer */}
         <div className="mt-6 text-center text-xs text-gray-500">
           <p>🔒 Secure authentication powered by Supabase</p>
-          <p className="mt-1">
-            First time? Use the temporary password from your welcome email
-          </p>
+          {isSignupMode ? (
+            <p className="mt-1">
+              Create your password and start planning your perfect wedding
+            </p>
+          ) : (
+            <p className="mt-1">
+              First time? Click "Create account" above to get started
+            </p>
+          )}
         </div>
       </div>
     </div>

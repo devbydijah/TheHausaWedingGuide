@@ -218,7 +218,7 @@ export default async function handler(req, res) {
           } catch (err) {
             console.error("Error checking existing purchases:", err);
           }
-        };
+        }
 
         // ============================================
         // SAVE TO DATABASE
@@ -282,7 +282,7 @@ export default async function handler(req, res) {
         if (shouldSendBundleEmail) {
           // Generate download token for PDF (if this is a PDF purchase, token is new; if webapp purchase, retrieve existing)
           let downloadLink;
-          
+
           if (productType === "pdf") {
             // Just purchased PDF, create new token
             const token = crypto.randomBytes(32).toString("hex");
@@ -315,7 +315,9 @@ export default async function handler(req, res) {
                 process.env.DOWNLOAD_TOKEN_SECRET ||
                 process.env.PAYSTACK_SECRET_KEY;
               const hmac = crypto.createHmac("sha256", SECRET);
-              hmac.update(`${existingToken.token}|${verifiedEmail}|${existingToken.expires_at}`);
+              hmac.update(
+                `${existingToken.token}|${verifiedEmail}|${existingToken.expires_at}`
+              );
               const sig = hmac.digest("hex");
 
               downloadLink = `${PDF_BASE_URL}?download=${existingToken.token}&expires=${existingToken.expires_at}&email=${encodeURIComponent(
