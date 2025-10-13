@@ -1,18 +1,20 @@
-// Simple Paystack webhook that sends download links via email using Resend
+// Paystack Webhook Handler - Clean Version
+// Handles payment success and sends appropriate emails via Resend
+
 import crypto from "crypto";
+import { createClient } from "@supabase/supabase-js";
 import {
   sendDownloadEmail,
   sendWebAppAccessEmail,
   sendBundleEmail,
 } from "../lib/email.js";
 import { tokenDB } from "../lib/database.cjs";
-import { createClient } from "@supabase/supabase-js";
 
-// Environment variables (support both test and live secrets)
-const PAYSTACK_TEST_SECRET = process.env.PAYSTACK_TEST_SECRET_KEY || null;
-const PAYSTACK_LIVE_SECRET = process.env.PAYSTACK_SECRET_KEY || null;
+// Environment variables
+const PAYSTACK_TEST_SECRET = process.env.PAYSTACK_TEST_SECRET_KEY;
+const PAYSTACK_LIVE_SECRET = process.env.PAYSTACK_SECRET_KEY;
 
-// Supabase Admin Client (for creating users)
+// Supabase Admin Client
 const supabaseAdmin =
   process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.VITE_SUPABASE_URL
     ? createClient(
@@ -21,400 +23,263 @@ const supabaseAdmin =
       )
     : null;
 
-// Product-specific URLs
+// Product URLs
 const PDF_BASE_URL = "https://the-hausa-weding-guide.vercel.app";
-const WEBAPP_BASE_URL = "https://the-hausa-weding-guide-interactive.vercel.app";
 
-const WEBHOOK_TEST_BYPASS =
-  (process.env.PAYSTACK_WEBHOOK_TEST_BYPASS || "").toLowerCase() === "true";
+// Product IDs
+const PDF_PRODUCT_ID = 2148110;
+const WEBAPP_PRODUCT_ID = 2183417;
 
-// Verify Paystack signature using the raw request body string
-// Tries both TEST and LIVE secrets when available to support a single URL for both modes
+/**
+ * Verify Paystack webhook signature
+ */
 function verifySignature(rawBodyString, signature) {
   if (!signature) return { ok: false, mode: null };
-  const candidates = [
+
+  const secrets = [
     { key: PAYSTACK_TEST_SECRET, mode: "test" },
     { key: PAYSTACK_LIVE_SECRET, mode: "live" },
-  ].filter((c) => !!c.key);
+  ].filter((s) => !!s.key);
 
-  for (const c of candidates) {
-    const hmac = crypto.createHmac("sha512", c.key);
+  for (const secret of secrets) {
+    const hmac = crypto.createHmac("sha512", secret.key);
     hmac.update(rawBodyString);
     const digest = hmac.digest("hex");
-    if (digest === signature) return { ok: true, mode: c.mode };
+    if (digest === signature) return { ok: true, mode: secret.mode };
   }
+
   return { ok: false, mode: null };
 }
 
+/**
+ * Main webhook handler
+ */
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  // Get raw body for signature verification
+  let rawBody = "";
+  if (req.body) {
+    rawBody = typeof req.body === "string" ? req.body : JSON.stringify(req.body);
+  }
+
+  // Verify webhook signature
+  const signature = req.headers["x-paystack-signature"];
+  const verification = verifySignature(rawBody, signature);
+
+  if (!verification.ok) {
+    console.error("[WEBHOOK] ❌ Invalid signature");
+    return res.status(401).json({ error: "Invalid signature" });
+  }
+
+  console.log(`[WEBHOOK] ✅ Signature verified (${verification.mode} mode)`);
+
+  // Parse webhook data
+  let data;
   try {
-    // Verify webhook signature
-    const signature = req.headers["x-paystack-signature"];
-    // Compute raw body string in a resilient way (prefer rawBody when available)
-    let rawBodyString;
-    if (req.rawBody) {
-      rawBodyString = Buffer.isBuffer(req.rawBody)
-        ? req.rawBody.toString("utf8")
-        : String(req.rawBody);
-    } else if (typeof req.body === "string") {
-      rawBodyString = req.body;
-    } else if (Buffer.isBuffer(req.body)) {
-      rawBodyString = req.body.toString("utf8");
-    } else {
-      rawBodyString = JSON.stringify(req.body || {});
+    data = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+  } catch (error) {
+    console.error("[WEBHOOK] ❌ Invalid JSON:", error);
+    return res.status(400).json({ error: "Invalid JSON" });
+  }
+
+  // Only process successful charges
+  if (data.event !== "charge.success") {
+    console.log(`[WEBHOOK] ℹ️ Ignoring event: ${data.event}`);
+    return res.status(200).json({ received: true });
+  }
+
+  const eventData = data.data;
+  const customerEmail = eventData.customer?.email;
+  const amount = eventData.amount;
+  const txReference = eventData.reference;
+  const metadata = eventData.metadata || {};
+
+  console.log(`[WEBHOOK] 💰 Payment received: ₦${(amount / 100).toFixed(2)} from ${customerEmail}`);
+
+  // Validate email
+  if (!customerEmail || !customerEmail.includes("@")) {
+    console.error("[WEBHOOK] ❌ Invalid customer email");
+    return res.status(400).json({ error: "Invalid customer email" });
+  }
+
+  // Detect product type
+  const productId = metadata.product_id;
+  let productType;
+
+  if (productId === PDF_PRODUCT_ID || productId === "2148110") {
+    productType = "pdf";
+  } else if (productId === WEBAPP_PRODUCT_ID || productId === "2183417") {
+    productType = "webapp";
+  } else {
+    // Fallback: detect by amount
+    productType = amount >= 10000 ? "pdf" : "webapp";
+    console.warn(`[WEBHOOK] ⚠️ Product ID not found, using amount-based detection: ${productType}`);
+  }
+
+  console.log(`[WEBHOOK] 📦 Product: ${productType.toUpperCase()} | Product ID: ${productId || "N/A"}`);
+
+  try {
+    // Check if user already has the other product (bundle detection)
+    let hasPdfPurchase = false;
+    let hasWebappPurchase = false;
+
+    if (supabaseAdmin) {
+      // Check PDF purchase
+      const pdfTokens = tokenDB.getTokensByEmail(customerEmail);
+      hasPdfPurchase = pdfTokens && pdfTokens.length > 0;
+
+      // Check webapp purchase
+      const { data: webappUser } = await supabaseAdmin
+        .from("web_app_users")
+        .select("email")
+        .eq("email", customerEmail)
+        .single();
+      hasWebappPurchase = !!webappUser;
     }
 
-    const verification = verifySignature(rawBodyString, signature);
-    if (!verification.ok) {
-      if (WEBHOOK_TEST_BYPASS) {
-        console.warn(
-          "Paystack signature invalid, but PAYSTACK_WEBHOOK_TEST_BYPASS=true — continuing in TEST mode"
-        );
+    // Determine if this is a bundle purchase
+    const isBundlePurchase =
+      (productType === "pdf" && hasWebappPurchase) ||
+      (productType === "webapp" && hasPdfPurchase);
+
+    console.log(`[WEBHOOK] 🔍 Bundle check: PDF=${hasPdfPurchase}, Webapp=${hasWebappPurchase}, IsBundle=${isBundlePurchase}`);
+
+    // === HANDLE BUNDLE PURCHASE ===
+    if (isBundlePurchase) {
+      console.log(`[WEBHOOK] 🎁 Bundle detected for ${customerEmail}`);
+
+      // Generate or retrieve PDF download link
+      let downloadLink;
+      
+      if (productType === "pdf") {
+        // Just purchased PDF, generate new token
+        const token = crypto.randomBytes(32).toString("hex");
+        const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+        const SECRET = process.env.DOWNLOAD_TOKEN_SECRET || process.env.PAYSTACK_SECRET_KEY;
+        
+        const hmac = crypto.createHmac("sha256", SECRET);
+        hmac.update(`${token}|${customerEmail}|${expires}`);
+        const sig = hmac.digest("hex");
+
+        tokenDB.storeToken(customerEmail, token, expires, 3);
+        downloadLink = `${PDF_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(customerEmail)}&sig=${sig}`;
       } else {
-        console.log("Invalid signature");
-        return res.status(401).json({ error: "Invalid signature" });
-      }
-    }
-
-    const { event, data } = req.body || {};
-    console.log(
-      "Webhook event received:",
-      event,
-      "status:",
-      data?.status,
-      "reference:",
-      data?.reference
-    );
-
-    // Only process successful payments
-    if (event === "charge.success" && data?.status === "success") {
-      const reference = data?.reference;
-      const email = data?.customer?.email || "unknown";
-
-      console.log(
-        `Processing successful payment for: ${email.replace(/(.{2}).*(@.*)/, "$1***$2")} (mode: ${
-          verification.mode || (WEBHOOK_TEST_BYPASS ? "test-bypass" : "unknown")
-        })`
-      );
-
-      // Verify transaction via Paystack API as an extra safety net (handles signature/bypass edge cases)
-      try {
-        const keyForVerify =
-          verification.mode === "live"
-            ? PAYSTACK_LIVE_SECRET || PAYSTACK_TEST_SECRET
-            : verification.mode === "test"
-              ? PAYSTACK_TEST_SECRET || PAYSTACK_LIVE_SECRET
-              : PAYSTACK_LIVE_SECRET || PAYSTACK_TEST_SECRET; // fallback
-
-        if (!keyForVerify) {
-          console.error("No Paystack secret available for verification");
-          return res.status(500).json({ error: "Server not configured" });
-        }
-
-        const resp = await fetch(
-          `https://api.paystack.co/transaction/verify/${encodeURIComponent(
-            reference || ""
-          )}`,
-          {
-            headers: {
-              Authorization: `Bearer ${keyForVerify}`,
-              Accept: "application/json",
-            },
-          }
-        );
-        const verifyJson = await resp.json();
-        if (!resp.ok || verifyJson?.data?.status !== "success") {
-          console.error("Paystack verify failed", verifyJson);
-          return res.status(400).json({ error: "Verification failed" });
-        }
-
-        // Prefer the email returned by Paystack verify API to avoid spoofing
-        const verifiedEmail =
-          verifyJson?.data?.customer?.email || data?.customer?.email;
-        if (!verifiedEmail) {
-          console.error("No customer email available after verification");
-          return res.status(400).json({ error: "No customer email available" });
-        }
-
-        // ============================================
-        // PRODUCT DETECTION - PRODUCT ID-BASED
-        // ============================================
-        // Detect product type by Paystack product ID
-        const amount = verifyJson?.data?.amount || data?.amount || 0;
-        const txReference =
-          verifyJson?.data?.reference || data?.reference || "";
-        const metadata = verifyJson?.data?.metadata || data?.metadata || {};
-
-        // Get product_id from metadata (Paystack sends this for storefront purchases)
-        const productId = metadata?.product_id || metadata?.productId || null;
-
-        // Paystack product IDs
-        const PDF_PRODUCT_ID = 2183419; // Northern wedding guide (PDF)
-        const WEBAPP_PRODUCT_ID = 2183415; // Interactive web guide
-
-        let productType;
-
-        // Primary detection: Product ID (most reliable)
-        if (productId === PDF_PRODUCT_ID || productId === "2183419") {
-          productType = "pdf";
-        } else if (productId === WEBAPP_PRODUCT_ID || productId === "2183415") {
-          productType = "webapp";
-        } else {
-          // Fallback 1: Check metadata product_type
-          const metadataType = (metadata.product_type || "").toLowerCase();
-          if (metadataType === "webapp" || metadataType === "interactive") {
-            productType = "webapp";
-          } else if (metadataType === "pdf" || metadataType === "guide") {
-            productType = "pdf";
-          }
-          // Fallback 2: Check reference for keywords
-          else if (
-            txReference.toLowerCase().includes("webapp") ||
-            txReference.toLowerCase().includes("interactive") ||
-            txReference.toLowerCase().includes("web-guide")
-          ) {
-            productType = "webapp";
-          } else if (
-            txReference.toLowerCase().includes("pdf") ||
-            txReference.toLowerCase().includes("guide")
-          ) {
-            productType = "pdf";
-          } else {
-            // Last resort: amount-based (legacy support)
-            console.warn(
-              `⚠️ Could not detect product from ID or metadata. Product ID: ${productId}, Amount: ₦${(amount / 100).toFixed(2)}`
-            );
-            // Assume PDF if amount is higher, webapp if lower
-            productType = amount >= 10000 ? "pdf" : "webapp";
-          }
-        }
-
-        console.log(
-          `✅ Product detected: ${productType.toUpperCase()} | Product ID: ${productId || "N/A"} | Amount: ₦${(amount / 100).toFixed(2)} | Reference: ${txReference}`
-        );
-
-        // ============================================
-        // CHECK FOR EXISTING PURCHASES (BUNDLE DETECTION)
-        // ============================================
-        // Check if user has already purchased the other product
-        let hasPdfPurchase = false;
-        let hasWebappPurchase = false;
-        let shouldSendBundleEmail = false;
-
-        if (supabaseAdmin) {
-          try {
-            // Check for PDF purchase (stored in sales table or downloads.db)
-            const pdfToken = tokenDB.getTokensByEmail(verifiedEmail);
-            hasPdfPurchase = pdfToken && pdfToken.length > 0;
-
-            // Check for webapp purchase (stored in web_app_users table)
-            const { data: webappUser } = await supabaseAdmin
-              .from("web_app_users")
-              .select("email")
-              .eq("email", verifiedEmail)
-              .single();
-            hasWebappPurchase = !!webappUser;
-
-            // Determine if we should send bundle email
-            if (productType === "pdf" && hasWebappPurchase) {
-              shouldSendBundleEmail = true;
-              console.log(
-                `User ${verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")} already has webapp - sending bundle email`
-              );
-            } else if (productType === "webapp" && hasPdfPurchase) {
-              shouldSendBundleEmail = true;
-              console.log(
-                `User ${verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")} already has PDF - sending bundle email`
-              );
-            }
-          } catch (err) {
-            console.error("Error checking existing purchases:", err);
-          }
-        }
-
-        // ============================================
-        // SAVE TO DATABASE
-        // ============================================
-        // Save to appropriate database table based on product type
-        let hasExistingAccount = false;
-
-        if (productType === "webapp") {
-          if (supabaseAdmin) {
-            try {
-              // Check if user already exists in web_app_users
-              const { data: existingUser } = await supabaseAdmin
-                .from("web_app_users")
-                .select("email, paystack_reference")
-                .eq("email", verifiedEmail)
-                .single();
-
-              if (existingUser) {
-                console.log(
-                  `User ${verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")} already exists in database with reference: ${existingUser.paystack_reference}`
-                );
-                hasExistingAccount = true;
-              } else {
-                // Create new web_app_users record (NO auth account yet)
-                const { error: dbError } = await supabaseAdmin
-                  .from("web_app_users")
-                  .insert({
-                    email: verifiedEmail,
-                    paystack_reference: txReference,
-                    purchased_at: new Date().toISOString(),
-                    access_days: 20,
-                    is_onboarded: false,
-                  });
-
-                if (dbError) {
-                  console.error(
-                    "Failed to create web_app_users record:",
-                    dbError
-                  );
-                } else {
-                  console.log(
-                    `Database record created for ${verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")} - user will create account during signup`
-                  );
-                }
-              }
-            } catch (err) {
-              console.error("Database operation error:", err);
-            }
-          } else {
-            console.warn(
-              "Supabase admin client not configured - skipping database save. Check SUPABASE_SERVICE_ROLE_KEY and VITE_SUPABASE_URL."
-            );
-          }
-        }
-
-        // ============================================
-        // SEND APPROPRIATE EMAIL BASED ON PRODUCT TYPE
-        // ============================================
-
-        // If user has purchased both products, send bundle email
-        if (shouldSendBundleEmail) {
-          // Generate download token for PDF (if this is a PDF purchase, token is new; if webapp purchase, retrieve existing)
-          let downloadLink;
-
-          if (productType === "pdf") {
-            // Just purchased PDF, create new token
-            const token = crypto.randomBytes(32).toString("hex");
-            const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-
-            const SECRET =
-              process.env.DOWNLOAD_TOKEN_SECRET ||
-              process.env.PAYSTACK_SECRET_KEY;
-            const hmac = crypto.createHmac("sha256", SECRET);
-            hmac.update(`${token}|${verifiedEmail}|${expires}`);
-            const sig = hmac.digest("hex");
-
-            const stored = tokenDB.storeToken(verifiedEmail, token, expires, 3);
-            if (!stored) {
-              console.error("Failed to store token in database");
-              return res
-                .status(500)
-                .json({ error: "Failed to create download token" });
-            }
-
-            downloadLink = `${PDF_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
-              verifiedEmail
-            )}&sig=${sig}`;
-          } else {
-            // Just purchased webapp, retrieve existing PDF token
-            const existingTokens = tokenDB.getTokensByEmail(verifiedEmail);
-            if (existingTokens && existingTokens.length > 0) {
-              const existingToken = existingTokens[0];
-              const SECRET =
-                process.env.DOWNLOAD_TOKEN_SECRET ||
-                process.env.PAYSTACK_SECRET_KEY;
-              const hmac = crypto.createHmac("sha256", SECRET);
-              hmac.update(
-                `${existingToken.token}|${verifiedEmail}|${existingToken.expires_at}`
-              );
-              const sig = hmac.digest("hex");
-
-              downloadLink = `${PDF_BASE_URL}?download=${existingToken.token}&expires=${existingToken.expires_at}&email=${encodeURIComponent(
-                verifiedEmail
-              )}&sig=${sig}`;
-            } else {
-              console.error("No existing PDF token found for bundle email");
-              // Fallback: send webapp-only email
-              await sendWebAppAccessEmail(verifiedEmail, txReference);
-              console.log(
-                "Fallback: Web app email sent (no PDF token found) to:",
-                verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")
-              );
-              return res.status(200).json({ received: true });
-            }
-          }
-
-          // Send bundle email with both PDF + web app access
-          await sendBundleEmail(
-            verifiedEmail,
-            downloadLink,
-            txReference,
-            hasExistingAccount
-          );
-          console.log(
-            "Bundle email sent (user has both products) to:",
-            verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")
-          );
-        } else if (productType === "webapp") {
-          // Web App Only - send signup instructions (NO temporary password)
-          if (!hasExistingAccount) {
-            await sendWebAppAccessEmail(verifiedEmail, txReference);
-            console.log(
-              "Web app signup email sent successfully to:",
-              verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")
-            );
-          } else {
-            console.log(
-              "Skipping email - user already has account:",
-              verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")
-            );
-          }
-        } else {
-          // PDF Only - send download link
-          const token = crypto.randomBytes(32).toString("hex");
-          const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-
-          const SECRET =
-            process.env.DOWNLOAD_TOKEN_SECRET ||
-            process.env.PAYSTACK_SECRET_KEY;
+        // Just purchased webapp, retrieve existing PDF token
+        const existingTokens = tokenDB.getTokensByEmail(customerEmail);
+        if (existingTokens && existingTokens.length > 0) {
+          const existingToken = existingTokens[0];
+          const SECRET = process.env.DOWNLOAD_TOKEN_SECRET || process.env.PAYSTACK_SECRET_KEY;
+          
           const hmac = crypto.createHmac("sha256", SECRET);
-          hmac.update(`${token}|${verifiedEmail}|${expires}`);
+          hmac.update(`${existingToken.token}|${customerEmail}|${existingToken.expires_at}`);
           const sig = hmac.digest("hex");
 
-          const stored = tokenDB.storeToken(verifiedEmail, token, expires, 3);
-          if (!stored) {
-            console.error("Failed to store token in database");
-            return res
-              .status(500)
-              .json({ error: "Failed to create download token" });
-          }
-
-          const downloadLink = `${PDF_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(
-            verifiedEmail
-          )}&sig=${sig}`;
-
-          await sendDownloadEmail(verifiedEmail, downloadLink);
-          console.log(
-            "PDF download email sent successfully to:",
-            verifiedEmail.replace(/(.{2}).*(@.*)/, "$1***$2")
-          );
+          downloadLink = `${PDF_BASE_URL}?download=${existingToken.token}&expires=${existingToken.expires_at}&email=${encodeURIComponent(customerEmail)}&sig=${sig}`;
         }
-      } catch (e) {
-        console.error("Error verifying/sending email:", e);
-        return res.status(500).json({ error: "Verification/email failed" });
       }
+
+      // Create webapp user if needed
+      let hasExistingAccount = hasWebappPurchase;
+      if (productType === "webapp" && !hasWebappPurchase && supabaseAdmin) {
+        try {
+          await supabaseAdmin.from("web_app_users").insert([
+            {
+              email: customerEmail,
+              paystack_reference: txReference,
+              payment_amount: amount,
+              first_login_at: null,
+              expires_at: null,
+            },
+          ]);
+          console.log(`[WEBHOOK] ✅ Created webapp user: ${customerEmail}`);
+        } catch (error) {
+          console.error("[WEBHOOK] ⚠️ Failed to create webapp user:", error.message);
+        }
+      }
+
+      // Send bundle email
+      await sendBundleEmail(customerEmail, downloadLink, txReference, hasExistingAccount);
+      console.log(`[WEBHOOK] ✅ Bundle email sent to: ${customerEmail}`);
+
+      return res.status(200).json({ received: true, product: "bundle" });
     }
 
-    res.status(200).json({ received: true });
+    // === HANDLE WEB APP PURCHASE ===
+    if (productType === "webapp") {
+      // Create webapp user in Supabase
+      if (supabaseAdmin) {
+        try {
+          const { data: existingUser } = await supabaseAdmin
+            .from("web_app_users")
+            .select("email")
+            .eq("email", customerEmail)
+            .single();
+
+          if (existingUser) {
+            console.log(`[WEBHOOK] ℹ️ User already exists, skipping email: ${customerEmail}`);
+            return res.status(200).json({ received: true, product: "webapp", status: "existing" });
+          }
+
+          await supabaseAdmin.from("web_app_users").insert([
+            {
+              email: customerEmail,
+              paystack_reference: txReference,
+              payment_amount: amount,
+              first_login_at: null,
+              expires_at: null,
+            },
+          ]);
+
+          console.log(`[WEBHOOK] ✅ Created webapp user: ${customerEmail}`);
+        } catch (error) {
+          console.error("[WEBHOOK] ❌ Failed to create webapp user:", error);
+          return res.status(500).json({ error: "Failed to create user" });
+        }
+      }
+
+      // Send signup email
+      await sendWebAppAccessEmail(customerEmail, txReference);
+      console.log(`[WEBHOOK] ✅ Web app email sent to: ${customerEmail}`);
+
+      return res.status(200).json({ received: true, product: "webapp" });
+    }
+
+    // === HANDLE PDF PURCHASE ===
+    if (productType === "pdf") {
+      // Generate download token
+      const token = crypto.randomBytes(32).toString("hex");
+      const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+      const SECRET = process.env.DOWNLOAD_TOKEN_SECRET || process.env.PAYSTACK_SECRET_KEY;
+
+      const hmac = crypto.createHmac("sha256", SECRET);
+      hmac.update(`${token}|${customerEmail}|${expires}`);
+      const sig = hmac.digest("hex");
+
+      // Store token in database
+      const stored = tokenDB.storeToken(customerEmail, token, expires, 3);
+      if (!stored) {
+        console.error("[WEBHOOK] ❌ Failed to store token");
+        return res.status(500).json({ error: "Failed to create download token" });
+      }
+
+      const downloadLink = `${PDF_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(customerEmail)}&sig=${sig}`;
+
+      // Send download email
+      await sendDownloadEmail(customerEmail, downloadLink);
+      console.log(`[WEBHOOK] ✅ PDF email sent to: ${customerEmail}`);
+
+      return res.status(200).json({ received: true, product: "pdf" });
+    }
+
+    // Unknown product type
+    console.error("[WEBHOOK] ❌ Unknown product type");
+    return res.status(400).json({ error: "Unknown product type" });
+
   } catch (error) {
-    console.error("Webhook error:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("[WEBHOOK] ❌ Error processing webhook:", error);
+    return res.status(500).json({ error: "Internal server error", details: error.message });
   }
 }
