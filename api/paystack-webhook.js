@@ -145,13 +145,14 @@ export default async function handler(req, res) {
         // ============================================
         // Detect product type primarily by amount (in kobo)
         const amount = verifyJson?.data?.amount || data?.amount || 0;
-        const txReference = verifyJson?.data?.reference || data?.reference || "";
-        
+        const txReference =
+          verifyJson?.data?.reference || data?.reference || "";
+
         // Amount-based detection (primary method)
-        const isPdfGuide = amount === 500000;  // ₦5,000 = 500,000 kobo (main branch)
-        const isWebGuide = amount === 10000;   // ₦100 = 10,000 kobo (interactive-guide branch)
-        const isBundle = amount === 550000;    // ₦5,500 = 550,000 kobo (both products)
-        
+        const isPdfGuide = amount === 11000; // ₦110 = 11,000 kobo (main branch)
+        const isWebGuide = amount === 10000; // ₦100 = 10,000 kobo (interactive-guide branch)
+        const isBundle = amount === 12100; // ₦121 = 12,100 kobo (both products - ₦110 + ₦11 = ₦121)
+
         let productType;
         if (isPdfGuide) {
           productType = "pdf";
@@ -163,15 +164,20 @@ export default async function handler(req, res) {
           // Fallback: try to detect from metadata or reference
           const metadata = verifyJson?.data?.metadata || data?.metadata || {};
           const metadataType = (metadata.product_type || "").toLowerCase();
-          
+
           if (metadataType === "webapp" || metadataType === "interactive") {
             productType = "webapp";
           } else if (metadataType === "bundle" || metadataType === "complete") {
             productType = "bundle";
-          } else if (txReference.toLowerCase().includes("webapp") || txReference.toLowerCase().includes("interactive")) {
+          } else if (
+            txReference.toLowerCase().includes("webapp") ||
+            txReference.toLowerCase().includes("interactive")
+          ) {
             productType = "webapp";
           } else {
-            console.warn(`Unknown product amount: ₦${(amount / 100).toFixed(2)} (${amount} kobo). Defaulting to PDF.`);
+            console.warn(
+              `Unknown product amount: ₦${(amount / 100).toFixed(2)} (${amount} kobo). Defaulting to PDF.`
+            );
             productType = "pdf"; // Default to PDF for backward compatibility
           }
         }
@@ -185,7 +191,7 @@ export default async function handler(req, res) {
         // ============================================
         // For Web Guide purchases, save to web_app_users table WITHOUT creating auth account
         // Users will sign up themselves using the email link
-        
+
         if (productType === "webapp" || productType === "bundle") {
           if (supabaseAdmin) {
             try {
