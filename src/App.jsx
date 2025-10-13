@@ -17,7 +17,7 @@ import {
   CaretDownIcon,
 } from "@phosphor-icons/react";
 import "./index.css";
-import LoginGate from "./components/LoginGate_NEW"; // Updated to new auth system
+import LoginGate from "./components/LoginGate";
 import InteractiveGuide from "./components/InteractiveGuide";
 import OnboardingForm from "./components/OnboardingForm";
 
