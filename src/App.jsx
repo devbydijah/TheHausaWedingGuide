@@ -48,7 +48,9 @@ function App() {
       setShowClaim(true);
     } else if (guideParam === "1") {
       setShowGuide(true);
-    } else if (purchasedParam === "true") {
+    } else if (purchasedParam) {
+      // Product-specific redirect URLs from Paystack products
+      // ?purchased=pdf (PDF Guide) or ?purchased=webapp (Web Guide)
       setShowPurchaseSuccess(true);
       // Auto-close after 15 seconds
       setTimeout(() => {
@@ -1240,7 +1242,11 @@ function App() {
               </button>
               <div className="flex justify-center mb-4">
                 <div className="bg-white/20 rounded-full p-4">
-                  <CheckCircleIcon size={48} weight="fill" className="text-white" />
+                  <CheckCircleIcon
+                    size={48}
+                    weight="fill"
+                    className="text-white"
+                  />
                 </div>
               </div>
               <h2 className="font-playfair text-3xl md:text-4xl font-bold">
@@ -1364,7 +1370,11 @@ function App() {
                   href="mailto:support@hausaroom.ng"
                   className="inline-flex items-center text-[#990200] hover:text-[#740015] font-semibold text-sm transition-colors"
                 >
-                  <EnvelopeSimpleIcon size={18} weight="bold" className="mr-2" />
+                  <EnvelopeSimpleIcon
+                    size={18}
+                    weight="bold"
+                    className="mr-2"
+                  />
                   Contact Support: support@hausaroom.ng
                 </a>
               </div>
