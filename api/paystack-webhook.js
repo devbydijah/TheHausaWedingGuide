@@ -55,7 +55,14 @@ function verifySignature(rawBodyString, signature) {
  * Main webhook handler
  */
 export default async function handler(req, res) {
+  console.log("\n========================================");
+  console.log("[WEBHOOK] 🎯 Paystack webhook received!");
+  console.log("[WEBHOOK] 📅 Time:", new Date().toISOString());
+  console.log("[WEBHOOK] 🔧 Method:", req.method);
+  console.log("[WEBHOOK] 🌐 Headers:", JSON.stringify(req.headers, null, 2));
+
   if (req.method !== "POST") {
+    console.log("[WEBHOOK] ❌ Invalid method");
     return res.status(405).json({ error: "Method not allowed" });
   }
 
@@ -65,13 +72,28 @@ export default async function handler(req, res) {
     rawBody =
       typeof req.body === "string" ? req.body : JSON.stringify(req.body);
   }
+  console.log("[WEBHOOK] 📦 Raw body length:", rawBody.length);
 
   // Verify webhook signature
   const signature = req.headers["x-paystack-signature"];
+  console.log("[WEBHOOK] 🔐 Signature received:", signature ? "YES" : "NO");
+  console.log(
+    "[WEBHOOK] 🔐 Signature (first 20 chars):",
+    signature?.substring(0, 20)
+  );
+
   const verification = verifySignature(rawBody, signature);
 
   if (!verification.ok) {
-    console.error("[WEBHOOK] ❌ Invalid signature");
+    console.error("[WEBHOOK] ❌ Invalid signature - Verification FAILED");
+    console.error(
+      "[WEBHOOK] ❌ PAYSTACK_TEST_SECRET exists:",
+      !!PAYSTACK_TEST_SECRET
+    );
+    console.error(
+      "[WEBHOOK] ❌ PAYSTACK_LIVE_SECRET exists:",
+      !!PAYSTACK_LIVE_SECRET
+    );
     return res.status(401).json({ error: "Invalid signature" });
   }
 
@@ -86,6 +108,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Invalid JSON" });
   }
 
+  console.log("[WEBHOOK] 📋 Event type:", data.event);
+
   // Only process successful charges
   if (data.event !== "charge.success") {
     console.log(`[WEBHOOK] ℹ️ Ignoring event: ${data.event}`);
@@ -98,9 +122,12 @@ export default async function handler(req, res) {
   const txReference = eventData.reference;
   const metadata = eventData.metadata || {};
 
-  console.log(
-    `[WEBHOOK] 💰 Payment received: ₦${(amount / 100).toFixed(2)} from ${customerEmail}`
-  );
+  console.log("[WEBHOOK] ==========================================");
+  console.log("[WEBHOOK] 🎉 CHARGE SUCCESS EVENT!");
+  console.log(`[WEBHOOK] 💰 Amount: ₦${(amount / 100).toFixed(2)}`);
+  console.log(`[WEBHOOK] 📧 Customer Email: ${customerEmail}`);
+  console.log(`[WEBHOOK] 🔖 Reference: ${txReference}`);
+  console.log("[WEBHOOK] 📦 Metadata:", JSON.stringify(metadata, null, 2));
 
   // Validate email
   if (!customerEmail || !customerEmail.includes("@")) {
@@ -110,33 +137,64 @@ export default async function handler(req, res) {
 
   // Detect product type
   const productId = metadata.product_id;
+  console.log("[WEBHOOK] 🔍 Product ID from metadata:", productId);
+  console.log("[WEBHOOK] 🔍 Product ID type:", typeof productId);
+  console.log(
+    "[WEBHOOK] 🔍 Expected PDF ID:",
+    PDF_PRODUCT_ID,
+    "(type:",
+    typeof PDF_PRODUCT_ID,
+    ")"
+  );
+  console.log(
+    "[WEBHOOK] 🔍 Expected WebApp ID:",
+    WEBAPP_PRODUCT_ID,
+    "(type:",
+    typeof WEBAPP_PRODUCT_ID,
+    ")"
+  );
+
   let productType;
 
-  if (productId === PDF_PRODUCT_ID || productId === "2148110") {
+  if (
+    productId === PDF_PRODUCT_ID ||
+    productId === "2148110" ||
+    String(productId) === "2148110"
+  ) {
     productType = "pdf";
-  } else if (productId === WEBAPP_PRODUCT_ID || productId === "2183417") {
+    console.log("[WEBHOOK] ✅ Detected product: PDF GUIDE");
+  } else if (
+    productId === WEBAPP_PRODUCT_ID ||
+    productId === "2183417" ||
+    String(productId) === "2183417"
+  ) {
     productType = "webapp";
+    console.log("[WEBHOOK] ✅ Detected product: WEB APP");
   } else {
     // Fallback: detect by amount
     productType = amount >= 10000 ? "pdf" : "webapp";
     console.warn(
       `[WEBHOOK] ⚠️ Product ID not found, using amount-based detection: ${productType}`
     );
+    console.warn(`[WEBHOOK] ⚠️ Amount: ${amount} (threshold: 10000)`);
   }
 
-  console.log(
-    `[WEBHOOK] 📦 Product: ${productType.toUpperCase()} | Product ID: ${productId || "N/A"}`
-  );
+  console.log(`[WEBHOOK] 📦 FINAL PRODUCT TYPE: ${productType.toUpperCase()}`);
 
   try {
+    console.log("[WEBHOOK] 🔍 Starting bundle detection...");
+
     // Check if user already has the other product (bundle detection)
     let hasPdfPurchase = false;
     let hasWebappPurchase = false;
 
     if (supabaseAdmin) {
+      console.log("[WEBHOOK] ✅ Supabase admin client available");
+
       // Check PDF purchase
       const pdfTokens = tokenDB.getTokensByEmail(customerEmail);
       hasPdfPurchase = pdfTokens && pdfTokens.length > 0;
+      console.log("[WEBHOOK] 📄 Has PDF purchase:", hasPdfPurchase);
 
       // Check webapp purchase
       const { data: webappUser } = await supabaseAdmin
@@ -145,6 +203,9 @@ export default async function handler(req, res) {
         .eq("email", customerEmail)
         .single();
       hasWebappPurchase = !!webappUser;
+      console.log("[WEBHOOK] 🌐 Has WebApp purchase:", hasWebappPurchase);
+    } else {
+      console.warn("[WEBHOOK] ⚠️ Supabase admin client NOT available");
     }
 
     // Determine if this is a bundle purchase
@@ -152,13 +213,15 @@ export default async function handler(req, res) {
       (productType === "pdf" && hasWebappPurchase) ||
       (productType === "webapp" && hasPdfPurchase);
 
-    console.log(
-      `[WEBHOOK] 🔍 Bundle check: PDF=${hasPdfPurchase}, Webapp=${hasWebappPurchase}, IsBundle=${isBundlePurchase}`
-    );
+    console.log("[WEBHOOK] 🎁 Bundle check result:", isBundlePurchase);
+    console.log("[WEBHOOK] ==========================================");
 
     // === HANDLE BUNDLE PURCHASE ===
     if (isBundlePurchase) {
-      console.log(`[WEBHOOK] 🎁 Bundle detected for ${customerEmail}`);
+      console.log(
+        `[WEBHOOK] 🎁🎁 BUNDLE PURCHASE DETECTED for ${customerEmail}!`
+      );
+      console.log("[WEBHOOK] 📧 Preparing to send BUNDLE email...");
 
       // Generate or retrieve PDF download link
       let downloadLink;
@@ -218,19 +281,35 @@ export default async function handler(req, res) {
       }
 
       // Send bundle email
-      await sendBundleEmail(
-        customerEmail,
-        downloadLink,
-        txReference,
-        hasExistingAccount
-      );
-      console.log(`[WEBHOOK] ✅ Bundle email sent to: ${customerEmail}`);
+      console.log("[WEBHOOK] 📤 Calling sendBundleEmail()...");
+      console.log("[WEBHOOK] 📤 Email:", customerEmail);
+      console.log("[WEBHOOK] 📤 Download link:", downloadLink ? "YES" : "NO");
+      console.log("[WEBHOOK] 📤 Reference:", txReference);
+
+      try {
+        await sendBundleEmail(
+          customerEmail,
+          downloadLink,
+          txReference,
+          hasExistingAccount
+        );
+        console.log(
+          `[WEBHOOK] ✅✅ Bundle email sent SUCCESSFULLY to: ${customerEmail}`
+        );
+      } catch (emailError) {
+        console.error("[WEBHOOK] ❌❌ sendBundleEmail() FAILED!");
+        console.error("[WEBHOOK] ❌ Error:", emailError);
+        console.error("[WEBHOOK] ❌ Error message:", emailError.message);
+        console.error("[WEBHOOK] ❌ Error stack:", emailError.stack);
+      }
 
       return res.status(200).json({ received: true, product: "bundle" });
     }
 
     // === HANDLE WEB APP PURCHASE ===
     if (productType === "webapp") {
+      console.log("[WEBHOOK] 🌐 Processing WEB APP purchase...");
+
       // Create webapp user in Supabase
       if (supabaseAdmin) {
         try {
@@ -249,6 +328,7 @@ export default async function handler(req, res) {
               .json({ received: true, product: "webapp", status: "existing" });
           }
 
+          console.log("[WEBHOOK] 📝 Creating new webapp user in Supabase...");
           await supabaseAdmin.from("web_app_users").insert([
             {
               email: customerEmail,
@@ -267,14 +347,29 @@ export default async function handler(req, res) {
       }
 
       // Send signup email
-      await sendWebAppAccessEmail(customerEmail, txReference);
-      console.log(`[WEBHOOK] ✅ Web app email sent to: ${customerEmail}`);
+      console.log("[WEBHOOK] 📤 Calling sendWebAppAccessEmail()...");
+      console.log("[WEBHOOK] 📤 Email:", customerEmail);
+      console.log("[WEBHOOK] 📤 Reference:", txReference);
+
+      try {
+        await sendWebAppAccessEmail(customerEmail, txReference);
+        console.log(
+          `[WEBHOOK] ✅✅ Web app email sent SUCCESSFULLY to: ${customerEmail}`
+        );
+      } catch (emailError) {
+        console.error("[WEBHOOK] ❌❌ sendWebAppAccessEmail() FAILED!");
+        console.error("[WEBHOOK] ❌ Error:", emailError);
+        console.error("[WEBHOOK] ❌ Error message:", emailError.message);
+        console.error("[WEBHOOK] ❌ Error stack:", emailError.stack);
+      }
 
       return res.status(200).json({ received: true, product: "webapp" });
     }
 
     // === HANDLE PDF PURCHASE ===
     if (productType === "pdf") {
+      console.log("[WEBHOOK] 📄 Processing PDF purchase...");
+
       // Generate download token
       const token = crypto.randomBytes(32).toString("hex");
       const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
@@ -286,6 +381,7 @@ export default async function handler(req, res) {
       const sig = hmac.digest("hex");
 
       // Store token in database
+      console.log("[WEBHOOK] 💾 Storing download token...");
       const stored = tokenDB.storeToken(customerEmail, token, expires, 3);
       if (!stored) {
         console.error("[WEBHOOK] ❌ Failed to store token");
@@ -293,12 +389,27 @@ export default async function handler(req, res) {
           .status(500)
           .json({ error: "Failed to create download token" });
       }
+      console.log("[WEBHOOK] ✅ Token stored successfully");
 
       const downloadLink = `${PDF_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(customerEmail)}&sig=${sig}`;
+      console.log("[WEBHOOK] 🔗 Download link generated:", downloadLink);
 
       // Send download email
-      await sendDownloadEmail(customerEmail, downloadLink);
-      console.log(`[WEBHOOK] ✅ PDF email sent to: ${customerEmail}`);
+      console.log("[WEBHOOK] 📤 Calling sendDownloadEmail()...");
+      console.log("[WEBHOOK] 📤 Email:", customerEmail);
+      console.log("[WEBHOOK] 📤 Download link:", downloadLink ? "YES" : "NO");
+
+      try {
+        await sendDownloadEmail(customerEmail, downloadLink);
+        console.log(
+          `[WEBHOOK] ✅✅ PDF email sent SUCCESSFULLY to: ${customerEmail}`
+        );
+      } catch (emailError) {
+        console.error("[WEBHOOK] ❌❌ sendDownloadEmail() FAILED!");
+        console.error("[WEBHOOK] ❌ Error:", emailError);
+        console.error("[WEBHOOK] ❌ Error message:", emailError.message);
+        console.error("[WEBHOOK] ❌ Error stack:", emailError.stack);
+      }
 
       return res.status(200).json({ received: true, product: "pdf" });
     }
