@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from "react";
 import {
-  List,
+  ListIcon,
   X,
-  ArrowUp,
-  Sparkle,
-  CurrencyCircleDollar,
-  ClipboardText,
-  CalendarBlank,
-  Cloud,
-  FloppyDisk,
-  CheckCircle,
-  ArrowRight,
-  EnvelopeSimple,
-  InstagramLogo,
-  FacebookLogo,
-  CaretDown,
+  ArrowUpIcon,
+  SparkleIcon,
+  CurrencyCircleDollarIcon,
+  ClipboardTextIcon,
+  CalendarBlankIcon,
+  CloudIcon,
+  FloppyDiskIcon,
+  CheckCircleIcon,
+  ArrowRightIcon,
+  EnvelopeSimpleIcon,
+  InstagramLogoIcon,
+  FacebookLogoIcon,
+  CaretDownIcon,
 } from "@phosphor-icons/react";
 import "./index.css";
 import LoginGate from "./components/LoginGate_NEW"; // Updated to new auth system
@@ -29,6 +29,7 @@ function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [openFAQ, setOpenFAQ] = useState(null);
+  const [showPurchaseSuccess, setShowPurchaseSuccess] = useState(false);
 
   // New auth states
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -41,11 +42,24 @@ function App() {
     const params = new URLSearchParams(window.location.search);
     const claimParam = params.get("claim");
     const guideParam = params.get("guide");
+    const purchasedParam = params.get("purchased");
 
     if (claimParam === "1") {
       setShowClaim(true);
     } else if (guideParam === "1") {
       setShowGuide(true);
+    } else if (purchasedParam === "true") {
+      setShowPurchaseSuccess(true);
+      // Auto-close after 15 seconds
+      setTimeout(() => {
+        setShowPurchaseSuccess(false);
+        // Clean URL
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname
+        );
+      }, 15000);
     }
   }, []);
 
@@ -202,8 +216,14 @@ function App() {
             className="text-center mb-12"
             aria-labelledby="success-heading"
           >
-            <div className="text-6xl mb-6" role="img" aria-label="Celebration">
-              🎉
+            <div className="flex justify-center mb-6">
+              <div className="bg-white/20 rounded-full p-6">
+                <SparkleIcon
+                  size={64}
+                  weight="fill"
+                  className="text-[#CE805C]"
+                />
+              </div>
             </div>
             <h1
               id="success-heading"
@@ -228,27 +248,51 @@ function App() {
             </h2>
             <ul className="space-y-3 text-lg font-inter">
               <li className="flex items-start">
-                <span className="text-2xl mr-3">✨</span>
+                <SparkleIcon
+                  size={24}
+                  weight="fill"
+                  className="text-[#CE805C] mr-3 mt-1 flex-shrink-0"
+                />
                 <span>Vision & Values Quiz to discover your wedding style</span>
               </li>
               <li className="flex items-start">
-                <span className="text-2xl mr-3">💰</span>
+                <CurrencyCircleDollarIcon
+                  size={24}
+                  weight="fill"
+                  className="text-[#CE805C] mr-3 mt-1 flex-shrink-0"
+                />
                 <span>Smart Budget Builder with real-time calculations</span>
               </li>
               <li className="flex items-start">
-                <span className="text-2xl mr-3">📋</span>
+                <ClipboardTextIcon
+                  size={24}
+                  weight="fill"
+                  className="text-[#CE805C] mr-3 mt-1 flex-shrink-0"
+                />
                 <span>Vendor Tracker to organize all your contacts</span>
               </li>
               <li className="flex items-start">
-                <span className="text-2xl mr-3">📅</span>
+                <CalendarBlankIcon
+                  size={24}
+                  weight="fill"
+                  className="text-[#CE805C] mr-3 mt-1 flex-shrink-0"
+                />
                 <span>Timeline & Task Manager with priority sorting</span>
               </li>
               <li className="flex items-start">
-                <span className="text-2xl mr-3">☁️</span>
+                <CloudIcon
+                  size={24}
+                  weight="fill"
+                  className="text-[#CE805C] mr-3 mt-1 flex-shrink-0"
+                />
                 <span>Cloud sync across all your devices</span>
               </li>
               <li className="flex items-start">
-                <span className="text-2xl mr-3">💾</span>
+                <FloppyDiskIcon
+                  size={24}
+                  weight="fill"
+                  className="text-[#CE805C] mr-3 mt-1 flex-shrink-0"
+                />
                 <span>Automatic progress saving</span>
               </li>
             </ul>
@@ -260,11 +304,9 @@ function App() {
           >
             <h3
               id="email-notice"
-              className="font-playfair text-xl font-bold mb-3"
+              className="font-playfair text-xl font-bold mb-3 flex items-center"
             >
-              <span role="img" aria-label="Email">
-                📧
-              </span>{" "}
+              <EnvelopeSimpleIcon size={24} weight="bold" className="mr-2" />
               Check Your Email
             </h3>
             <p className="font-inter text-lg mb-2">
@@ -428,7 +470,11 @@ function App() {
           >
             <div className="inline-block mb-6 animate-fade-in">
               <span className="bg-gradient-to-r from-[#CE805C] to-[#D4A574] text-white px-6 py-3 rounded-full text-sm font-semibold shadow-lg flex items-center gap-2 justify-center hover:scale-105 transition-transform duration-300">
-                <Sparkle size={20} weight="duotone" className="animate-pulse" />
+                <SparkleIcon
+                  size={20}
+                  weight="duotone"
+                  className="animate-pulse"
+                />
                 <span>Your Complete Wedding Planning Solution</span>
               </span>
             </div>
@@ -528,7 +574,7 @@ function App() {
             <div className="grid md:grid-cols-3 gap-6 mb-12">
               <div className="group bg-gradient-to-br from-[#990200]/5 to-[#740015]/10 backdrop-blur-xl rounded-2xl p-8 border border-[#740015]/20 hover:border-[#CE805C]/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 fade-in-up-delay-1">
                 <div className="mb-6 inline-block p-4 bg-gradient-to-br from-[#CE805C]/10 to-[#740015]/10 rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                  <Sparkle
+                  <SparkleIcon
                     size={40}
                     weight="duotone"
                     className="text-[#CE805C]"
@@ -544,7 +590,7 @@ function App() {
 
               <div className="group bg-gradient-to-br from-[#990200]/5 to-[#740015]/10 backdrop-blur-xl rounded-2xl p-8 border border-[#740015]/20 hover:border-[#CE805C]/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 fade-in-up-delay-2">
                 <div className="mb-6 inline-block p-4 bg-gradient-to-br from-[#CE805C]/10 to-[#740015]/10 rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                  <CurrencyCircleDollar
+                  <CurrencyCircleDollarIcon
                     size={40}
                     weight="duotone"
                     className="text-[#CE805C]"
@@ -560,7 +606,7 @@ function App() {
 
               <div className="group bg-gradient-to-br from-[#990200]/5 to-[#740015]/10 backdrop-blur-xl rounded-2xl p-8 border border-[#740015]/20 hover:border-[#CE805C]/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 fade-in-up-delay-3">
                 <div className="mb-6 inline-block p-4 bg-gradient-to-br from-[#CE805C]/10 to-[#740015]/10 rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                  <ClipboardText
+                  <ClipboardTextIcon
                     size={40}
                     weight="duotone"
                     className="text-[#CE805C]"
@@ -578,7 +624,7 @@ function App() {
             <div className="grid md:grid-cols-3 gap-6">
               <div className="group bg-gradient-to-br from-[#990200]/5 to-[#740015]/10 backdrop-blur-xl rounded-2xl p-8 border border-[#740015]/20 hover:border-[#CE805C]/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 fade-in-up-delay-4">
                 <div className="mb-6 inline-block p-4 bg-gradient-to-br from-[#CE805C]/10 to-[#740015]/10 rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                  <CalendarBlank
+                  <CalendarBlankIcon
                     size={40}
                     weight="duotone"
                     className="text-[#CE805C]"
@@ -594,7 +640,7 @@ function App() {
 
               <div className="group bg-gradient-to-br from-[#990200]/5 to-[#740015]/10 backdrop-blur-xl rounded-2xl p-8 border border-[#740015]/20 hover:border-[#CE805C]/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 fade-in-up-delay-5">
                 <div className="mb-6 inline-block p-4 bg-gradient-to-br from-[#CE805C]/10 to-[#740015]/10 rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                  <Cloud
+                  <CloudIcon
                     size={40}
                     weight="duotone"
                     className="text-[#CE805C]"
@@ -610,7 +656,7 @@ function App() {
 
               <div className="group bg-gradient-to-br from-[#990200]/5 to-[#740015]/10 backdrop-blur-xl rounded-2xl p-8 border border-[#740015]/20 hover:border-[#CE805C]/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 fade-in-up-delay-6">
                 <div className="mb-6 inline-block p-4 bg-gradient-to-br from-[#CE805C]/10 to-[#740015]/10 rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                  <FloppyDisk
+                  <FloppyDiskIcon
                     size={40}
                     weight="duotone"
                     className="text-[#CE805C]"
@@ -649,7 +695,7 @@ function App() {
               <div className="flex gap-4">
                 <div className="flex-shrink-0">
                   <div className="w-12 h-12 rounded-full bg-[#CE805C] flex items-center justify-center">
-                    <CheckCircle
+                    <CheckCircleIcon
                       size={24}
                       weight="bold"
                       className="text-white"
@@ -670,7 +716,7 @@ function App() {
               <div className="flex gap-4">
                 <div className="flex-shrink-0">
                   <div className="w-12 h-12 rounded-full bg-[#CE805C] flex items-center justify-center">
-                    <CheckCircle
+                    <CheckCircleIcon
                       size={24}
                       weight="bold"
                       className="text-white"
@@ -691,7 +737,7 @@ function App() {
               <div className="flex gap-4">
                 <div className="flex-shrink-0">
                   <div className="w-12 h-12 rounded-full bg-[#CE805C] flex items-center justify-center">
-                    <CheckCircle
+                    <CheckCircleIcon
                       size={24}
                       weight="bold"
                       className="text-white"
@@ -712,7 +758,7 @@ function App() {
               <div className="flex gap-4">
                 <div className="flex-shrink-0">
                   <div className="w-12 h-12 rounded-full bg-[#CE805C] flex items-center justify-center">
-                    <CheckCircle
+                    <CheckCircleIcon
                       size={24}
                       weight="bold"
                       className="text-white"
@@ -820,7 +866,7 @@ function App() {
                 <span className="flex-1 text-left">
                   How long do I have access to the interactive guide?
                 </span>
-                <CaretDown
+                <CaretDownIcon
                   size={24}
                   weight="bold"
                   className={`text-[#CE805C] transition-transform duration-300 flex-shrink-0 ${openFAQ === 0 ? "rotate-180" : ""}`}
@@ -848,7 +894,7 @@ function App() {
                 <span className="flex-1 text-left">
                   Can I access the guide on my phone and tablet?
                 </span>
-                <CaretDown
+                <CaretDownIcon
                   size={24}
                   weight="bold"
                   className={`text-[#CE805C] transition-transform duration-300 flex-shrink-0 ${openFAQ === 1 ? "rotate-180" : ""}`}
@@ -875,7 +921,7 @@ function App() {
                 <span className="flex-1 text-left">
                   What happens after I generate my PDF?
                 </span>
-                <CaretDown
+                <CaretDownIcon
                   size={24}
                   weight="bold"
                   className={`text-[#CE805C] transition-transform duration-300 flex-shrink-0 ${openFAQ === 2 ? "rotate-180" : ""}`}
@@ -904,7 +950,7 @@ function App() {
                   Does the guide include traditional Northern Nigerian wedding
                   customs?
                 </span>
-                <CaretDown
+                <CaretDownIcon
                   size={24}
                   weight="bold"
                   className={`text-[#CE805C] transition-transform duration-300 flex-shrink-0 ${openFAQ === 3 ? "rotate-180" : ""}`}
@@ -933,7 +979,7 @@ function App() {
                 <span className="flex-1 text-left">
                   Is my data saved automatically?
                 </span>
-                <CaretDown
+                <CaretDownIcon
                   size={24}
                   weight="bold"
                   className={`text-[#CE805C] transition-transform duration-300 flex-shrink-0 ${openFAQ === 4 ? "rotate-180" : ""}`}
@@ -961,7 +1007,7 @@ function App() {
                 <span className="flex-1 text-left">
                   Can I customize everything to match my vision?
                 </span>
-                <CaretDown
+                <CaretDownIcon
                   size={24}
                   weight="bold"
                   className={`text-[#CE805C] transition-transform duration-300 flex-shrink-0 ${openFAQ === 5 ? "rotate-180" : ""}`}
@@ -1011,7 +1057,7 @@ function App() {
             >
               <span className="relative z-10 flex items-center justify-center gap-3">
                 <span>Get Started Now</span>
-                <ArrowRight
+                <ArrowRightIcon
                   size={24}
                   weight="bold"
                   className="group-hover:translate-x-2 transition-transform"
@@ -1037,7 +1083,7 @@ function App() {
               </div>
               <span className="text-gray-300">•</span>
               <div className="flex items-center gap-2">
-                <CheckCircle
+                <CheckCircleIcon
                   size={20}
                   weight="fill"
                   className="text-green-600"
@@ -1046,7 +1092,7 @@ function App() {
               </div>
               <span className="text-gray-300">•</span>
               <div className="flex items-center gap-2">
-                <CheckCircle
+                <CheckCircleIcon
                   size={20}
                   weight="fill"
                   className="text-green-600"
@@ -1114,7 +1160,7 @@ function App() {
                 className="group text-white/80 hover:text-[#D4A574] transition-all duration-300 transform hover:scale-125 hover:-translate-y-1"
                 aria-label="Email us"
               >
-                <EnvelopeSimple
+                <EnvelopeSimpleIcon
                   size={24}
                   weight="fill"
                   className="drop-shadow-lg"
@@ -1127,7 +1173,7 @@ function App() {
                 className="group text-white/80 hover:text-[#D4A574] transition-all duration-300 transform hover:scale-125 hover:-translate-y-1"
                 aria-label="Follow us on Instagram"
               >
-                <InstagramLogo
+                <InstagramLogoIcon
                   size={24}
                   weight="fill"
                   className="drop-shadow-lg"
@@ -1140,7 +1186,7 @@ function App() {
                 className="group text-white/80 hover:text-[#D4A574] transition-all duration-300 transform hover:scale-125 hover:-translate-y-1"
                 aria-label="Follow us on Facebook"
               >
-                <FacebookLogo
+                <FacebookLogoIcon
                   size={24}
                   weight="fill"
                   className="drop-shadow-lg"
@@ -1168,8 +1214,187 @@ function App() {
           className="fixed bottom-8 right-8 bg-[#CE805C] hover:bg-[#740015] text-white p-4 rounded-full shadow-2xl hover:shadow-[#CE805C]/50 transition-all duration-300 transform hover:scale-110 z-40 animate-fade-in-delay"
           aria-label="Scroll to top"
         >
-          <ArrowUp size={24} weight="bold" />
+          <ArrowUpIcon size={24} weight="bold" />
         </button>
+      )}
+
+      {/* Purchase Success Modal */}
+      {showPurchaseSuccess && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-auto overflow-hidden animate-slide-up">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-[#990200] to-[#531946] p-8 text-white text-center relative">
+              <button
+                onClick={() => {
+                  setShowPurchaseSuccess(false);
+                  window.history.replaceState(
+                    {},
+                    document.title,
+                    window.location.pathname
+                  );
+                }}
+                className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
+                aria-label="Close modal"
+              >
+                <X size={24} weight="bold" />
+              </button>
+              <div className="flex justify-center mb-4">
+                <div className="bg-white/20 rounded-full p-4">
+                  <CheckCircleIcon size={48} weight="fill" className="text-white" />
+                </div>
+              </div>
+              <h2 className="font-playfair text-3xl md:text-4xl font-bold">
+                Payment Successful!
+              </h2>
+            </div>
+
+            {/* Body */}
+            <div className="p-8">
+              <div className="text-center mb-6">
+                <p className="text-gray-700 text-lg font-inter leading-relaxed">
+                  Thank you for your purchase! We've sent detailed instructions
+                  to your email.
+                </p>
+              </div>
+
+              {/* Email Check Alert */}
+              <div className="bg-gradient-to-r from-[#CE805C]/10 to-[#740015]/10 border-l-4 border-[#CE805C] rounded-lg p-6 mb-6">
+                <div className="flex items-start">
+                  <EnvelopeSimpleIcon
+                    size={28}
+                    weight="bold"
+                    className="text-[#990200] mt-1 mr-4 flex-shrink-0"
+                  />
+                  <div>
+                    <h3 className="font-semibold text-gray-900 text-lg mb-2 flex items-center">
+                      <EnvelopeSimpleIcon
+                        size={20}
+                        weight="bold"
+                        className="mr-2"
+                      />
+                      Check Your Email
+                    </h3>
+                    <p className="text-gray-700 text-sm leading-relaxed mb-3">
+                      Please check your inbox (and spam folder) for:
+                    </p>
+                    <ul className="space-y-2 text-sm text-gray-600">
+                      <li className="flex items-start">
+                        <CheckCircleIcon
+                          size={18}
+                          weight="fill"
+                          className="text-green-600 mt-0.5 mr-2 flex-shrink-0"
+                        />
+                        <span>
+                          <strong>PDF Guide:</strong> You'll receive a download
+                          link (valid for 24 hours)
+                        </span>
+                      </li>
+                      <li className="flex items-start">
+                        <CheckCircleIcon
+                          size={18}
+                          weight="fill"
+                          className="text-green-600 mt-0.5 mr-2 flex-shrink-0"
+                        />
+                        <span>
+                          <strong>Interactive Guide:</strong> You'll receive
+                          signup instructions to create your account
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* What's Next */}
+              <div className="bg-gray-50 rounded-lg p-6 mb-6">
+                <h3 className="font-semibold text-gray-900 text-lg mb-3 flex items-center">
+                  <ArrowRightIcon
+                    size={20}
+                    weight="bold"
+                    className="mr-2 text-[#990200]"
+                  />
+                  What Happens Next?
+                </h3>
+                <ol className="space-y-3 text-sm text-gray-700">
+                  <li className="flex items-start">
+                    <span className="font-bold text-[#990200] mr-3 flex-shrink-0">
+                      1.
+                    </span>
+                    <span>Check your email for instructions</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="font-bold text-[#990200] mr-3 flex-shrink-0">
+                      2.
+                    </span>
+                    <span>
+                      For PDF: Click the download link and save the file
+                    </span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="font-bold text-[#990200] mr-3 flex-shrink-0">
+                      3.
+                    </span>
+                    <span>
+                      For Interactive Guide: Click the signup link and create
+                      your account
+                    </span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="font-bold text-[#990200] mr-3 flex-shrink-0">
+                      4.
+                    </span>
+                    <span className="flex items-center">
+                      Start planning your dream wedding!{" "}
+                      <SparkleIcon
+                        size={16}
+                        weight="fill"
+                        className="ml-2 text-[#CE805C]"
+                      />
+                    </span>
+                  </li>
+                </ol>
+              </div>
+
+              {/* Support */}
+              <div className="text-center">
+                <p className="text-sm text-gray-600 mb-4">
+                  Didn't receive an email or need help?
+                </p>
+                <a
+                  href="mailto:support@hausaroom.ng"
+                  className="inline-flex items-center text-[#990200] hover:text-[#740015] font-semibold text-sm transition-colors"
+                >
+                  <EnvelopeSimpleIcon size={18} weight="bold" className="mr-2" />
+                  Contact Support: support@hausaroom.ng
+                </a>
+              </div>
+
+              {/* Auto-close notice */}
+              <div className="mt-6 text-center">
+                <p className="text-xs text-gray-500 italic">
+                  This message will close automatically in 15 seconds
+                </p>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="bg-gray-50 px-8 py-4 text-center border-t">
+              <button
+                onClick={() => {
+                  setShowPurchaseSuccess(false);
+                  window.history.replaceState(
+                    {},
+                    document.title,
+                    window.location.pathname
+                  );
+                }}
+                className="bg-[#CE805C] hover:bg-[#740015] text-white px-8 py-3 rounded-lg font-semibold transition-all transform hover:scale-105"
+              >
+                Got It, Thanks!
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -148,16 +148,16 @@ export default async function handler(req, res) {
         const txReference =
           verifyJson?.data?.reference || data?.reference || "";
         const metadata = verifyJson?.data?.metadata || data?.metadata || {};
-        
+
         // Get product_id from metadata (Paystack sends this for storefront purchases)
         const productId = metadata?.product_id || metadata?.productId || null;
-        
+
         // Paystack product IDs
         const PDF_PRODUCT_ID = 2183419; // Northern wedding guide (PDF)
         const WEBAPP_PRODUCT_ID = 2183415; // Interactive web guide
-        
+
         let productType;
-        
+
         // Primary detection: Product ID (most reliable)
         if (productId === PDF_PRODUCT_ID || productId === "2183419") {
           productType = "pdf";
