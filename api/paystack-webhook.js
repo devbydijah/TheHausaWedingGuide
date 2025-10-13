@@ -62,7 +62,8 @@ export default async function handler(req, res) {
   // Get raw body for signature verification
   let rawBody = "";
   if (req.body) {
-    rawBody = typeof req.body === "string" ? req.body : JSON.stringify(req.body);
+    rawBody =
+      typeof req.body === "string" ? req.body : JSON.stringify(req.body);
   }
 
   // Verify webhook signature
@@ -97,7 +98,9 @@ export default async function handler(req, res) {
   const txReference = eventData.reference;
   const metadata = eventData.metadata || {};
 
-  console.log(`[WEBHOOK] 💰 Payment received: ₦${(amount / 100).toFixed(2)} from ${customerEmail}`);
+  console.log(
+    `[WEBHOOK] 💰 Payment received: ₦${(amount / 100).toFixed(2)} from ${customerEmail}`
+  );
 
   // Validate email
   if (!customerEmail || !customerEmail.includes("@")) {
@@ -116,10 +119,14 @@ export default async function handler(req, res) {
   } else {
     // Fallback: detect by amount
     productType = amount >= 10000 ? "pdf" : "webapp";
-    console.warn(`[WEBHOOK] ⚠️ Product ID not found, using amount-based detection: ${productType}`);
+    console.warn(
+      `[WEBHOOK] ⚠️ Product ID not found, using amount-based detection: ${productType}`
+    );
   }
 
-  console.log(`[WEBHOOK] 📦 Product: ${productType.toUpperCase()} | Product ID: ${productId || "N/A"}`);
+  console.log(
+    `[WEBHOOK] 📦 Product: ${productType.toUpperCase()} | Product ID: ${productId || "N/A"}`
+  );
 
   try {
     // Check if user already has the other product (bundle detection)
@@ -145,7 +152,9 @@ export default async function handler(req, res) {
       (productType === "pdf" && hasWebappPurchase) ||
       (productType === "webapp" && hasPdfPurchase);
 
-    console.log(`[WEBHOOK] 🔍 Bundle check: PDF=${hasPdfPurchase}, Webapp=${hasWebappPurchase}, IsBundle=${isBundlePurchase}`);
+    console.log(
+      `[WEBHOOK] 🔍 Bundle check: PDF=${hasPdfPurchase}, Webapp=${hasWebappPurchase}, IsBundle=${isBundlePurchase}`
+    );
 
     // === HANDLE BUNDLE PURCHASE ===
     if (isBundlePurchase) {
@@ -153,13 +162,14 @@ export default async function handler(req, res) {
 
       // Generate or retrieve PDF download link
       let downloadLink;
-      
+
       if (productType === "pdf") {
         // Just purchased PDF, generate new token
         const token = crypto.randomBytes(32).toString("hex");
         const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-        const SECRET = process.env.DOWNLOAD_TOKEN_SECRET || process.env.PAYSTACK_SECRET_KEY;
-        
+        const SECRET =
+          process.env.DOWNLOAD_TOKEN_SECRET || process.env.PAYSTACK_SECRET_KEY;
+
         const hmac = crypto.createHmac("sha256", SECRET);
         hmac.update(`${token}|${customerEmail}|${expires}`);
         const sig = hmac.digest("hex");
@@ -171,10 +181,14 @@ export default async function handler(req, res) {
         const existingTokens = tokenDB.getTokensByEmail(customerEmail);
         if (existingTokens && existingTokens.length > 0) {
           const existingToken = existingTokens[0];
-          const SECRET = process.env.DOWNLOAD_TOKEN_SECRET || process.env.PAYSTACK_SECRET_KEY;
-          
+          const SECRET =
+            process.env.DOWNLOAD_TOKEN_SECRET ||
+            process.env.PAYSTACK_SECRET_KEY;
+
           const hmac = crypto.createHmac("sha256", SECRET);
-          hmac.update(`${existingToken.token}|${customerEmail}|${existingToken.expires_at}`);
+          hmac.update(
+            `${existingToken.token}|${customerEmail}|${existingToken.expires_at}`
+          );
           const sig = hmac.digest("hex");
 
           downloadLink = `${PDF_BASE_URL}?download=${existingToken.token}&expires=${existingToken.expires_at}&email=${encodeURIComponent(customerEmail)}&sig=${sig}`;
@@ -196,12 +210,20 @@ export default async function handler(req, res) {
           ]);
           console.log(`[WEBHOOK] ✅ Created webapp user: ${customerEmail}`);
         } catch (error) {
-          console.error("[WEBHOOK] ⚠️ Failed to create webapp user:", error.message);
+          console.error(
+            "[WEBHOOK] ⚠️ Failed to create webapp user:",
+            error.message
+          );
         }
       }
 
       // Send bundle email
-      await sendBundleEmail(customerEmail, downloadLink, txReference, hasExistingAccount);
+      await sendBundleEmail(
+        customerEmail,
+        downloadLink,
+        txReference,
+        hasExistingAccount
+      );
       console.log(`[WEBHOOK] ✅ Bundle email sent to: ${customerEmail}`);
 
       return res.status(200).json({ received: true, product: "bundle" });
@@ -219,8 +241,12 @@ export default async function handler(req, res) {
             .single();
 
           if (existingUser) {
-            console.log(`[WEBHOOK] ℹ️ User already exists, skipping email: ${customerEmail}`);
-            return res.status(200).json({ received: true, product: "webapp", status: "existing" });
+            console.log(
+              `[WEBHOOK] ℹ️ User already exists, skipping email: ${customerEmail}`
+            );
+            return res
+              .status(200)
+              .json({ received: true, product: "webapp", status: "existing" });
           }
 
           await supabaseAdmin.from("web_app_users").insert([
@@ -252,7 +278,8 @@ export default async function handler(req, res) {
       // Generate download token
       const token = crypto.randomBytes(32).toString("hex");
       const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-      const SECRET = process.env.DOWNLOAD_TOKEN_SECRET || process.env.PAYSTACK_SECRET_KEY;
+      const SECRET =
+        process.env.DOWNLOAD_TOKEN_SECRET || process.env.PAYSTACK_SECRET_KEY;
 
       const hmac = crypto.createHmac("sha256", SECRET);
       hmac.update(`${token}|${customerEmail}|${expires}`);
@@ -262,7 +289,9 @@ export default async function handler(req, res) {
       const stored = tokenDB.storeToken(customerEmail, token, expires, 3);
       if (!stored) {
         console.error("[WEBHOOK] ❌ Failed to store token");
-        return res.status(500).json({ error: "Failed to create download token" });
+        return res
+          .status(500)
+          .json({ error: "Failed to create download token" });
       }
 
       const downloadLink = `${PDF_BASE_URL}?download=${token}&expires=${expires}&email=${encodeURIComponent(customerEmail)}&sig=${sig}`;
@@ -277,9 +306,10 @@ export default async function handler(req, res) {
     // Unknown product type
     console.error("[WEBHOOK] ❌ Unknown product type");
     return res.status(400).json({ error: "Unknown product type" });
-
   } catch (error) {
     console.error("[WEBHOOK] ❌ Error processing webhook:", error);
-    return res.status(500).json({ error: "Internal server error", details: error.message });
+    return res
+      .status(500)
+      .json({ error: "Internal server error", details: error.message });
   }
 }
