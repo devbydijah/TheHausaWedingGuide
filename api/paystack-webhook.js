@@ -141,44 +141,60 @@ export default async function handler(req, res) {
         }
 
         // ============================================
-        // PRODUCT DETECTION - AMOUNT-BASED
+        // PRODUCT DETECTION - PRODUCT ID-BASED
         // ============================================
-        // Detect product type primarily by amount (in kobo)
+        // Detect product type by Paystack product ID
         const amount = verifyJson?.data?.amount || data?.amount || 0;
         const txReference =
           verifyJson?.data?.reference || data?.reference || "";
-
-        // Amount-based detection (primary method)
-        const isPdfGuide = amount === 11000; // ₦110 = 11,000 kobo (main branch)
-        const isWebGuide = amount === 10000; // ₦100 = 10,000 kobo (interactive-guide branch)
-
+        const metadata = verifyJson?.data?.metadata || data?.metadata || {};
+        
+        // Get product_id from metadata (Paystack sends this for storefront purchases)
+        const productId = metadata?.product_id || metadata?.productId || null;
+        
+        // Paystack product IDs
+        const PDF_PRODUCT_ID = 2183419; // Northern wedding guide (PDF)
+        const WEBAPP_PRODUCT_ID = 2183415; // Interactive web guide
+        
         let productType;
-        if (isPdfGuide) {
+        
+        // Primary detection: Product ID (most reliable)
+        if (productId === PDF_PRODUCT_ID || productId === "2183419") {
           productType = "pdf";
-        } else if (isWebGuide) {
+        } else if (productId === WEBAPP_PRODUCT_ID || productId === "2183415") {
           productType = "webapp";
         } else {
-          // Fallback: try to detect from metadata or reference
-          const metadata = verifyJson?.data?.metadata || data?.metadata || {};
+          // Fallback 1: Check metadata product_type
           const metadataType = (metadata.product_type || "").toLowerCase();
-
           if (metadataType === "webapp" || metadataType === "interactive") {
             productType = "webapp";
-          } else if (
+          } else if (metadataType === "pdf" || metadataType === "guide") {
+            productType = "pdf";
+          }
+          // Fallback 2: Check reference for keywords
+          else if (
             txReference.toLowerCase().includes("webapp") ||
-            txReference.toLowerCase().includes("interactive")
+            txReference.toLowerCase().includes("interactive") ||
+            txReference.toLowerCase().includes("web-guide")
           ) {
             productType = "webapp";
+          } else if (
+            txReference.toLowerCase().includes("pdf") ||
+            txReference.toLowerCase().includes("guide")
+          ) {
+            productType = "pdf";
           } else {
+            // Last resort: amount-based (legacy support)
             console.warn(
-              `Unknown product amount: ₦${(amount / 100).toFixed(2)} (${amount} kobo). Defaulting to PDF.`
+              `⚠️ Could not detect product from ID or metadata. Product ID: ${productId}, Amount: ₦${(amount / 100).toFixed(2)}`
             );
-            productType = "pdf"; // Default to PDF for backward compatibility
+            // Assume PDF if amount is higher, webapp if lower
+            productType = amount >= 10000 ? "pdf" : "webapp";
           }
         }
 
         console.log(
-          `Product detected: ${productType} | Amount: ₦${(amount / 100).toFixed(2)} (${amount} kobo) | Reference: ${txReference}`
+          `✅ Product detected: ${productType.toUpperCase()} | Product ID: ${productId || "N/A"} | Amount: ₦${(amount / 100).toFixed(2)} | Reference: ${txReference}`
         );
 
         // ============================================
