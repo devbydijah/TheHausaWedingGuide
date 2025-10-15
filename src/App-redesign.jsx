@@ -5,8 +5,8 @@ import LoginGate from "./components/LoginGate";
 // Paystack Storefront URLs
 const USE_TEST_STOREFRONT = window.location.search.includes("test=1");
 const STOREFRONT_URL = USE_TEST_STOREFRONT
-  ? "https://paystack.shop/the-hausa-wedding-guide?test=1"
-  : "https://paystack.shop/the-hausa-wedding-guide";
+  ? "https://paystack.shop/the-hausa-room-wedding-guide-yXfkk"
+  : "https://paystack.shop/hausaroom-wedding-guide-kOOeu";
 
 function App() {
   // State management
