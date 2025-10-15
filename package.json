@@ -31,7 +31,7 @@
     "jspdf-autotable": "^5.0.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "resend": "^4.0.1"
+    "resend": "^4.8.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.7.0",
