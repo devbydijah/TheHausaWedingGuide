@@ -87,12 +87,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
-import crypto from "crypto";
-import { sendDownloadEmail, sendWebAppAccessEmail } from "../lib/email.js";
-
-// Environment variables
-const PAYSTACK_TEST_SECRET = process.env.PAYSTACK_TEST_SECRET_KEY;
-const PDF_BASE_URL = "https://the-hausa-weding-guide.vercel.app";
+// (Duplicate import and variable declarations removed)
 
 // --- REMOVED: All Supabase and tokenDB code ---
 
