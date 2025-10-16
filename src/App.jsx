@@ -119,9 +119,15 @@ function App() {
     });
   };
 
+  // Use the correct Paystack storefront links
+  // Test: https://paystack.shop/the-hausa-room-wedding-guide-yXfkk
+  // Live: https://paystack.shop/hausaroom-wedding-guide-kOOeu
+  const PAYSTACK_TEST_URL = "https://paystack.shop/the-hausa-room-wedding-guide-yXfkk";
+  const PAYSTACK_LIVE_URL = "https://paystack.shop/hausaroom-wedding-guide-kOOeu";
+  // Switch between test and live as needed:
   const handlePurchase = () => {
-    window.location.href =
-      "https://paystack.shop/hausaroom-wedding-guide-GLQSt";
+    // Change to PAYSTACK_TEST_URL for test, PAYSTACK_LIVE_URL for live
+    window.location.href = PAYSTACK_LIVE_URL;
   };
 
   const handleAccessGuide = () => {
