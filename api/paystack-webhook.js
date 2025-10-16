@@ -1,15 +1,8 @@
-// api/paystack-webhook.js
-
 import crypto from "crypto";
-import {
-  sendDownloadEmail,
-  sendWebAppAccessEmail,
-  // sendBundleEmail, // Temporarily remove bundle logic
-} from "../lib/email.js";
+import { sendDownloadEmail, sendWebAppAccessEmail } from "../lib/email.js";
 
 // Environment variables
 const PAYSTACK_TEST_SECRET = process.env.PAYSTACK_TEST_SECRET_KEY;
-const PAYSTACK_LIVE_SECRET = process.env.PAYSTACK_SECRET_KEY;
 const PDF_BASE_URL = "https://the-hausa-weding-guide.vercel.app";
 
 // --- REMOVED: All Supabase and tokenDB code ---
@@ -18,7 +11,11 @@ const PDF_BASE_URL = "https://the-hausa-weding-guide.vercel.app";
  * Verify Paystack webhook signature
  */
 function verifySignature(rawBodyString, signature) {
-  // ... (this function is correct, no changes needed) ...
+  const hmac = crypto.createHmac("sha512", PAYSTACK_TEST_SECRET);
+  hmac.update(rawBodyString);
+  const digest = hmac.digest("hex");
+  if (digest === signature) return { ok: true, mode: "test" };
+  return { ok: false, mode: null };
 }
 
 /**
@@ -31,9 +28,18 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  // ... (Signature verification is correct, no changes needed) ...
+  // Signature verification
+  const rawBody =
+    typeof req.body === "string" ? req.body : JSON.stringify(req.body);
+  const signature = req.headers["x-paystack-signature"];
+  const verification = verifySignature(rawBody, signature);
 
-  const data = req.body;
+  if (!verification.ok) {
+    console.error("[WEBHOOK] ❌ Invalid signature");
+    return res.status(401).json({ error: "Invalid signature" });
+  }
+
+  const data = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
   if (data.event !== "charge.success") {
     return res.status(200).json({ received: true });
