@@ -5,7 +5,7 @@
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
-const { rateLimit } = require("../lib/rateLimit");
+const { rateLimit } = require("./_lib/rateLimit");
 const { logger } = require("../lib/logger");
 const { tokenDB } = require("../lib/database.cjs");
 

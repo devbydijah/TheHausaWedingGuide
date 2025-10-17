@@ -5,7 +5,7 @@
 
 const crypto = require("crypto");
 const { createClient } = require("@supabase/supabase-js");
-const { rateLimit } = require("../lib/rateLimit");
+const { rateLimit } = require("./_lib/rateLimit");
 const { logger } = require("../lib/logger");
 
 // Initialize Supabase client
