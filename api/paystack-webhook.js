@@ -1,5 +1,7 @@
+// paystack-webhook.js
+
 import crypto from "crypto";
-import { sendDownloadEmail, sendWebAppAccessEmail } from "./email.js";
+import { sendDownloadEmail, sendWebAppAccessEmail } from "./email.js"; 
 
 // Environment variables
 const PAYSTACK_TEST_SECRET = process.env.PAYSTACK_TEST_SECRET_KEY;
@@ -81,7 +83,9 @@ export default async function handler(req, res) {
       hmac.update(`${token}|${customer.email}|${expires}`);
       const sig = hmac.digest("hex");
 
-      const downloadLink = `${PDF_BASE_URL}/api/pdf-download?token=${token}&expires=${expires}&email=${encodeURIComponent(customer.email)}&sig=${sig}`;
+      const downloadLink = `${PDF_BASE_URL}/api/pdf-download?token=${token}&expires=${expires}&email=${encodeURIComponent(
+        customer.email
+      )}&sig=${sig}`;
 
       await sendDownloadEmail(customer.email, downloadLink);
       console.log(
