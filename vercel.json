@@ -28,6 +28,5 @@
         { "key": "X-Download-Options", "value": "noopen" }
       ]
     }
-  ],
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  ]
 }
