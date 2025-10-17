@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { sendDownloadEmail, sendWebAppAccessEmail } from "./lib/email.js";
+import { sendDownloadEmail, sendWebAppAccessEmail } from "./email.js";
 
 // Environment variables
 const PAYSTACK_TEST_SECRET = process.env.PAYSTACK_TEST_SECRET_KEY;

@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
-import { rateLimit } from "./lib/rateLimit.js";
-import { logger } from "./lib/logger.js";
+import { rateLimit } from "./rateLimit.js";
+import { logger } from "./logger.js";
 
 // --- Initialize Supabase Client (with safety check) ---
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
