@@ -4,15 +4,11 @@ import { sendDownloadEmail, sendWebAppAccessEmail } from "./_lib/email.js";
 // Environment variables
 const PAYSTACK_TEST_SECRET = process.env.PAYSTACK_TEST_SECRET_KEY;
 const PAYSTACK_LIVE_SECRET = process.env.PAYSTACK_SECRET_KEY;
-const PDF_BASE_URL = "https://the-hausa-weding-guide.vercel.app"; // Your production URL
+const PDF_BASE_URL = "https://the-hausa-weding-guide.vercel.app";
 
-/**
- * Verifies a Paystack signature and determines the mode (test or live).
- */
 function verifySignature(rawBody, signature) {
   if (!signature) return { isValid: false };
 
-  // Check against the LIVE secret first
   if (PAYSTACK_LIVE_SECRET) {
     const hmac_live = crypto.createHmac("sha512", PAYSTACK_LIVE_SECRET);
     hmac_live.update(rawBody);
@@ -21,7 +17,6 @@ function verifySignature(rawBody, signature) {
     }
   }
 
-  // Check against the TEST secret
   if (PAYSTACK_TEST_SECRET) {
     const hmac_test = crypto.createHmac("sha512", PAYSTACK_TEST_SECRET);
     hmac_test.update(rawBody);
@@ -33,9 +28,6 @@ function verifySignature(rawBody, signature) {
   return { isValid: false };
 }
 
-/**
- * Main webhook handler for both TEST and LIVE events.
- */
 export default async function handler(req, res) {
   console.log("========================================");
   console.log("[WEBHOOK] 🎯 Paystack webhook received!");
@@ -45,7 +37,6 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  // Vercel automatically parses the JSON body, but we need the raw string for verification.
   const rawBody = JSON.stringify(req.body);
   const signature = req.headers["x-paystack-signature"];
 
@@ -75,8 +66,6 @@ export default async function handler(req, res) {
     `[WEBHOOK] 🎉 Processing successful charge for ${customer.email}`
   );
 
-  // Simplified product detection based on amount (in kobo)
-  // PDF is 1000 NGN (100000 kobo)
   const productType = amount >= 100000 ? "pdf" : "webapp";
 
   console.log(`[WEBHOOK] 📦 Detected product: ${productType.toUpperCase()}`);
@@ -108,12 +97,11 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ received: true });
   } catch (error) {
-    hbda1;
     console.error(
       "[WEBHOOK] ❌❌ FATAL ERROR while processing:",
       error.message
     );
-    console.error(error); // Log the full error object
+    console.error(error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }

@@ -1,22 +1,36 @@
-// PDF Download Handler - Merged endpoint
-// Validates token and serves PDF file
-// GET /api/pdf-download?token=xxx&expires=xxx&email=xxx&sig=xxx
+import crypto from "crypto";
+import path from "path";
+import fs from "fs";
+import { createClient } from "@supabase/supabase-js";
 
-const crypto = require("crypto");
-const fs = require("fs");
-const path = require("path");
-const { rateLimit } = require("./_lib/rateLimit");
-const { logger } = require("../lib/logger");
-const { tokenDB } = require("../lib/database.cjs");
+// --- Initialize Supabase Client (with safety check) ---
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+const supabase =
+  supabaseUrl && supabaseServiceKey
+    ? createClient(supabaseUrl, supabaseServiceKey)
+    : null;
+
+if (!supabase) {
+  console.warn(
+    "[PDF-DOWNLOAD] Supabase variables not set. API will be non-functional."
+  );
+}
 
 /**
- * Verify token signature
+ * Verifies the signature of the download link.
  */
 function verifyTokenSignature(token, email, expires, sig) {
   const SECRET =
-    process.env.DOWNLOAD_TOKEN_SECRET || process.env.PAYSTACK_SECRET_KEY;
+    process.env.DOWNLOAD_TOKEN_SECRET ||
+    process.env.PAYSTACK_SECRET_KEY ||
+    process.env.PAYSTACK_TEST_SECRET_KEY;
 
   if (!SECRET) {
+    console.error(
+      "[PDF-DOWNLOAD] ❌ No secret key found for signature verification."
+    );
     return { valid: false, error: "Server configuration error" };
   }
 
@@ -36,86 +50,92 @@ function verifyTokenSignature(token, email, expires, sig) {
 }
 
 /**
- * Main handler
+ * Main handler for serving the PDF file.
  */
-module.exports = rateLimit(async (req, res) => {
-  const { token, expires, email, sig } = req.query;
+export default async function handler(req, res) {
+  try {
+    const { token, expires, email, sig } = req.query;
 
-  // Validate required parameters
-  if (!token || !expires || !email || !sig) {
-    logger.warn("[PDF-DOWNLOAD] Missing required parameters");
-    return res.status(400).json({ error: "Missing required parameters" });
-  }
-
-  // Check expiration (24 hours)
-  const expiresNum = parseInt(expires, 10);
-  if (isNaN(expiresNum) || Date.now() > expiresNum) {
-    logger.warn(
-      `[PDF-DOWNLOAD] Expired token for: ${email.replace(/(.{2}).*(@.*)/, "$1***$2")}`
-    );
-    return res
-      .status(401)
-      .json({ error: "Download link has expired (24 hours)" });
-  }
-
-  // Verify HMAC signature
-  const verification = verifyTokenSignature(token, email, expires, sig);
-  if (!verification.valid) {
-    logger.warn(
-      `[PDF-DOWNLOAD] Invalid signature for: ${email.replace(/(.{2}).*(@.*)/, "$1***$2")}`
-    );
-    return res.status(401).json({ error: verification.error });
-  }
-
-  // Validate token in database and decrement download count
-  if (!tokenDB.validateAndDecrement(token)) {
-    logger.warn(
-      `[PDF-DOWNLOAD] Token validation failed for: ${email.replace(/(.{2}).*(@.*)/, "$1***$2")}`
-    );
-    return res.status(401).json({
-      error:
-        "Invalid or exhausted download token. Maximum 3 downloads allowed.",
-    });
-  }
-
-  // Locate PDF file
-  const filePath = path.join(
-    process.cwd(),
-    "public",
-    "Hausa_Wedding_Guide.pdf"
-  );
-
-  if (!fs.existsSync(filePath)) {
-    logger.error("[PDF-DOWNLOAD] PDF file not found on server");
-    return res
-      .status(500)
-      .json({ error: "Guide not found on server. Please contact support." });
-  }
-
-  // Stream PDF to client
-  logger.info(
-    `[PDF-DOWNLOAD] ✅ Serving PDF to: ${email.replace(/(.{2}).*(@.*)/, "$1***$2")}`
-  );
-
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader(
-    "Content-Disposition",
-    'attachment; filename="Hausa_Wedding_Guide.pdf"'
-  );
-  res.setHeader(
-    "Cache-Control",
-    "private, no-cache, no-store, must-revalidate"
-  );
-  res.setHeader("Expires", "0");
-  res.setHeader("Pragma", "no-cache");
-
-  const stream = fs.createReadStream(filePath);
-  stream.pipe(res);
-
-  stream.on("error", (error) => {
-    logger.error("[PDF-DOWNLOAD] Stream error:", error);
-    if (!res.headersSent) {
-      res.status(500).json({ error: "Failed to download file" });
+    if (!token || !expires || !email || !sig) {
+      return res
+        .status(400)
+        .json({ error: "Missing required download parameters" });
     }
-  });
-});
+
+    if (Date.now() > parseInt(expires, 10)) {
+      return res.status(403).json({ error: "This download link has expired." });
+    }
+
+    const verification = verifyTokenSignature(token, email, expires, sig);
+    if (!verification.valid) {
+      return res.status(403).json({ error: verification.error });
+    }
+
+    // --- New Supabase Logic ---
+    if (!supabase) {
+      return res
+        .status(503)
+        .json({ error: "Database service is not configured." });
+    }
+
+    // 1. Find the token in the database
+    const { data: tokenData, error: fetchError } = await supabase
+      .from("download_tokens")
+      .select("download_count")
+      .eq("token", token)
+      .single();
+
+    if (fetchError || !tokenData) {
+      console.error(
+        `[PDF-DOWNLOAD] ❌ Token not found in DB for ${email}: ${token}`
+      );
+      return res.status(403).json({ error: "Download token is invalid." });
+    }
+
+    // 2. Check if downloads are remaining
+    if (tokenData.download_count <= 0) {
+      console.warn(
+        `[PDF-DOWNLOAD] ⚠️ Exhausted download attempts for ${email}`
+      );
+      return res.status(403).json({ error: "Maximum download limit reached." });
+    }
+
+    // 3. Decrement the download count
+    const { error: updateError } = await supabase
+      .from("download_tokens")
+      .update({ download_count: tokenData.download_count - 1 })
+      .eq("token", token);
+
+    if (updateError) {
+      console.error(
+        `[PDF-DOWNLOAD] ❌ Failed to decrement download count for ${email}:`,
+        updateError
+      );
+      // We can still proceed to serve the file, but we should log this error.
+    }
+    // --- End of Supabase Logic ---
+
+    // If all checks pass, serve the file.
+    const filePath = path.resolve("./public", "Hausa_Wedding_Guide.pdf");
+
+    if (fs.existsSync(filePath)) {
+      console.log(`[PDF-DOWNLOAD] ✅ Serving PDF to ${email}`);
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        'attachment; filename="Hausa Wedding Guide.pdf"'
+      );
+      fs.createReadStream(filePath).pipe(res);
+    } else {
+      console.error(
+        `[PDF-DOWNLOAD] ❌ PDF file not found at path: ${filePath}`
+      );
+      res
+        .status(404)
+        .json({ error: "File not found. Please contact support." });
+    }
+  } catch (error) {
+    console.error("[PDF-DOWNLOAD] ❌ Unexpected error:", error);
+    res.status(500).json({ error: "An internal server error occurred." });
+  }
+}
