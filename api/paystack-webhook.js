@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { sendDownloadEmail, sendWebAppAccessEmail } from "../lib/email.js";
+import { sendDownloadEmail, sendWebAppAccessEmail } from "./_lib/email.js";
 
 // Environment variables
 const PAYSTACK_TEST_SECRET = process.env.PAYSTACK_TEST_SECRET_KEY;
@@ -108,6 +108,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ received: true });
   } catch (error) {
+    hbda1;
     console.error(
       "[WEBHOOK] ❌❌ FATAL ERROR while processing:",
       error.message

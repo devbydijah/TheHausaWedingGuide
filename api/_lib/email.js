@@ -1,8 +1,8 @@
 import * as Brevo from "@getbrevo/brevo";
 import { render } from "@react-email/render";
-import PDFGuideEmail from "../emails/PDFGuideEmail.jsx";
-import WebGuideEmail from "../emails/WebGuideEmail.jsx";
-import BundleEmail from "../emails/BundleEmail.jsx";
+import PDFGuideEmail from "../../emails/PDFGuideEmail.jsx";
+import WebGuideEmail from "../../emails/WebGuideEmail.jsx";
+import BundleEmail from "../../emails/BundleEmail.jsx";
 
 // --- 1. CONFIGURE THE API INSTANCE ---
 // This is the new, correct way to set up the client.
