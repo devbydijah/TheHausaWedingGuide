@@ -3,7 +3,7 @@
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const fromEmail = "The Hausa Wedding Guide <purchase@thehausaweddingguide.com>";
+const fromEmail = "The Hausa Wedding Guide <contact@devwithdijah.com>";
 
 export const sendDownloadEmail = async (to, downloadLink) => {
   try {
