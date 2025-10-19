@@ -1,70 +1,71 @@
+// Corrected api/email.js
+
 import { Resend } from "resend";
-import PDFGuideEmail from "../../emails/PDFGuideEmail.jsx";
-import WebGuideEmail from "../../emails/WebGuideEmail.jsx";
 
-// --- Initialize the Resend Client ---
 const resend = new Resend(process.env.RESEND_API_KEY);
+const fromEmail = "The Hausa Wedding Guide <purchase@thehausaweddingguide.com>";
 
-// --- Sender Information ---
-const FROM_ADDRESS = process.env.FROM_EMAIL;
-
-/**
- * Reusable function to send an email using Resend.
- * @param {string} to - The recipient's email address.
- * @param {string} subject - The subject of the email.
- * @param {React.ReactElement} react - The React Email component.
- */
-async function sendEmail(to, subject, react) {
-  if (!process.env.RESEND_API_KEY || !FROM_ADDRESS) {
-    const errorMessage =
-      "FATAL: RESEND_API_KEY or FROM_EMAIL is not set in environment variables.";
-    console.error(errorMessage);
-    throw new Error(errorMessage);
-  }
-
+export const sendDownloadEmail = async (to, downloadLink) => {
   try {
-    console.log(
-      `[EMAIL] Attempting to send email to ${to} with subject "${subject}"`
-    );
     const { data, error } = await resend.emails.send({
-      from: "Hausa Room <" + FROM_ADDRESS + ">",
-      to: [to],
-      subject: subject,
-      react: react,
+      from: fromEmail,
+      to,
+      subject: "Your Hausa Wedding Guide is Here!",
+      // Use simple HTML instead of React/JSX
+      html: `
+        <div style="font-family: sans-serif; line-height: 1.6;">
+          <h2>Thank You for Your Purchase!</h2>
+          <p>Your Hausa Wedding Guide is ready for download.</p>
+          <p>Please click the button below to get your PDF. This link will expire in 24 hours.</p>
+          <a href="${downloadLink}" style="background-color: #4CAF50; color: white; padding: 14px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 5px;">
+            Download Your Guide
+          </a>
+          <p>If you have any issues, please contact our support team.</p>
+          <p>Sincerely,<br/>The Hausa Wedding Guide Team</p>
+        </div>
+      `,
     });
 
     if (error) {
-      console.error(`[EMAIL] ❌ Failed to send email to ${to}:`, error);
-      throw error;
+      console.error("[EMAIL] Resend API error (PDF):", error);
+      throw new Error(error.message);
     }
-
-    console.log(`[EMAIL] ✅ Successfully sent email. Message ID: ${data.id}`);
     return data;
-  } catch (error) {
-    // Log the detailed API error from Resend for better debugging
-    console.error("Resend API Error Body:", JSON.stringify(error, null, 2));
-    throw error;
+  } catch (err) {
+    console.error("[EMAIL] Fatal error in sendDownloadEmail:", err);
+    throw err;
   }
-}
+};
 
-// --- Specific Email Functions ---
-
-export function sendDownloadEmail(email, downloadLink) {
-  return sendEmail(
-    email,
-    "Your Northern Wedding PDF Guide by Hausa Room",
-    <PDFGuideEmail name={email.split("@")[0]} downloadUrl={downloadLink} />
-  );
-}
-
-export function sendWebAppAccessEmail(email, txReference) {
-  const WEB_APP_URL = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "http://localhost:3000";
-  const signupUrl = `${WEB_APP_URL}/?guide=1&email=${encodeURIComponent(email)}`;
-  return sendEmail(
-    email,
-    "Your Northern Wedding Interactive Guide by Hausa Room",
-    <WebGuideEmail name={email.split("@")[0]} signupUrl={signupUrl} />
-  );
-}
+export const sendWebAppAccessEmail = async (to, reference) => {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: fromEmail,
+      to,
+      subject: "Welcome to the Interactive Hausa Wedding Guide!",
+      // Use simple HTML instead of React/JSX
+      html: `
+        <div style="font-family: sans-serif; line-height: 1.6;">
+          <h2>Welcome!</h2>
+          <p>Thank you for purchasing access to the interactive Hausa Wedding Guide web application.</p>
+          <p>You can now log in using the email address you purchased with. Your first-time login might require a password reset or a magic link, depending on your account status.</p>
+          <p>Your purchase reference is: <strong>${reference}</strong></p>
+          <a href="https://the-hausa-weding-guide.vercel.app" style="background-color: #008CBA; color: white; padding: 14px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 5px;">
+            Access the Web App
+          </a>
+          <p>Enjoy planning your perfect wedding!</p>
+          <p>Sincerely,<br/>The Hausa Wedding Guide Team</p>
+        </div>
+      `,
+    });
+    
+    if (error) {
+      console.error("[EMAIL] Resend API error (Web App):", error);
+      throw new Error(error.message);
+    }
+    return data;
+  } catch (err) {
+    console.error("[EMAIL] Fatal error in sendWebAppAccessEmail:", err);
+    throw err;
+  }
+};
