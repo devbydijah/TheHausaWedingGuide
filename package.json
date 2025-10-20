@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "render-emails": "tsx scripts/render-emails.js", 
+    "render-emails": "tsx scripts/render-emails.jsx", 
     "build": "npm run render-emails && vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
