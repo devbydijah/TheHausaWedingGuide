@@ -4,10 +4,12 @@ import fs from "fs"; // Node.js File System
 import path from "path"; // Node.js Path
 
 // --- Initialize the Resend Client ---
+// It will automatically use the RESEND_API_KEY environment variable
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// --- Sender Information ---
-const fromEmail = "The Hausa Wedding Guide <contact@devwithdijah.com>";
+// --- Sender Information (Updated) ---
+// Using the desired "From" name and the new email address
+const fromEmail = "Hausa Room <support@hausaroom.com>";
 
 // --- Helper function to read the pre-rendered HTML files ---
 function getEmailTemplate(templateName) {
@@ -15,8 +17,8 @@ function getEmailTemplate(templateName) {
     // Path inside the API directory where templates are saved during build
     const templatePath = path.join(
       process.cwd(), // Project Root in Vercel build
-      "api",
-      "email-templates",
+      "api", // API folder
+      "email-templates", // Subfolder where templates are saved
       templateName
     );
     // console.log(`[DEBUG] Reading template from: ${templatePath}`); // Optional debugging
@@ -53,7 +55,7 @@ async function sendEmail(to, subject, html) {
       `[EMAIL] Attempting to send email to ${to} with subject "${subject}"`
     );
     const { data, error } = await resend.emails.send({
-      from: fromEmail,
+      from: fromEmail, // Uses the updated sender info
       to: [to],
       subject: subject,
       html: html,
@@ -91,7 +93,11 @@ export function sendDownloadEmail(email, downloadLink) {
     .replace(/{{downloadLink}}/g, downloadLink);
 
   // 3. Send the final HTML
-  return sendEmail(email, "Your Hausa Wedding Guide PDF is Here!", emailHtml);
+  return sendEmail(
+    email,
+    "Your Hausa Wedding Guide PDF is Here!", // Consider updating subject if needed
+    emailHtml
+  );
 }
 
 export function sendWebAppAccessEmail(email, txReference) {
@@ -123,7 +129,7 @@ export function sendWebAppAccessEmail(email, txReference) {
   // 3. Send the final HTML
   return sendEmail(
     email,
-    "Welcome to the Interactive Hausa Wedding Guide!",
+    "Welcome to the Interactive Hausa Wedding Guide!", // Consider updating subject if needed
     emailHtml
   );
 }
