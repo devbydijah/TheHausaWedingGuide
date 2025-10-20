@@ -1,71 +1,129 @@
-// Corrected api/email.js
-
+// File: api/email.js
 import { Resend } from "resend";
+import fs from "fs"; // Node.js File System
+import path from "path"; // Node.js Path
 
+// --- Initialize the Resend Client ---
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+// --- Sender Information ---
 const fromEmail = "The Hausa Wedding Guide <contact@devwithdijah.com>";
 
-export const sendDownloadEmail = async (to, downloadLink) => {
+// --- Helper function to read the pre-rendered HTML files ---
+function getEmailTemplate(templateName) {
   try {
+    // Path inside the API directory where templates are saved during build
+    const templatePath = path.join(
+      process.cwd(), // Project Root in Vercel build
+      "api",
+      "email-templates",
+      templateName
+    );
+    // console.log(`[DEBUG] Reading template from: ${templatePath}`); // Optional debugging
+    if (!fs.existsSync(templatePath)) {
+      console.error(`[ERROR] Template file not found at: ${templatePath}`);
+      return null;
+    }
+    return fs.readFileSync(templatePath, "utf-8");
+  } catch (error) {
+    console.error(`Error reading email template ${templateName}:`, error);
+    return null; // Return null on error
+  }
+}
+
+/**
+ * Reusable function to send an email using Resend.
+ */
+async function sendEmail(to, subject, html) {
+  // Add check if HTML is null or empty
+  if (!html) {
+    const errorMessage = `Cannot send email, HTML content for subject "${subject}" is missing or failed to load.`;
+    console.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+  if (!process.env.RESEND_API_KEY) {
+    const errorMessage =
+      "FATAL: RESEND_API_KEY is not set in environment variables.";
+    console.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+
+  try {
+    console.log(
+      `[EMAIL] Attempting to send email to ${to} with subject "${subject}"`
+    );
     const { data, error } = await resend.emails.send({
       from: fromEmail,
-      to,
-      subject: "Your Hausa Wedding Guide is Here!",
-      // Use simple HTML instead of React/JSX
-      html: `
-        <div style="font-family: sans-serif; line-height: 1.6;">
-          <h2>Thank You for Your Purchase!</h2>
-          <p>Your Hausa Wedding Guide is ready for download.</p>
-          <p>Please click the button below to get your PDF. This link will expire in 24 hours.</p>
-          <a href="${downloadLink}" style="background-color: #4CAF50; color: white; padding: 14px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 5px;">
-            Download Your Guide
-          </a>
-          <p>If you have any issues, please contact our support team.</p>
-          <p>Sincerely,<br/>The Hausa Wedding Guide Team</p>
-        </div>
-      `,
+      to: [to],
+      subject: subject,
+      html: html,
     });
 
     if (error) {
-      console.error("[EMAIL] Resend API error (PDF):", error);
-      throw new Error(error.message);
+      console.error(`[EMAIL] ❌ Failed to send email to ${to}:`, error);
+      throw error;
     }
-    return data;
-  } catch (err) {
-    console.error("[EMAIL] Fatal error in sendDownloadEmail:", err);
-    throw err;
-  }
-};
 
-export const sendWebAppAccessEmail = async (to, reference) => {
-  try {
-    const { data, error } = await resend.emails.send({
-      from: fromEmail,
-      to,
-      subject: "Welcome to the Interactive Hausa Wedding Guide!",
-      // Use simple HTML instead of React/JSX
-      html: `
-        <div style="font-family: sans-serif; line-height: 1.6;">
-          <h2>Welcome!</h2>
-          <p>Thank you for purchasing access to the interactive Hausa Wedding Guide web application.</p>
-          <p>You can now log in using the email address you purchased with. Your first-time login might require a password reset or a magic link, depending on your account status.</p>
-          <p>Your purchase reference is: <strong>${reference}</strong></p>
-          <a href="https://the-hausa-weding-guide.vercel.app" style="background-color: #008CBA; color: white; padding: 14px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 5px;">
-            Access the Web App
-          </a>
-          <p>Enjoy planning your perfect wedding!</p>
-          <p>Sincerely,<br/>The Hausa Wedding Guide Team</p>
-        </div>
-      `,
-    });
-    
-    if (error) {
-      console.error("[EMAIL] Resend API error (Web App):", error);
-      throw new Error(error.message);
-    }
+    console.log(`[EMAIL] ✅ Successfully sent email. Message ID: ${data.id}`);
     return data;
-  } catch (err) {
-    console.error("[EMAIL] Fatal error in sendWebAppAccessEmail:", err);
-    throw err;
+  } catch (error) {
+    console.error("[EMAIL] Fatal error during sendEmail:", error);
+    throw error;
   }
-};
+}
+
+// --- Specific Email Functions ---
+
+export function sendDownloadEmail(email, downloadLink) {
+  const userName = email.split("@")[0] || "Friend";
+
+  // 1. Get the pre-rendered HTML template
+  let emailHtml = getEmailTemplate("pdf_guide_template.html");
+
+  // If loading failed, throw error before trying to replace
+  if (!emailHtml) {
+    throw new Error("Could not load PDF email template. Check build logs.");
+  }
+
+  // 2. Replace placeholders with real data (use global flag 'g' for multiple occurrences)
+  emailHtml = emailHtml
+    .replace(/{{userName}}/g, userName)
+    .replace(/{{downloadLink}}/g, downloadLink);
+
+  // 3. Send the final HTML
+  return sendEmail(email, "Your Hausa Wedding Guide PDF is Here!", emailHtml);
+}
+
+export function sendWebAppAccessEmail(email, txReference) {
+  const userName = email.split("@")[0] || "Friend";
+
+  // --- Construct the Signup/Access Link ---
+  const WEB_APP_BASE_URL = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:5173";
+
+  const signupUrl = `${WEB_APP_BASE_URL}/?guide=1&email=${encodeURIComponent(
+    email
+  )}`;
+
+  // 1. Get the pre-rendered HTML template
+  let emailHtml = getEmailTemplate("web_guide_template.html");
+
+  // If loading failed, throw error before trying to replace
+  if (!emailHtml) {
+    throw new Error("Could not load Web App email template. Check build logs.");
+  }
+
+  // 2. Replace placeholders with real data (use global flag 'g')
+  emailHtml = emailHtml
+    .replace(/{{userName}}/g, userName)
+    .replace(/{{signupUrl}}/g, signupUrl)
+    .replace(/{{txReference}}/g, txReference);
+
+  // 3. Send the final HTML
+  return sendEmail(
+    email,
+    "Welcome to the Interactive Hausa Wedding Guide!",
+    emailHtml
+  );
+}

@@ -43,3 +43,6 @@ Thumbs.db
 *.tmp
 *.temp
 .vercel
+
+# Generated email templates
+/api/email-templates
