@@ -20,6 +20,7 @@ import "./index.css";
 import LoginGate from "./components/LoginGate";
 import InteractiveGuide from "./components/InteractiveGuide";
 import OnboardingForm from "./components/OnboardingForm";
+import supabase from "./supabaseClient"; // Import the centralized client
 
 // --- PAYSTACK LINKS (Updated Bundle Link) ---
 const PDF_GUIDE_PRODUCT_URL =
@@ -135,7 +136,7 @@ function App() {
   };
 
   const handleLogout = async () => {
-    if (typeof supabase !== "undefined" && supabase?.auth) {
+    if (supabase && supabase.auth) {
       try {
         await supabase.auth.signOut();
       } catch (error) {
