@@ -77,7 +77,6 @@ export function sendDownloadEmail(email, firstName, downloadLink) {
       .heading { font-family: 'Playfair Display', Georgia, serif; color: #740015; font-size: 24px; font-weight: 700; line-height: 32px; margin: 0 0 16px 0; }
       .paragraph { color: #333; font-size: 16px; line-height: 24px; margin: 16px 0; font-family: 'Inter', Arial, sans-serif; }
       .button { background-color: #CE805C; color: #ffffff !important; border-radius: 8px; padding: 14px 28px; font-weight: 600; font-size: 16px; text-decoration: none; display: inline-block; font-family: 'Inter', Arial, sans-serif; mso-padding-alt: 0; text-align: center; }
-      /* Button hover effects won't work in most email clients, set desired state directly */
       .link-text { font-size: 14px; color: #555; margin: 24px 0 8px 0; font-family: 'Inter', Arial, sans-serif;}
       .link-url { font-size: 12px; color: #777; word-break: break-all; text-decoration: none; font-family: 'Inter', Arial, sans-serif;}
       .hr { margin: 24px 0; border: none; border-top: 1px solid #eee; }
@@ -266,7 +265,7 @@ export function sendWebAppAccessEmail(email, firstName, txReference) {
   );
 }
 
-// --- *** NEW: Bundle Email Function *** ---
+// --- *** ADDED Bundle Email Function *** ---
 export function sendBundleEmail(
   email,
   firstName,
