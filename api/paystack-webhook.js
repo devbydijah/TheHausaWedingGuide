@@ -76,10 +76,13 @@ export default async function handler(req, res) {
   let productType = null;
 
   if (amount === bundleAmountKobo) {
+    // 12000
     productType = "bundle";
   } else if (amount === pdfAmountKobo) {
+    // 11000
     productType = "pdf";
   } else if (amount === webAppAmountKobo) {
+    // 10000
     productType = "webapp";
   } else {
     console.error(`[WEBHOOK] ❌ Unrecognized amount: ${amount} kobo.`);
