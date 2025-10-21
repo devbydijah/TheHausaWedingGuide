@@ -1,22 +1,6 @@
 import crypto from "crypto";
 import path from "path";
 import fs from "fs";
-import { createClient } from "@supabase/supabase-js";
-
-// --- Initialize Supabase Client (with safety check) ---
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-const supabase =
-  supabaseUrl && supabaseServiceKey
-    ? createClient(supabaseUrl, supabaseServiceKey)
-    : null;
-
-if (!supabase) {
-  console.warn(
-    "[PDF-DOWNLOAD] Supabase variables not set. API will be non-functional."
-  );
-}
 
 /**
  * Verifies the signature of the download link.
@@ -70,50 +54,6 @@ export default async function handler(req, res) {
     if (!verification.valid) {
       return res.status(403).json({ error: verification.error });
     }
-
-    // --- New Supabase Logic ---
-    if (!supabase) {
-      return res
-        .status(503)
-        .json({ error: "Database service is not configured." });
-    }
-
-    // 1. Find the token in the database
-    const { data: tokenData, error: fetchError } = await supabase
-      .from("download_tokens")
-      .select("download_count")
-      .eq("token", token)
-      .single();
-
-    if (fetchError || !tokenData) {
-      console.error(
-        `[PDF-DOWNLOAD] ❌ Token not found in DB for ${email}: ${token}`
-      );
-      return res.status(403).json({ error: "Download token is invalid." });
-    }
-
-    // 2. Check if downloads are remaining
-    if (tokenData.download_count <= 0) {
-      console.warn(
-        `[PDF-DOWNLOAD] ⚠️ Exhausted download attempts for ${email}`
-      );
-      return res.status(403).json({ error: "Maximum download limit reached." });
-    }
-
-    // 3. Decrement the download count
-    const { error: updateError } = await supabase
-      .from("download_tokens")
-      .update({ download_count: tokenData.download_count - 1 })
-      .eq("token", token);
-
-    if (updateError) {
-      console.error(
-        `[PDF-DOWNLOAD] ❌ Failed to decrement download count for ${email}:`,
-        updateError
-      );
-      // We can still proceed to serve the file, but we should log this error.
-    }
-    // --- End of Supabase Logic ---
 
     // If all checks pass, serve the file.
     const filePath = path.resolve("./public", "Hausa_Wedding_Guide.pdf");
