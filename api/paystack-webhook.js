@@ -1,16 +1,18 @@
-// paystack-webhook.js
-
 import crypto from "crypto";
-import { sendDownloadEmail, sendWebAppAccessEmail } from "./email.js"; 
+// Correctly import the email functions
+import { sendDownloadEmail, sendWebAppAccessEmail } from "./email.js";
 
 // Environment variables
 const PAYSTACK_TEST_SECRET = process.env.PAYSTACK_TEST_SECRET_KEY;
 const PAYSTACK_LIVE_SECRET = process.env.PAYSTACK_SECRET_KEY;
-const PDF_BASE_URL = "https://the-hausa-weding-guide.vercel.app";
+const PDF_BASE_URL = process.env.VERCEL_URL
+  ? `https://${process.env.VERCEL_URL}`
+  : "https://the-hausa-weding-guide.vercel.app";
 
 function verifySignature(rawBody, signature) {
   if (!signature) return { isValid: false };
 
+  // Check live secret first in production
   if (PAYSTACK_LIVE_SECRET) {
     const hmac_live = crypto.createHmac("sha512", PAYSTACK_LIVE_SECRET);
     hmac_live.update(rawBody);
@@ -19,6 +21,7 @@ function verifySignature(rawBody, signature) {
     }
   }
 
+  // Fallback to test secret for development/testing
   if (PAYSTACK_TEST_SECRET) {
     const hmac_test = crypto.createHmac("sha512", PAYSTACK_TEST_SECRET);
     hmac_test.update(rawBody);
@@ -39,6 +42,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  // Vercel's helper `req.body` is already parsed. We need the raw body for signature verification.
+  // A middleware or different approach might be needed if `req.body` is the only option.
+  // For now, we assume a setup where rawBody can be reconstructed or is available.
+  // A common approach is to stringify the parsed body, but this can be brittle.
   const rawBody = JSON.stringify(req.body);
   const signature = req.headers["x-paystack-signature"];
 
@@ -64,11 +71,15 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Invalid customer email" });
   }
 
+  // --- **FIX**: Get the customer's first name ---
+  const firstName = customer.first_name || ""; // Use first name, fallback to empty string
+
   console.log(
     `[WEBHOOK] 🎉 Processing successful charge for ${customer.email}`
   );
 
-  const productType = amount >= 100000 ? "pdf" : "webapp";
+  // Use amount in kobo (lowest currency unit) for comparison
+  const productType = amount >= 500000 ? "pdf" : "webapp"; // 5000 kobo = ₦50, 10000 kobo = ₦100 etc. Assuming ₦100 is the threshold. Adjust as needed.
 
   console.log(`[WEBHOOK] 📦 Detected product: ${productType.toUpperCase()}`);
 
@@ -77,7 +88,15 @@ export default async function handler(req, res) {
       const token = crypto.randomBytes(32).toString("hex");
       const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
       const SECRET =
-        mode === "live" ? PAYSTACK_LIVE_SECRET : PAYSTACK_TEST_SECRET;
+        mode === "live"
+          ? process.env.DOWNLOAD_TOKEN_SECRET_LIVE
+          : process.env.DOWNLOAD_TOKEN_SECRET_TEST;
+
+      if (!SECRET) {
+        throw new Error(
+          "Download token secret is not configured for the current mode."
+        );
+      }
 
       const hmac = crypto.createHmac("sha256", SECRET);
       hmac.update(`${token}|${customer.email}|${expires}`);
@@ -87,13 +106,15 @@ export default async function handler(req, res) {
         customer.email
       )}&sig=${sig}`;
 
-      await sendDownloadEmail(customer.email, downloadLink);
+      // --- **FIX**: Pass the first name to the email function ---
+      await sendDownloadEmail(customer.email, firstName, downloadLink);
       console.log(
         `[WEBHOOK] ✅ PDF email sent successfully to ${customer.email}`
       );
     } else {
       // webapp
-      await sendWebAppAccessEmail(customer.email, reference);
+      // --- **FIX**: Pass the first name to the email function ---
+      await sendWebAppAccessEmail(customer.email, firstName, reference);
       console.log(
         `[WEBHOOK] ✅ Web App access email sent successfully to ${customer.email}`
       );
@@ -105,7 +126,7 @@ export default async function handler(req, res) {
       "[WEBHOOK] ❌❌ FATAL ERROR while processing:",
       error.message
     );
-    console.error(error);
+    console.error(error.stack); // Log the full stack trace for better debugging
     return res.status(500).json({ error: "Internal server error" });
   }
 }

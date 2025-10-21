@@ -41,8 +41,8 @@ async function sendEmail(to, subject, html) {
 
 // --- Specific Email Functions ---
 
-export function sendDownloadEmail(email, downloadLink) {
-  const userName = email.split("@")[0] || "Friend";
+export function sendDownloadEmail(email, firstName, downloadLink) {
+  const userName = firstName || email.split("@")[0];
   // --- Determine Base URL for Assets (Vercel) ---
   const ASSET_BASE_URL = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
@@ -144,8 +144,8 @@ export function sendDownloadEmail(email, downloadLink) {
   return sendEmail(email, "Your Hausa Wedding Guide PDF is Here!", emailHtml);
 }
 
-export function sendWebAppAccessEmail(email, txReference) {
-  const userName = email.split("@")[0] || "Friend";
+export function sendWebAppAccessEmail(email, firstName, txReference) {
+  const userName = firstName || email.split("@")[0];
   // --- Determine Base URL for Links and Assets (Vercel) ---
   const WEB_APP_BASE_URL = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
@@ -224,7 +224,7 @@ export function sendWebAppAccessEmail(email, txReference) {
                 </p>
                 <a href="${signupUrl}" target="_blank" class="link-url" style="color: #777; text-decoration: none;">${signupUrl}</a>
                 <hr class="hr" />
-                <p class="paragraph">
+                <p class="paragraph" style="font-size: 14px;">
                   Your purchase reference is: <strong>${txReference}</strong>
                 </p>
                 <p class="small-text">
