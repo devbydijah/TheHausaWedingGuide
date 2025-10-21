@@ -53,36 +53,11 @@ export function sendDownloadEmail(email, firstName, downloadLink) {
   const BASE_URL = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
     : "https://the-hausa-weding-guide.vercel.app"; // Fallback needed
-  const logoUrl = `${BASE_URL}/assets/logowhite.jpg`; // Correct path to JPG in public/assets folder
 
   // --- HTML Template for PDF Guide ---
   const emailHtml = `
-  <!DOCTYPE html>
-  <html lang="en" style="font-family: 'Inter', Arial, sans-serif;">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <style>
-      body { margin: 0; background-color: #f9f4f1; color: #374151;}
-      .container { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
-      .header { padding: 32px; text-align: center; background-color: #fdfaf8; border-bottom: 1px solid #f0e6dd; }
-      .content { padding: 32px; }
-      .heading { font-family: 'Playfair Display', serif; color: #740015; font-size: 26px; font-weight: 700; margin: 0 0 16px; }
-      .paragraph { font-size: 16px; line-height: 1.6; margin: 16px 0; }
-      .button-container { text-align: center; padding: 20px 0; }
-      .button { background-color: #CE805C; color: #ffffff !important; border-radius: 8px; padding: 14px 28px; font-weight: 600; font-size: 16px; text-decoration: none; display: inline-block; border: none; cursor: pointer; transition: background-color 0.3s; }
-      .link-info { font-size: 14px; color: #6b7280; text-align: center; margin-top: 24px; }
-      .link-url { font-size: 12px; color: #9ca3af; word-break: break-all; }
-      .hr { margin: 30px 0; border: none; border-top: 1px solid #f0e6dd; }
-      .footer { font-size: 12px; color: #9ca3af; text-align: center; padding: 20px; border-top: 1px solid #e5e7eb; background-color: #f9fafb; }
-      .footer a { color: #740015; text-decoration: none; }
-    </style>
-  </head>
-  <body>
-    <div class="container">
+  <img src="https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.svg" alt="Logo" style="width: 100px; height: auto;" />
+  <div class="container">
       <div class="header">
         <img src="https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.svg" alt="Logo" style="width: 100px; height: auto;" />
       </div>
@@ -121,33 +96,8 @@ export function sendWebAppAccessEmail(email, firstName, txReference) {
   const logoUrl = `${BASE_URL}/assets/logowhite.jpg`;
 
   const emailHtml = `
-  <!DOCTYPE html>
-  <html lang="en" style="font-family: 'Inter', Arial, sans-serif;">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <style>
-      body { margin: 0; background-color: #f9f4f1; color: #374151; }
-      .container { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
-      .header { padding: 32px; text-align: center; background-color: #fdfaf8; border-bottom: 1px solid #f0e6dd; }
-      .content { padding: 32px; }
-      .heading { font-family: 'Playfair Display', serif; color: #740015; font-size: 26px; font-weight: 700; margin: 0 0 16px; }
-      .paragraph { font-size: 16px; line-height: 1.6; margin: 16px 0; }
-      .button-container { text-align: center; padding: 20px 0; }
-      .button { background-color: #740015; color: #ffffff !important; border-radius: 8px; padding: 14px 28px; font-weight: 600; font-size: 16px; text-decoration: none; display: inline-block; border: none; cursor: pointer; transition: background-color 0.3s;}
-      .link-info { font-size: 14px; color: #6b7280; text-align: center; margin-top: 24px; }
-      .link-url { font-size: 12px; color: #9ca3af; word-break: break-all; }
-      .hr { margin: 30px 0; border: none; border-top: 1px solid #f0e6dd; }
-      .small-text { font-size: 14px; color: #6b7280; line-height: 1.6; margin: 16px 0; }
-      .footer { font-size: 12px; color: #9ca3af; text-align: center; padding: 20px; border-top: 1px solid #e5e7eb; background-color: #f9fafb; }
-      .footer a { color: #740015; text-decoration: none; }
-    </style>
-  </head>
-  <body>
-    <div class="container">
+  <img src="https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.svg" alt="Logo" style="width: 100px; height: auto;" />
+  <div class="container">
       <div class="header">
         <img src="https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.svg" alt="Logo" style="width: 100px; height: auto;" />
       </div>
@@ -199,34 +149,8 @@ export function sendBundleEmail(
 
   // --- HTML Template for Bundle Purchase ---
   const emailHtml = `
-  <!DOCTYPE html>
-  <html lang="en" style="font-family: 'Inter', Arial, sans-serif;">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <style>
-      body { margin: 0; background-color: #f9f4f1; color: #374151; }
-      .container { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
-      .header { padding: 32px; text-align: center; background-color: #fdfaf8; border-bottom: 1px solid #f0e6dd; }
-      .content { padding: 32px; }
-      .heading { font-family: 'Playfair Display', serif; color: #740015; font-size: 26px; font-weight: 700; margin: 0 0 16px; }
-      .subheading { font-family: 'Playfair Display', serif; color: #740015; font-size: 20px; font-weight: 700; margin: 24px 0 10px 0; }
-      .paragraph { font-size: 16px; line-height: 1.6; margin: 16px 0; }
-      .button-container { text-align: center; padding: 15px 0; }
-      .button-pdf { background-color: #CE805C; color: #ffffff !important; border-radius: 8px; padding: 14px 28px; font-weight: 600; font-size: 16px; text-decoration: none; display: inline-block; border: none; cursor: pointer; transition: background-color 0.3s; margin-bottom: 15px;}
-      .button-webapp { background-color: #740015; color: #ffffff !important; border-radius: 8px; padding: 14px 28px; font-weight: 600; font-size: 16px; text-decoration: none; display: inline-block; border: none; cursor: pointer; transition: background-color 0.3s;}
-      .link-info { font-size: 14px; color: #6b7280; text-align: center; margin-top: 10px; }
-      .link-url { font-size: 12px; color: #9ca3af; word-break: break-all; }
-      .hr { margin: 30px 0; border: none; border-top: 1px solid #f0e6dd; }
-      .footer { font-size: 12px; color: #9ca3af; text-align: center; padding: 20px; border-top: 1px solid #e5e7eb; background-color: #f9fafb; }
-      .footer a { color: #740015; text-decoration: none; }
-    </style>
-  </head>
-  <body>
-    <div class="container">
+  <img src="https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.svg" alt="Logo" style="width: 100px; height: auto;" />
+  <div class="container">
       <div class="header">
         <img src="https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.svg" alt="Logo" style="width: 100px; height: auto;" />
       </div>
