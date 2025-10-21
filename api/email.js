@@ -84,7 +84,7 @@ export function sendDownloadEmail(email, firstName, downloadLink) {
   <body>
     <div class="container">
       <div class="header">
-        <img src="${logoUrl}" alt="Hausa Room Logo" height="50" style="max-height: 50px;" />
+        <img src="https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.svg" alt="Logo" style="width: 100px; height: auto;" />
       </div>
       <div class="content">
         <h2 class="heading">Hi ${userName},</h2>
@@ -149,7 +149,7 @@ export function sendWebAppAccessEmail(email, firstName, txReference) {
   <body>
     <div class="container">
       <div class="header">
-        <img src="${logoUrl}" alt="Hausa Room Logo" height="50" style="max-height: 50px;" />
+        <img src="https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.svg" alt="Logo" style="width: 100px; height: auto;" />
       </div>
       <div class="content">
         <h2 class="heading">Welcome, ${userName}!</h2>
@@ -228,7 +228,7 @@ export function sendBundleEmail(
   <body>
     <div class="container">
       <div class="header">
-        <img src="${logoUrl}" alt="Hausa Room Logo" height="50" style="max-height: 50px;" />
+        <img src="https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.svg" alt="Logo" style="width: 100px; height: auto;" />
       </div>
       <div class="content">
         <h2 class="heading">Thank You, ${userName}!</h2>
