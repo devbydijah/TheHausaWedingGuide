@@ -1,5 +1,6 @@
+// /api/paystack-webhook.js
+
 import crypto from "crypto";
-// Import all three email functions
 import {
   sendDownloadEmail,
   sendWebAppAccessEmail,
@@ -9,16 +10,13 @@ import {
 // Environment variables
 const PAYSTACK_TEST_SECRET = process.env.PAYSTACK_TEST_SECRET_KEY;
 const PAYSTACK_LIVE_SECRET = process.env.PAYSTACK_SECRET_KEY;
-const BASE_URL = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "https://the-hausa-weding-guide.vercel.app";
+// --- FIX: Use the production URL for all email links ---
+const BASE_URL = "https://the-hausa-weding-guide.vercel.app";
 const DOWNLOAD_TOKEN_SECRET_TEST = process.env.DOWNLOAD_TOKEN_SECRET_TEST;
 const DOWNLOAD_TOKEN_SECRET_LIVE = process.env.DOWNLOAD_TOKEN_SECRET_LIVE;
 
 function verifySignature(rawBody, signature) {
   if (!signature) return { isValid: false };
-
-  // Check live secret first
   if (PAYSTACK_LIVE_SECRET) {
     const hmac_live = crypto.createHmac("sha512", PAYSTACK_LIVE_SECRET);
     hmac_live.update(rawBody);
@@ -26,8 +24,6 @@ function verifySignature(rawBody, signature) {
       return { isValid: true, mode: "live" };
     }
   }
-
-  // Fallback to test secret
   if (PAYSTACK_TEST_SECRET) {
     const hmac_test = crypto.createHmac("sha512", PAYSTACK_TEST_SECRET);
     hmac_test.update(rawBody);
@@ -35,7 +31,6 @@ function verifySignature(rawBody, signature) {
       return { isValid: true, mode: "test" };
     }
   }
-
   return { isValid: false };
 }
 
@@ -43,13 +38,11 @@ export default async function handler(req, res) {
   console.log("[WEBHOOK] 🎯 Paystack webhook received!");
 
   if (req.method !== "POST") {
-    console.log("[WEBHOOK] ❌ Method not allowed");
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   const rawBody = JSON.stringify(req.body);
   const signature = req.headers["x-paystack-signature"];
-
   const { isValid, mode } = verifySignature(rawBody, signature);
 
   if (!isValid) {
@@ -61,7 +54,6 @@ export default async function handler(req, res) {
 
   const event = req.body;
   if (event.event !== "charge.success") {
-    console.log(`[WEBHOOK] ℹ️ Ignoring event: ${event.event}`);
     return res.status(200).json({ received: true });
   }
 
@@ -76,7 +68,7 @@ export default async function handler(req, res) {
   const email = customer.email;
   console.log(`[WEBHOOK] 🎉 Processing successful charge for ${email}`);
 
-  // --- **UPDATED**: Determine product type based on amount (kobo) ---
+  // --- **UPDATED**: Prices in Kobo ---
   const pdfAmountKobo = 11000; // ₦110 test price
   const webAppAmountKobo = 10000; // ₦100 test price
   const bundleAmountKobo = 12000; // ₦120 test price
@@ -105,10 +97,10 @@ export default async function handler(req, res) {
     let downloadLink = null;
     let signupUrl = null;
 
-    // Generate PDF link if needed
+    // --- **FIX**: Generate PDF link (if needed) & pass mode ---
     if (productType === "pdf" || productType === "bundle") {
       const token = crypto.randomBytes(32).toString("hex");
-      const expires = Date.now() + 24 * 60 * 60 * 1000;
+      const expires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
       const SECRET =
         mode === "live"
           ? DOWNLOAD_TOKEN_SECRET_LIVE
@@ -117,10 +109,12 @@ export default async function handler(req, res) {
       const hmac = crypto.createHmac("sha256", SECRET);
       hmac.update(`${token}|${email}|${expires}`);
       const sig = hmac.digest("hex");
-      downloadLink = `${BASE_URL}/api/pdf-download?token=${token}&expires=${expires}&email=${encodeURIComponent(email)}&sig=${sig}`;
+
+      // --- ADDED &mode=${mode} ---
+      downloadLink = `${BASE_URL}/api/pdf-download?token=${token}&expires=${expires}&email=${encodeURIComponent(email)}&sig=${sig}&mode=${mode}`;
     }
 
-    // Generate Web App link if needed
+    // Generate Web App link (if needed)
     if (productType === "webapp" || productType === "bundle") {
       signupUrl = `${BASE_URL}/?guide=1&email=${encodeURIComponent(email)}`;
     }
