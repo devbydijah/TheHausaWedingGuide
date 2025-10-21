@@ -23,11 +23,11 @@ import OnboardingForm from "./components/OnboardingForm";
 
 // --- PAYSTACK LINKS (Updated Bundle Link) ---
 const PDF_GUIDE_PRODUCT_URL =
-  "https://paystack.com/buy/northern-wedding-guide-by-hausaroom-vzdojl"; // PDF Test Link
+  "https://paystack.com/buy/hausa-wedding-guide-by-hausaroom-vzdojl"; // PDF Test Link
 const WEB_APP_PRODUCT_URL =
   "https://paystack.com/buy/interactive-hausa-wedding-web-guide-btclqx"; // Web App Test Link
 const BUNDLE_PRODUCT_URL =
-  "https://paystack.com/buy/hausa-wedding-guide-bundle-pdf--interactive-access-scykqb"; // NEW Bundle Test Link
+  "https://paystack.com/buy/hausa-wedding-guide-bundle--scykqb"; // NEW Bundle Test Link
 // --- END PAYSTACK LINKS ---
 
 function App() {
@@ -752,7 +752,7 @@ function App() {
               style={{ animationDelay: "0.1s" }}
             >
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-[#D4A574] text-[#740015] px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg">
-                Discounted
+                Best Value
               </div>
               <PackageIcon
                 size={40}
