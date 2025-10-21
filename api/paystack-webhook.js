@@ -69,9 +69,9 @@ export default async function handler(req, res) {
   console.log(`[WEBHOOK] 🎉 Processing successful charge for ${email}`);
 
   // --- **UPDATED**: Prices in Kobo ---
-  const pdfAmountKobo = 11000; // ₦110 test price
-  const webAppAmountKobo = 10000; // ₦100 test price
-  const bundleAmountKobo = 12000; // ₦120 test price
+  const pdfAmountKobo = 11000; // ₦110.00 in kobo
+  const webAppAmountKobo = 10000; // ₦100.00 in kobo
+  const bundleAmountKobo = 12000; // ₦120.00 in kobo
 
   let productType = null;
 
