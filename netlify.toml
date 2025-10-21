@@ -1,0 +1,25 @@
+# netlify.toml - Configuration for Netlify
+
+# Build settings for your site
+[build]
+  # Command to build your Vite project (from package.json)
+  command = "npm run build"
+
+  # Directory containing your serverless functions
+  functions = "api"
+
+  # Directory where the built frontend site is located
+  publish = "dist"
+
+# Settings for netlify dev (local development)
+[dev]
+  # You can specify the port for the local dev server if needed,
+  # otherwise it defaults (often 8888)
+  # port = 8888
+
+# Redirect rule for Single Page Application (SPA) routing
+# Ensures direct links to pages work correctly
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
