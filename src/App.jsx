@@ -3,18 +3,18 @@
 import React, { useState, useEffect } from "react";
 // --- CORRECTED ICON IMPORTS (Using ONLY used icons and EXACT user-specified names) ---
 import {
-  List as ListIcon,
+  ListIcon,
   X,
-  ArrowUp as ArrowUpIcon,
-  Sparkle as SparkleIcon,
-  CheckCircle as CheckCircleIcon,
-  ArrowRight as ArrowRightIcon,
-  EnvelopeSimple as EnvelopeSimpleIcon,
-  InstagramLogo as InstagramLogoIcon,
-  FacebookLogo as FacebookLogoIcon,
-  CaretDown as CaretDownIcon,
-  DownloadSimple as DownloadSimpleIcon,
-  MonitorPlay as MonitorPlayIcon,
+  ArrowUpIcon,
+  SparkleIcon,
+  CheckCircleIcon,
+  ArrowRightIcon,
+  EnvelopeSimpleIcon,
+  InstagramLogoIcon,
+  FacebookLogoIcon,
+  CaretDownIcon,
+  DownloadSimpleIcon,
+  MonitorPlayIcon,
 } from "@phosphor-icons/react";
 // --- END CORRECTED ICON IMPORTS ---
 import "./index.css";
@@ -116,19 +116,17 @@ function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // --- CORRECTED Purchase Handlers (No redirect_url param) ---
   const handlePurchasePDF = () => {
-    const redirectUrl = `${window.location.origin}?purchased=pdf`;
-    window.location.href = `${PDF_GUIDE_STOREFRONT_URL}?redirect_url=${encodeURIComponent(
-      redirectUrl
-    )}`;
+    // Navigate directly to the Paystack product link
+    window.location.href = PDF_GUIDE_STOREFRONT_URL;
   };
 
   const handlePurchaseWebApp = () => {
-    const redirectUrl = `${window.location.origin}?purchased=webapp`;
-    window.location.href = `${WEB_APP_STOREFRONT_URL}?redirect_url=${encodeURIComponent(
-      redirectUrl
-    )}`;
+    // Navigate directly to the Paystack product link
+    window.location.href = WEB_APP_STOREFRONT_URL;
   };
+  // --- END CORRECTION ---
 
   const toggleFAQ = (index) => {
     setOpenFAQ(openFAQ === index ? null : index);
