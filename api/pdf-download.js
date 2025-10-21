@@ -21,15 +21,15 @@ if (!supabase) {
 /**
  * Verifies the signature of the download link.
  */
-function verifyTokenSignature(token, email, expires, sig) {
+function verifyTokenSignature(token, email, expires, sig, mode) {
   const SECRET =
-    process.env.DOWNLOAD_TOKEN_SECRET ||
-    process.env.PAYSTACK_SECRET_KEY ||
-    process.env.PAYSTACK_TEST_SECRET_KEY;
+    mode === "live"
+      ? process.env.DOWNLOAD_TOKEN_SECRET_LIVE
+      : process.env.DOWNLOAD_TOKEN_SECRET_TEST;
 
   if (!SECRET) {
     console.error(
-      "[PDF-DOWNLOAD] ❌ No secret key found for signature verification."
+      `[PDF-DOWNLOAD] ❌ No secret key found for signature verification in ${mode} mode.`
     );
     return { valid: false, error: "Server configuration error" };
   }
@@ -54,7 +54,7 @@ function verifyTokenSignature(token, email, expires, sig) {
  */
 export default async function handler(req, res) {
   try {
-    const { token, expires, email, sig } = req.query;
+    const { token, expires, email, sig, mode = "test" } = req.query; // Default to 'test' for safety
 
     if (!token || !expires || !email || !sig) {
       return res
@@ -66,7 +66,7 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: "This download link has expired." });
     }
 
-    const verification = verifyTokenSignature(token, email, expires, sig);
+    const verification = verifyTokenSignature(token, email, expires, sig, mode);
     if (!verification.valid) {
       return res.status(403).json({ error: verification.error });
     }

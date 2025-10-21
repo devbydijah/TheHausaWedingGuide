@@ -507,153 +507,192 @@ function App() {
         </div>
       </section>
 
-      <section id="features" className="py-16 md:py-24 bg-white">
+      <section
+        id="features"
+        className="py-16 md:py-24 bg-white overflow-x-auto"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16 animate-fade-in">
             <h2 className="font-playfair text-3xl md:text-4xl lg:text-5xl font-bold text-[#740015] mb-4">
               Choose Your Perfect Planning Tool
             </h2>
             <p className="text-gray-600 text-base md:text-lg">
-              We offer two powerful options to guide your Hausa wedding planning
-              journey.
+              Compare our guides and find the perfect fit for your planning
+              style.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-stretch">
-            <div className="flex flex-col bg-gradient-to-br from-[#F9F4F1] to-white rounded-2xl p-8 border-2 border-[#CE805C]/30 shadow-lg hover:shadow-xl transition-all duration-300 animate-slide-up">
-              <div className="flex-shrink-0 mb-6 inline-block p-4 bg-gradient-to-br from-[#CE805C]/10 to-[#B87050]/10 rounded-2xl border border-[#CE805C]/20">
-                <DownloadSimpleIcon
-                  size={40}
-                  weight="duotone"
-                  className="text-[#CE805C]"
-                />
-              </div>
-              <h3 className="font-playfair text-2xl font-bold text-[#740015] mb-4">
-                The PDF Guide
-              </h3>
-              <p className="text-gray-600 text-sm leading-relaxed mb-6 flex-grow">
-                A comprehensive, beautifully designed downloadable guide.
-                Perfect for printing, taking notes, and offline planning.
-                Includes checklists, budget templates, and detailed cultural
-                explanations.
-              </p>
-              <ul className="space-y-3 text-sm text-gray-700 mb-8">
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon
-                    size={18}
-                    weight="fill"
-                    className="text-[#CE805C]"
-                  />{" "}
-                  Instant Download
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon
-                    size={18}
-                    weight="fill"
-                    className="text-[#CE805C]"
-                  />{" "}
-                  Printable Checklists & Templates
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon
-                    size={18}
-                    weight="fill"
-                    className="text-[#CE805C]"
-                  />{" "}
-                  Keep Forever
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon
-                    size={18}
-                    weight="fill"
-                    className="text-[#CE805C]"
-                  />{" "}
-                  Detailed Cultural Guidance
-                </li>
-              </ul>
-              <button
-                onClick={() => scrollToSection("pricing")}
-                className="mt-auto w-full px-6 py-3 bg-[#CE805C] hover:bg-[#B87050] text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
-              >
-                See PDF Pricing
-              </button>
-            </div>
-            <div
-              className="flex flex-col bg-gradient-to-br from-[#740015]/5 to-[#531946]/5 rounded-2xl p-8 border-2 border-[#740015]/30 shadow-lg hover:shadow-xl transition-all duration-300 animate-slide-up"
-              style={{ animationDelay: "0.2s" }}
-            >
-              <div className="flex-shrink-0 mb-6 inline-block p-4 bg-gradient-to-br from-[#740015]/10 to-[#531946]/10 rounded-2xl border border-[#740015]/20">
-                <MonitorPlayIcon
-                  size={40}
-                  weight="duotone"
-                  className="text-[#740015]"
-                />
-              </div>
-              <h3 className="font-playfair text-2xl font-bold text-[#740015] mb-4">
-                The Interactive Guide
-              </h3>
-              <p className="text-gray-600 text-sm leading-relaxed mb-6 flex-grow">
-                A dynamic web application for a modern planning experience.
-                Includes everything in the PDF, plus interactive tools: vision
-                quiz, smart budget calculator, vendor tracker, task manager,
-                cloud sync, and personalized PDF export.
-              </p>
-              <ul className="space-y-3 text-sm text-gray-700 mb-8">
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon
-                    size={18}
-                    weight="fill"
-                    className="text-[#740015]"
-                  />{" "}
-                  All PDF Content Included
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon
-                    size={18}
-                    weight="fill"
-                    className="text-[#740015]"
-                  />{" "}
-                  Dynamic Budget Tools
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon
-                    size={18}
-                    weight="fill"
-                    className="text-[#740015]"
-                  />{" "}
-                  Vendor & Task Management
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon
-                    size={18}
-                    weight="fill"
-                    className="text-[#740015]"
-                  />{" "}
-                  Cloud Sync & Auto-Save
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon
-                    size={18}
-                    weight="fill"
-                    className="text-[#740015]"
-                  />{" "}
-                  Personalized PDF Export
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon
-                    size={18}
-                    weight="fill"
-                    className="text-[#740015]"
-                  />{" "}
-                  20-Day Access
-                </li>
-              </ul>
-              <button
-                onClick={() => scrollToSection("pricing")}
-                className="mt-auto w-full px-6 py-3 bg-[#740015] hover:bg-[#531946] text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
-              >
-                See Interactive Pricing
-              </button>
-            </div>
+          <div className="w-full animate-slide-up">
+            <table className="w-full min-w-[700px] border-collapse text-sm text-left font-inter">
+              <thead>
+                <tr className="border-b-2 border-gray-200">
+                  <th className="p-4 w-2/5 font-playfair text-xl text-[#740015]">
+                    Feature
+                  </th>
+                  <th className="p-4 text-center">
+                    <h4 className="font-playfair text-lg font-bold text-[#740015]">
+                      PDF Guide
+                    </h4>
+                    <p className="text-xs text-gray-500">Printable & Offline</p>
+                  </th>
+                  <th className="p-4 text-center bg-[#740015]/5 rounded-t-lg">
+                    <h4 className="font-playfair text-lg font-bold text-[#740015]">
+                      Interactive Guide
+                    </h4>
+                    <p className="text-xs text-gray-500">
+                      Dynamic & Cloud-Synced
+                    </p>
+                  </th>
+                  <th className="p-4 text-center">
+                    <h4 className="font-playfair text-lg font-bold text-[#740015]">
+                      Bundle
+                    </h4>
+                    <p className="text-xs text-gray-500">Best of Both</p>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  {
+                    feature: "Detailed Cultural Guidance",
+                    pdf: true,
+                    web: true,
+                    bundle: true,
+                  },
+                  {
+                    feature: "Printable Checklists & Templates",
+                    pdf: true,
+                    web: true,
+                    bundle: true,
+                  },
+                  {
+                    feature: "Keep Forever (PDF format)",
+                    pdf: true,
+                    web: "export",
+                    bundle: true,
+                  },
+                  {
+                    feature: "Instant Download",
+                    pdf: true,
+                    web: false,
+                    bundle: true,
+                  },
+                  {
+                    feature: "Interactive Vision Quiz",
+                    pdf: false,
+                    web: true,
+                    bundle: true,
+                  },
+                  {
+                    feature: "Dynamic Budget Calculator",
+                    pdf: false,
+                    web: true,
+                    bundle: true,
+                  },
+                  {
+                    feature: "Vendor & Guest Management",
+                    pdf: false,
+                    web: true,
+                    bundle: true,
+                  },
+                  {
+                    feature: "Task Manager with Timelines",
+                    pdf: false,
+                    web: true,
+                    bundle: true,
+                  },
+                  {
+                    feature: "Cloud Sync Across Devices",
+                    pdf: false,
+                    web: true,
+                    bundle: true,
+                  },
+                  {
+                    feature: "Personalized PDF Export",
+                    pdf: false,
+                    web: true,
+                    bundle: true,
+                  },
+                  {
+                    feature: "20-Day Web App Access",
+                    pdf: false,
+                    web: true,
+                    bundle: true,
+                  },
+                ].map((item, index) => (
+                  <tr key={index} className="border-b border-gray-200/80">
+                    <td className="p-4 font-semibold text-gray-700">
+                      {item.feature}
+                    </td>
+                    <td className="p-4 text-center">
+                      {item.pdf ? (
+                        <CheckCircleIcon
+                          size={24}
+                          weight="fill"
+                          className="text-[#CE805C] mx-auto"
+                        />
+                      ) : (
+                        <X size={20} className="text-gray-400 mx-auto" />
+                      )}
+                    </td>
+                    <td className="p-4 text-center bg-[#740015]/5">
+                      {item.web === true ? (
+                        <CheckCircleIcon
+                          size={24}
+                          weight="fill"
+                          className="text-[#740015] mx-auto"
+                        />
+                      ) : item.web === "export" ? (
+                        <span className="text-xs text-gray-600 font-medium">
+                          Via Export
+                        </span>
+                      ) : (
+                        <X size={20} className="text-gray-400 mx-auto" />
+                      )}
+                    </td>
+                    <td className="p-4 text-center">
+                      {item.bundle ? (
+                        <CheckCircleIcon
+                          size={24}
+                          weight="fill"
+                          className="text-[#D4A574] mx-auto"
+                        />
+                      ) : (
+                        <X size={20} className="text-gray-400 mx-auto" />
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="">
+                  <td className="p-4"></td>
+                  <td className="p-4 text-center">
+                    <button
+                      onClick={() => scrollToSection("pricing")}
+                      className="w-full max-w-[150px] px-4 py-2.5 bg-[#CE805C] hover:bg-[#B87050] text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-sm"
+                    >
+                      Get PDF
+                    </button>
+                  </td>
+                  <td className="p-4 text-center bg-[#740015]/5 rounded-b-lg">
+                    <button
+                      onClick={() => scrollToSection("pricing")}
+                      className="w-full max-w-[150px] px-4 py-2.5 bg-[#740015] hover:bg-[#531946] text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-sm"
+                    >
+                      Get Interactive
+                    </button>
+                  </td>
+                  <td className="p-4 text-center">
+                    <button
+                      onClick={() => scrollToSection("pricing")}
+                      className="w-full max-w-[150px] px-4 py-2.5 bg-gradient-to-r from-[#D4A574] to-[#CE805C] text-[#740015] font-bold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-sm"
+                    >
+                      Get Bundle
+                    </button>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
           </div>
           <p className="text-center text-gray-600 mt-12 text-base md:text-lg animate-fade-in">
             <strong>Save more!</strong> Get both the PDF and Interactive Guide
