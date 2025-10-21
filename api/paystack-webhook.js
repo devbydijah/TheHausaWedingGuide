@@ -83,12 +83,10 @@ export default async function handler(req, res) {
     productType = "webapp";
   } else {
     console.error(`[WEBHOOK] ❌ Unrecognized amount: ${amount} kobo.`);
-    return res
-      .status(200)
-      .json({
-        received: true,
-        warning: "Unrecognized amount, no product email sent.",
-      });
+    return res.status(200).json({
+      received: true,
+      warning: "Unrecognized amount, no product email sent.",
+    });
   }
 
   console.log(`[WEBHOOK] 📦 Determined product: ${productType.toUpperCase()}`);
@@ -124,7 +122,7 @@ export default async function handler(req, res) {
       await sendDownloadEmail(email, firstName, downloadLink);
       console.log(`[WEBHOOK] ✅ PDF email sent to ${email}`);
     } else if (productType === "webapp") {
-      await sendWebAppAccessEmail(email, firstName, reference);
+      await sendWebAppAccessEmail(email, firstName, reference); // This function correctly generates the signupUrl internally
       console.log(`[WEBHOOK] ✅ Web App email sent to ${email}`);
     } else if (productType === "bundle") {
       if (!downloadLink || !signupUrl)
