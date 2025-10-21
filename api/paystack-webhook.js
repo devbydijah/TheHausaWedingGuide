@@ -1,6 +1,5 @@
-// /api/paystack-webhook.js
-
 import crypto from "crypto";
+// Import all three email functions
 import {
   sendDownloadEmail,
   sendWebAppAccessEmail,
@@ -17,8 +16,9 @@ const DOWNLOAD_TOKEN_SECRET_TEST = process.env.DOWNLOAD_TOKEN_SECRET_TEST;
 const DOWNLOAD_TOKEN_SECRET_LIVE = process.env.DOWNLOAD_TOKEN_SECRET_LIVE;
 
 function verifySignature(rawBody, signature) {
-  // Verification logic remains the same...
   if (!signature) return { isValid: false };
+
+  // Check live secret first
   if (PAYSTACK_LIVE_SECRET) {
     const hmac_live = crypto.createHmac("sha512", PAYSTACK_LIVE_SECRET);
     hmac_live.update(rawBody);
@@ -26,6 +26,8 @@ function verifySignature(rawBody, signature) {
       return { isValid: true, mode: "live" };
     }
   }
+
+  // Fallback to test secret
   if (PAYSTACK_TEST_SECRET) {
     const hmac_test = crypto.createHmac("sha512", PAYSTACK_TEST_SECRET);
     hmac_test.update(rawBody);
@@ -33,6 +35,7 @@ function verifySignature(rawBody, signature) {
       return { isValid: true, mode: "test" };
     }
   }
+
   return { isValid: false };
 }
 
@@ -40,11 +43,13 @@ export default async function handler(req, res) {
   console.log("[WEBHOOK] 🎯 Paystack webhook received!");
 
   if (req.method !== "POST") {
+    console.log("[WEBHOOK] ❌ Method not allowed");
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   const rawBody = JSON.stringify(req.body);
   const signature = req.headers["x-paystack-signature"];
+
   const { isValid, mode } = verifySignature(rawBody, signature);
 
   if (!isValid) {
@@ -56,14 +61,10 @@ export default async function handler(req, res) {
 
   const event = req.body;
   if (event.event !== "charge.success") {
+    console.log(`[WEBHOOK] ℹ️ Ignoring event: ${event.event}`);
     return res.status(200).json({ received: true });
   }
 
-  // Check if cart items details are available (Paystack might add this for Storefront)
-  const cartItems =
-    event.data.metadata?.cart_items ||
-    event.data.cart_items ||
-    event.data.items; // Look in various potential places
   const { customer, amount, reference } = event.data;
 
   if (!customer || !customer.email) {
@@ -78,36 +79,23 @@ export default async function handler(req, res) {
   // --- **UPDATED**: Determine product type based on amount (kobo) ---
   const pdfAmountKobo = 11000; // ₦110 test price
   const webAppAmountKobo = 10000; // ₦100 test price
-  const bundleAmountKobo = 21000; // ₦210 test price (PDF + WebApp)
+  const bundleAmountKobo = 12000; // ₦120 test price
 
   let productType = null;
 
-  // Check amounts from most specific (bundle) to least specific
-  // IMPORTANT: This assumes the customer added *exactly* these items for these amounts.
   if (amount === bundleAmountKobo) {
-    // We assume this amount means they added both PDF and WebApp in the storefront cart
     productType = "bundle";
   } else if (amount === pdfAmountKobo) {
     productType = "pdf";
   } else if (amount === webAppAmountKobo) {
     productType = "webapp";
   } else {
-    // Check if maybe cart items detail amount (less reliable for total check)
-    if (Array.isArray(cartItems)) {
-      console.log("[WEBHOOK] Cart items detected:", JSON.stringify(cartItems));
-      // You could add logic here to check item IDs/SKUs in cartItems if amount check fails
-    }
-    console.error(
-      `[WEBHOOK] ❌ Unrecognized exact amount: ${amount} kobo. Cart:`,
-      cartItems || "N/A"
-    );
-    // Sending a generic thank you might be safest here if amount doesn't match exactly
-    // For now, return warning. Consider a generic email function.
+    console.error(`[WEBHOOK] ❌ Unrecognized amount: ${amount} kobo.`);
     return res
       .status(200)
       .json({
         received: true,
-        warning: "Unrecognized exact amount, no specific product email sent.",
+        warning: "Unrecognized amount, no product email sent.",
       });
   }
 

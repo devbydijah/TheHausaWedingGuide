@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
-// --- CORRECTED ICON IMPORTS (Using ONLY used icons and EXACT user-specified names) ---
+// --- CORRECTED ICON IMPORTS ---
 import {
-  ListIcon, // For mobile menu open
-  X, // For mobile menu close AND modal close
-  ArrowUpIcon, // For Back to Top
-  SparkleIcon, // For Hero badge
-  CheckCircleIcon, // For lists and success modal
-  ArrowRightIcon, // For Hero button
-  EnvelopeSimpleIcon, // For Footer contact and Success modal
-  InstagramLogoIcon, // For Footer social
-  FacebookLogoIcon, // For Footer social
-  CaretDownIcon, // For FAQ dropdown
-  DownloadSimpleIcon, // For PDF buttons/cards
-  MonitorPlayIcon, // For Web App buttons/cards
-  PackageIcon, // For Bundle card
+  ListIcon,
+  X,
+  ArrowUpIcon,
+  SparkleIcon,
+  CheckCircleIcon,
+  ArrowRightIcon,
+  EnvelopeSimpleIcon,
+  InstagramLogoIcon,
+  FacebookLogoIcon,
+  CaretDownIcon,
+  DownloadSimpleIcon,
+  MonitorPlayIcon,
+  PackageIcon, // Added PackageIcon for Bundle
 } from "@phosphor-icons/react";
 // --- END CORRECTED ICON IMPORTS ---
 import "./index.css";
@@ -21,15 +21,13 @@ import LoginGate from "./components/LoginGate";
 import InteractiveGuide from "./components/InteractiveGuide";
 import OnboardingForm from "./components/OnboardingForm";
 
-// --- PAYSTACK LINKS ---
-// Direct links for individual products
+// --- PAYSTACK LINKS (Updated Bundle Link) ---
 const PDF_GUIDE_PRODUCT_URL =
   "https://paystack.com/buy/northern-wedding-guide-by-hausaroom-vzdojl"; // PDF Test Link
 const WEB_APP_PRODUCT_URL =
   "https://paystack.com/buy/interactive-hausa-wedding-web-guide-btclqx"; // Web App Test Link
-// General storefront link (for the bundle button)
-const STOREFRONT_URL =
-  "https://paystack.shop/the-hausa-room-wedding-guide-test-AutTd"; // Storefront Test Link
+const BUNDLE_PRODUCT_URL =
+  "https://paystack.com/buy/hausa-wedding-guide-bundle-pdf--interactive-access-scykqb"; // NEW Bundle Test Link
 // --- END PAYSTACK LINKS ---
 
 function App() {
@@ -60,7 +58,7 @@ function App() {
         setUserEmail(emailParam);
       }
     } else if (purchasedParam) {
-      setPurchasedProductType(purchasedParam);
+      setPurchasedProductType(purchasedParam); // 'pdf', 'webapp', 'bundle' (set by Paystack product redirect config)
       setShowPurchaseSuccess(true);
       setTimeout(() => {
         setShowPurchaseSuccess(false);
@@ -119,7 +117,7 @@ function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // --- Purchase Handlers ---
+  // --- Purchase Handlers (Using Specific Links) ---
   const handlePurchasePDF = () => {
     window.location.href = PDF_GUIDE_PRODUCT_URL;
   };
@@ -129,7 +127,7 @@ function App() {
   };
 
   const handlePurchaseBundle = () => {
-    window.location.href = STOREFRONT_URL;
+    window.location.href = BUNDLE_PRODUCT_URL; // Use the direct bundle link
   };
 
   const toggleFAQ = (index) => {
@@ -201,6 +199,11 @@ function App() {
         "The PDF is a downloadable, static guide with templates you can print. The Interactive Guide is a web application with dynamic tools like budget calculators, task management, vendor tracking, and cloud sync. It offers a more engaging and automated planning experience.",
     },
     {
+      question: "Is there a discount if I buy both (the Bundle)?",
+      answer:
+        "Yes! Purchasing the Bundle Deal gives you both the PDF Guide and access to the Interactive Web Planner at a special discounted price (₦120) compared to buying them separately (total ₦210).",
+    },
+    {
       question: "How long do I have access to the Interactive Guide?",
       answer:
         "You get 20 days of access from your first login. This period allows ample time to use the tools, plan your wedding, and export your personalized plan as a PDF to keep forever.",
@@ -216,11 +219,6 @@ function App() {
         "Absolutely. Both guides are created with deep respect for Hausa and Northern Nigerian traditions, covering ceremonies, customs, and etiquette accurately.",
     },
     {
-      question: "What if I already bought the PDF Guide?",
-      answer:
-        "Thank you for your support! The Interactive Guide is a separate product with enhanced features. You can purchase access to the interactive tools for the full digital planning experience.",
-    },
-    {
       question: "What happens after the 20-day access expires?",
       answer:
         "After 20 days, you'll no longer be able to log in to the Interactive Guide web app. However, you can export your entire personalized plan (budget, vendors, tasks) as a PDF anytime during your access period to keep forever.",
@@ -234,9 +232,9 @@ function App() {
           <div className="flex items-center justify-between h-16 md:h-20">
             <div className="flex items-center py-2">
               <img
-                src="/assets/logowhite.jpg"
+                src="/logowhite.svg"
                 alt="Hausa Wedding Guide"
-                className="h-12 md:h-14 w-auto object-contain rounded-lg"
+                className="h-12 md:h-14 w-auto object-contain"
               />
             </div>
             <div className="desktop-nav-links hidden md:flex items-center space-x-6 lg:space-x-8">
@@ -682,8 +680,8 @@ function App() {
               Choose Your Perfect Guide
             </h2>
             <p className="text-gray-600 text-base md:text-lg max-w-2xl mx-auto">
-              Select the planning tool that fits your needs. Get both in a
-              bundle via our Storefront! (Test prices shown).
+              Select your planning tool or get the bundle for the best value!
+              (Test prices shown).
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10 items-stretch">
@@ -754,7 +752,7 @@ function App() {
               style={{ animationDelay: "0.1s" }}
             >
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-[#D4A574] text-[#740015] px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg">
-                Best Value
+                Discounted
               </div>
               <PackageIcon
                 size={40}
@@ -768,7 +766,7 @@ function App() {
                 PDF Guide + Interactive Access
               </p>
               <p className="font-playfair text-4xl md:text-5xl font-bold text-[#D4A574] mb-2">
-                ₦210
+                ₦120
               </p>
               <p className="text-white/70 text-xs md:text-sm mb-6">
                 One-time payment
@@ -811,7 +809,7 @@ function App() {
                 onClick={handlePurchaseBundle}
                 className="w-full mt-auto px-6 py-2.5 bg-[#D4A574] hover:bg-[#CE805C] text-[#740015] font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-sm"
               >
-                Go to Storefront (Test)
+                Buy Bundle (Test)
               </button>
             </div>
 
@@ -953,9 +951,9 @@ function App() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 items-center">
             <div className="text-center md:text-left space-y-3">
               <img
-                src="/assets/logowhite.jpg"
+                src="/logowhite.svg"
                 alt="Hausa Wedding Guide Logo"
-                className="h-16 md:h-20 mb-4 mx-auto md:mx-0 rounded-lg"
+                className="h-16 md:h-20 mb-4 mx-auto md:mx-0"
               />
               <h3 className="font-playfair text-xl md:text-2xl font-bold bg-gradient-to-r from-[#D4A574] to-white bg-clip-text text-transparent">
                 Hausa Room
@@ -1123,7 +1121,7 @@ function App() {
             </div>
             <div className="p-6 space-y-4">
               <p className="text-gray-700 text-base font-inter text-center">
-                Thank you for your purchase! We've sent instructions for your
+                Thank you! We've sent instructions for your
                 <strong>
                   {purchasedProductType === "pdf" ? " PDF Guide download" : ""}
                   {purchasedProductType === "webapp"
@@ -1143,8 +1141,9 @@ function App() {
                 </h3>
                 <p className="text-gray-700 text-sm leading-relaxed">
                   Please check your inbox (and spam folder!) for an email from
-                  Hausa Room containing your access details based on the item(s)
-                  you purchased.
+                  Hausa Room containing your access details.
+                  {purchasedProductType === "bundle" &&
+                    " You should receive two separate emails, one for your PDF and one for your planner access."}
                 </p>
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
@@ -1152,7 +1151,7 @@ function App() {
                   Next Steps:
                 </h3>
                 <ol className="space-y-1 text-sm text-gray-600 list-decimal list-inside">
-                  <li>Find the email from Hausa Room.</li>
+                  <li>Find the email(s) from Hausa Room.</li>
                   <li>
                     Follow the instructions for your PDF download and/or
                     interactive planner access.
