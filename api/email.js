@@ -56,10 +56,10 @@ export function sendDownloadEmail(email, firstName, downloadLink) {
 
   // --- HTML Template for PDF Guide ---
   const emailHtml = `
-  <img src="https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.svg" alt="Logo" style="width: 100px; height: auto;" />
+  <img src="https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.jpg" alt="Logo" style="width: 100px; height: auto;" />
   <div class="container">
       <div class="header">
-        <img src="https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.svg" alt="Logo" style="width: 100px; height: auto;" />
+        <img src="https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.jpg" alt="Logo" style="width: 100px; height: auto;" />
       </div>
       <div class="content">
         <h2 class="heading">Hi ${userName},</h2>
@@ -96,10 +96,10 @@ export function sendWebAppAccessEmail(email, firstName, txReference) {
   const logoUrl = `${BASE_URL}/assets/logowhite.jpg`;
 
   const emailHtml = `
-  <img src="https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.svg" alt="Logo" style="width: 100px; height: auto;" />
+  <img src="https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.jpg" alt="Logo" style="width: 100px; height: auto;" />
   <div class="container">
       <div class="header">
-        <img src="https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.svg" alt="Logo" style="width: 100px; height: auto;" />
+        <img src="https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.jpg" alt="Logo" style="width: 100px; height: auto;" />
       </div>
       <div class="content">
         <h2 class="heading">Welcome, ${userName}!</h2>
@@ -149,10 +149,10 @@ export function sendBundleEmail(
 
   // --- HTML Template for Bundle Purchase ---
   const emailHtml = `
-  <img src="https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.svg" alt="Logo" style="width: 100px; height: auto;" />
+  <img src="https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.jpg" alt="Logo" style="width: 100px; height: auto;" />
   <div class="container">
       <div class="header">
-        <img src="https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.svg" alt="Logo" style="width: 100px; height: auto;" />
+        <img src="https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.jpg" alt="Logo" style="width: 100px; height: auto;" />
       </div>
       <div class="content">
         <h2 class="heading">Thank You, ${userName}!</h2>
