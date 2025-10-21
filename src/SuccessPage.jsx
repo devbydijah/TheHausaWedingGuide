@@ -1,11 +1,13 @@
-import React from "react";
+// src/SuccessPage.jsx
+
 import {
-  CheckCircle,
-  Sparkle,
-  Cloud,
-  LockKey,
-  EnvelopeSimple,
+  CheckCircleIcon, 
+  SparkleIcon,
+  CloudIcon, 
+  LockKeyIcon, 
+  EnvelopeSimpleIcon, 
 } from "@phosphor-icons/react";
+// --- END CORRECTED ICON IMPORTS ---
 
 function SuccessPage() {
   return (
@@ -14,7 +16,8 @@ function SuccessPage() {
         {/* Success Icon */}
         <div className="text-center mb-8 animate-fade-in">
           <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full mb-6 shadow-2xl animate-bounce-slow">
-            <CheckCircle size={60} weight="bold" className="text-white" />
+            <CheckCircleIcon size={60} weight="bold" className="text-white" />{" "}
+            {/* Correct Usage */}
           </div>
           <h1 className="font-playfair text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#740015] via-[#531946] to-[#CE805C] bg-clip-text text-transparent mb-3">
             Thank You for Your Purchase!
@@ -41,32 +44,32 @@ function SuccessPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
               {[
                 {
-                  icon: Sparkle,
+                  icon: SparkleIcon,
                   text: "Vision & Values Quiz to discover your wedding style",
                   color: "from-purple-500 to-pink-500",
                 },
                 {
-                  icon: Cloud,
+                  icon: CloudIcon,
                   text: "Smart Budget Builder with real-time calculations",
                   color: "from-yellow-500 to-orange-500",
                 },
                 {
-                  icon: LockKey,
+                  icon: LockKeyIcon,
                   text: "Vendor Tracker to organize all your contacts",
                   color: "from-green-500 to-teal-500",
                 },
                 {
-                  icon: CheckCircle,
+                  icon: CheckCircleIcon,
                   text: "Timeline & Task Manager with priority sorting",
                   color: "from-blue-500 to-indigo-500",
                 },
                 {
-                  icon: Cloud,
+                  icon: CloudIcon,
                   text: "Cloud sync across all your devices",
                   color: "from-cyan-500 to-blue-500",
                 },
                 {
-                  icon: CheckCircle,
+                  icon: CheckCircleIcon,
                   text: "Automatic progress saving",
                   color: "from-red-500 to-pink-500",
                 },
@@ -82,7 +85,8 @@ function SuccessPage() {
                       size={20}
                       weight="bold"
                       className="text-white"
-                    />
+                    />{" "}
+                    {/* Correct Usage */}
                   </div>
                   <p className="text-sm text-gray-700 leading-relaxed pt-1">
                     {feature.text}
@@ -95,11 +99,12 @@ function SuccessPage() {
             <div className="bg-gradient-to-br from-[#CE805C]/10 to-[#531946]/10 border-2 border-[#CE805C]/30 rounded-2xl p-6 mb-6">
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-[#CE805C] to-[#740015] rounded-full flex items-center justify-center">
-                  <EnvelopeSimple
+                  <EnvelopeSimpleIcon
                     size={24}
                     weight="bold"
                     className="text-white"
-                  />
+                  />{" "}
+                  {/* Correct Usage */}
                 </div>
                 <div className="flex-1">
                   <h3 className="font-playfair text-xl font-bold text-gray-900 mb-2">
@@ -123,7 +128,7 @@ function SuccessPage() {
                 href="/?guide=1"
                 className="inline-flex items-center gap-3 bg-gradient-to-r from-[#CE805C] to-[#740015] text-white font-bold py-4 px-8 rounded-full text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
               >
-                <LockKey size={24} weight="bold" />
+                <LockKeyIcon size={24} weight="bold" /> {/* Correct Usage */}
                 Access Your Interactive Guide
               </a>
               <p className="text-sm text-gray-500 mt-4">
@@ -136,7 +141,12 @@ function SuccessPage() {
           <div className="bg-gradient-to-br from-green-50 to-teal-50 border-t-2 border-green-200 p-6">
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0 w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
-                <CheckCircle size={20} weight="bold" className="text-white" />
+                <CheckCircleIcon
+                  size={20}
+                  weight="bold"
+                  className="text-white"
+                />{" "}
+                {/* Correct Usage */}
               </div>
               <div>
                 <h4 className="font-bold text-gray-900 mb-2">
@@ -157,10 +167,12 @@ function SuccessPage() {
           <p className="text-gray-600">
             Need help? Email{" "}
             <a
-              href="mailto:support@hausaroom.ng"
+              href="mailto:support@hausaroom.com"
               className="text-[#CE805C] font-semibold hover:underline"
             >
-              support@hausaroom.ng
+              {" "}
+              {/* Updated Email */}
+              support@hausaroom.com
             </a>
           </p>
         </div>
