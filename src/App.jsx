@@ -327,14 +327,14 @@ function App() {
           <button
             onClick={handlePurchaseWebApp}
             disabled={true}
-            className="w-full mt-2 px-6 py-3 font-semibold rounded-lg shadow-md transition-all duration-300 flex items-center justify-center gap-2 bg-gray-300 text-gray-500 cursor-not-allowed"
+            className="w-full mt-2 px-6 py-3 font-semibold rounded-lg shadow-md transition-all duration-300 flex items-center justify-center gap-2 bg-[#740015]/20 text-[#740015]/60 cursor-not-allowed border border-[#740015]/30"
           >
             <MonitorPlayIcon size={18} weight="bold" /> Coming Soon!
           </button>
           <button
             onClick={handlePurchaseBundle}
             disabled={true}
-            className="w-full mt-2 px-6 py-3 font-semibold rounded-lg shadow-sm transition-all duration-300 flex items-center justify-center gap-2 border-2 border-gray-300 text-gray-500 cursor-not-allowed"
+            className="w-full mt-2 px-6 py-3 font-semibold rounded-lg shadow-sm transition-all duration-300 flex items-center justify-center gap-2 bg-[#740015]/20 text-[#740015]/60 cursor-not-allowed border border-[#740015]/30"
           >
             <PackageIcon size={18} weight="bold" /> Coming Soon!
           </button>
@@ -706,7 +706,7 @@ function App() {
                   <td className="p-4 text-center bg-[#740015]/5 rounded-b-lg">
                     <button
                       disabled
-                      className="w-full max-w-[150px] px-4 py-2.5 bg-gray-300 text-gray-500 font-semibold rounded-lg shadow-sm cursor-not-allowed opacity-60 text-sm"
+                      className="w-full max-w-[150px] px-4 py-2.5 bg-[#740015]/20 text-[#740015]/60 font-semibold rounded-lg shadow-sm cursor-not-allowed border border-[#740015]/30 text-sm"
                     >
                       Coming Soon
                     </button>
@@ -714,7 +714,7 @@ function App() {
                   <td className="p-4 text-center">
                     <button
                       disabled
-                      className="w-full max-w-[150px] px-4 py-2.5 bg-gray-300 text-gray-500 font-semibold rounded-lg shadow-sm cursor-not-allowed opacity-60 text-sm"
+                      className="w-full max-w-[150px] px-4 py-2.5 bg-[#740015]/20 text-[#740015]/60 font-semibold rounded-lg shadow-sm cursor-not-allowed border border-[#740015]/30 text-sm"
                     >
                       Coming Soon
                     </button>
@@ -876,7 +876,7 @@ function App() {
               <button
                 onClick={handlePurchaseBundle}
                 disabled={true}
-                className="w-full mt-auto px-6 py-2.5 font-semibold rounded-lg shadow-md transition-all duration-300 text-sm bg-gray-400 text-gray-600 cursor-not-allowed opacity-50"
+                className="w-full mt-auto px-6 py-2.5 font-semibold rounded-lg shadow-md transition-all duration-300 text-sm bg-[#F9F4F1]/90 text-[#740015] cursor-not-allowed border border-[#D4A574]/50"
               >
                 Coming Soon!
               </button>
@@ -964,7 +964,7 @@ function App() {
               <button
                 onClick={handlePurchaseWebApp}
                 disabled={true}
-                className="w-full mt-auto px-6 py-2.5 font-semibold rounded-lg shadow-md transition-all duration-300 text-sm bg-gray-400 text-gray-600 cursor-not-allowed opacity-50"
+                className="w-full mt-auto px-6 py-2.5 font-semibold rounded-lg shadow-md transition-all duration-300 text-sm bg-[#740015]/20 text-[#740015]/60 cursor-not-allowed border border-[#740015]/30"
               >
                 Coming Soon!
               </button>
