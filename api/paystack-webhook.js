@@ -68,24 +68,42 @@ export default async function handler(req, res) {
   const email = customer.email;
   console.log(`[WEBHOOK] 🎉 Processing successful charge for ${email}`);
 
-  // --- **UPDATED**: Prices in Kobo (corrected to match storefront) ---
-  const pdfAmountKobo = 11000; // ₦110.00 (PDF)
-  const webAppAmountKobo = 10000; // ₦100.00 (Web App)
-  const bundleAmountKobo = 12000; // ₦120.00 (Bundle)
+  // --- **UPDATED**: Prices in Kobo (Test and Live) ---
+  // Test prices
+  const pdfAmountKobo_Test = 999000; // ₦9,990.00 (PDF Test)
+  const webAppAmountKobo_Test = 10000; // ₦100.00 (Web App Test)
+  const bundleAmountKobo_Test = 12000; // ₦120.00 (Bundle Test)
+
+  // Live prices
+  const pdfAmountKobo_Live = 999000; // ₦9,990.00 (PDF Live)
+  const webAppAmountKobo_Live = 10000; // ₦100.00 (Web App Live - Coming Soon)
+  const bundleAmountKobo_Live = 12000; // ₦120.00 (Bundle Live - Coming Soon)
 
   let productType = null;
 
-  if (amount === bundleAmountKobo) {
-    // 12000
-    productType = "bundle";
-  } else if (amount === pdfAmountKobo) {
-    // 11000
-    productType = "pdf";
-  } else if (amount === webAppAmountKobo) {
-    // 10000
-    productType = "webapp";
-  } else {
-    console.error(`[WEBHOOK] ❌ Unrecognized amount: ${amount} kobo.`);
+  // Check amount based on mode
+  if (mode === "test") {
+    if (amount === bundleAmountKobo_Test) {
+      productType = "bundle";
+    } else if (amount === pdfAmountKobo_Test) {
+      productType = "pdf";
+    } else if (amount === webAppAmountKobo_Test) {
+      productType = "webapp";
+    }
+  } else if (mode === "live") {
+    if (amount === bundleAmountKobo_Live) {
+      productType = "bundle";
+    } else if (amount === pdfAmountKobo_Live) {
+      productType = "pdf";
+    } else if (amount === webAppAmountKobo_Live) {
+      productType = "webapp";
+    }
+  }
+
+  if (!productType) {
+    console.error(
+      `[WEBHOOK] ❌ Unrecognized amount: ${amount} kobo in ${mode} mode.`
+    );
     return res.status(200).json({
       received: true,
       warning: "Unrecognized amount, no product email sent.",

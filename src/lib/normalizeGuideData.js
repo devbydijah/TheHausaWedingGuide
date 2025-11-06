@@ -14,9 +14,13 @@ export function normalizeGuideData(data = {}) {
   // Priorities: migrate weddingPriorities (array or object) to priorities (object)
   if (Array.isArray(normalized.weddingPriorities)) {
     // If old array format, convert to object with default keys
-    const [cultural = 5, budget = 5, family = 5, personal = 5] = normalized.weddingPriorities;
+    const [cultural = 5, budget = 5, family = 5, personal = 5] =
+      normalized.weddingPriorities;
     normalized.priorities = { cultural, budget, family, personal };
-  } else if (normalized.weddingPriorities && typeof normalized.weddingPriorities === 'object') {
+  } else if (
+    normalized.weddingPriorities &&
+    typeof normalized.weddingPriorities === "object"
+  ) {
     normalized.priorities = { ...normalized.weddingPriorities };
   }
   // If already using priorities, leave as is
@@ -47,3 +51,6 @@ export function normalizeGuideData(data = {}) {
 
   return normalized;
 }
+
+// Default export for easier imports
+export default normalizeGuideData;

@@ -25,7 +25,7 @@ import supabase from "./supabaseClient"; // Import the centralized client
 // --- PAYSTACK LINKS (Updated Bundle Link) ---
 // Test Links
 const PDF_GUIDE_TEST_URL =
-  "https://paystack.com/buy/hausa-wedding-guide-by-hausaroom-vzdojl"; // PDF Test Link (₦110)
+  "https://paystack.com/buy/hausa-wedding-guide-by-hausaroom-vzdojl"; // PDF Test Link (₦9,990)
 const WEB_APP_TEST_URL =
   "https://paystack.com/buy/interactive-hausa-wedding-web-guide-btclqx"; // Web App Test Link (₦100)
 const BUNDLE_TEST_URL =
@@ -33,7 +33,7 @@ const BUNDLE_TEST_URL =
 
 // Live Links (Production)
 const PDF_GUIDE_LIVE_URL =
-  "https://paystack.com/buy/hausa-wedding-guide-live-xxxxxx"; // PDF Live Link (₦9,990) - REPLACE WITH ACTUAL LIVE LINK
+  "https://paystack.com/buy/northern-wedding-guideby-hausaroom-fciigx"; // PDF Live Link (₦9,990)
 const WEB_APP_LIVE_URL = ""; // Coming Soon
 const BUNDLE_LIVE_URL = ""; // Coming Soon
 
@@ -41,7 +41,9 @@ const BUNDLE_LIVE_URL = ""; // Coming Soon
 const IS_TEST_MODE = true;
 
 // Active URLs
-const PDF_GUIDE_PRODUCT_URL = IS_TEST_MODE ? PDF_GUIDE_TEST_URL : PDF_GUIDE_LIVE_URL;
+const PDF_GUIDE_PRODUCT_URL = IS_TEST_MODE
+  ? PDF_GUIDE_TEST_URL
+  : PDF_GUIDE_LIVE_URL;
 const WEB_APP_PRODUCT_URL = IS_TEST_MODE ? WEB_APP_TEST_URL : WEB_APP_LIVE_URL;
 const BUNDLE_PRODUCT_URL = IS_TEST_MODE ? BUNDLE_TEST_URL : BUNDLE_LIVE_URL;
 // --- END PAYSTACK LINKS ---
@@ -331,7 +333,8 @@ function App() {
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >
-            <MonitorPlayIcon size={18} weight="bold" /> {IS_TEST_MODE ? "Get Interactive Guide" : "Coming Soon"}
+            <MonitorPlayIcon size={18} weight="bold" />{" "}
+            {IS_TEST_MODE ? "Get Interactive Guide" : "Coming Soon"}
           </button>
           <button
             onClick={handlePurchaseBundle}
@@ -342,7 +345,8 @@ function App() {
                 : "border-2 border-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >
-            <PackageIcon size={18} weight="bold" /> {IS_TEST_MODE ? "Get Bundle Deal" : "Coming Soon"}
+            <PackageIcon size={18} weight="bold" />{" "}
+            {IS_TEST_MODE ? "Get Bundle Deal" : "Coming Soon"}
           </button>
         </div>
       </div>
@@ -711,18 +715,18 @@ function App() {
                   </td>
                   <td className="p-4 text-center bg-[#740015]/5 rounded-b-lg">
                     <button
-                      onClick={() => scrollToSection("pricing")}
-                      className="w-full max-w-[150px] px-4 py-2.5 bg-[#740015] hover:bg-[#531946] text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-sm"
+                      disabled
+                      className="w-full max-w-[150px] px-4 py-2.5 bg-gray-300 text-gray-500 font-semibold rounded-lg shadow-sm cursor-not-allowed opacity-60 text-sm"
                     >
-                      Get Interactive
+                      Coming Soon
                     </button>
                   </td>
                   <td className="p-4 text-center">
                     <button
-                      onClick={() => scrollToSection("pricing")}
-                      className="w-full max-w-[150px] px-4 py-2.5 bg-gradient-to-r from-[#D4A574] to-[#CE805C] text-[#740015] font-bold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-sm"
+                      disabled
+                      className="w-full max-w-[150px] px-4 py-2.5 bg-gray-300 text-gray-500 font-semibold rounded-lg shadow-sm cursor-not-allowed opacity-60 text-sm"
                     >
-                      Get Bundle
+                      Coming Soon
                     </button>
                   </td>
                 </tr>
@@ -730,19 +734,11 @@ function App() {
             </table>
           </div>
           <p className="text-center text-gray-600 mt-12 text-base md:text-lg animate-fade-in">
-            <strong>Save more!</strong> Get both the PDF and Interactive Guide
-            in our{" "}
-            <a
-              href="#pricing"
-              onClick={(e) => {
-                e.preventDefault();
-                scrollToSection("pricing");
-              }}
-              className="text-[#740015] font-semibold hover:underline"
-            >
-              Best Value Bundle
-            </a>
-            .
+            <strong>Coming Soon:</strong> Bundle deal with both PDF and
+            Interactive Guide!{" "}
+            <span className="text-[#740015] font-semibold">
+              Currently, only the PDF Guide is available.
+            </span>
           </p>
         </div>
       </section>
@@ -754,7 +750,7 @@ function App() {
               Choose Your Perfect Guide
             </h2>
             <p className="text-gray-600 text-base md:text-lg max-w-2xl mx-auto">
-              {IS_TEST_MODE 
+              {IS_TEST_MODE
                 ? "Select your planning tool or get the bundle for the best value! (Test prices shown)."
                 : "Get your comprehensive PDF wedding guide now! More options coming soon."}
             </p>
@@ -774,7 +770,7 @@ function App() {
                 Comprehensive & Printable
               </p>
               <p className="font-playfair text-4xl md:text-5xl font-bold text-[#740015] mb-2">
-                {IS_TEST_MODE ? "₦110" : "₦9,990"}
+                ₦9,990
               </p>
               <p className="text-gray-500 text-xs md:text-sm mb-6">
                 One-time payment
@@ -817,7 +813,7 @@ function App() {
                 onClick={handlePurchasePDF}
                 className="w-full mt-auto px-6 py-2.5 bg-[#CE805C] hover:bg-[#B87050] text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-sm"
               >
-                {IS_TEST_MODE ? "Buy PDF (Test)" : "Buy PDF Guide"}
+                Buy PDF Guide
               </button>
             </div>
 
@@ -831,7 +827,9 @@ function App() {
               </div>
               {!IS_TEST_MODE && (
                 <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm rounded-2xl z-20 flex items-center justify-center">
-                  <span className="text-white text-2xl font-bold">Coming Soon</span>
+                  <span className="text-white text-2xl font-bold">
+                    Coming Soon
+                  </span>
                 </div>
               )}
               <PackageIcon
@@ -845,11 +843,11 @@ function App() {
               <p className="text-white/80 text-sm mb-6">
                 PDF Guide + Interactive Access
               </p>
-              <p className="font-playfair text-4xl md:text-5xl font-bold text-[#D4A574] mb-2">
-                ₦120
+              <p className="font-playfair text-2xl md:text-3xl font-bold text-[#D4A574] mb-2">
+                Coming Soon
               </p>
               <p className="text-white/70 text-xs md:text-sm mb-6">
-                One-time payment
+                Limited time offer
               </p>
               <ul className="space-y-2 text-xs md:text-sm text-white/90 text-left mb-6 list-none pl-0 flex-grow">
                 <li className="flex items-center gap-2">
@@ -894,7 +892,7 @@ function App() {
                     : "bg-gray-400 text-gray-600 cursor-not-allowed opacity-50"
                 }`}
               >
-                {IS_TEST_MODE ? "Buy Bundle (Test)" : "Coming Soon"}
+                {IS_TEST_MODE ? "Buy Bundle" : "Coming Soon"}
               </button>
             </div>
 
@@ -905,7 +903,9 @@ function App() {
             >
               {!IS_TEST_MODE && (
                 <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm rounded-2xl z-20 flex items-center justify-center">
-                  <span className="text-white text-2xl font-bold">Coming Soon</span>
+                  <span className="text-white text-2xl font-bold">
+                    Coming Soon
+                  </span>
                 </div>
               )}
               <MonitorPlayIcon
@@ -919,11 +919,11 @@ function App() {
               <p className="text-gray-600 text-sm mb-6">
                 Dynamic & Cloud-Synced
               </p>
-              <p className="font-playfair text-4xl md:text-5xl font-bold text-[#740015] mb-2">
-                ₦100
+              <p className="font-playfair text-2xl md:text-3xl font-bold text-[#740015] mb-2">
+                Coming Soon
               </p>
               <p className="text-gray-500 text-xs md:text-sm mb-6">
-                One-time payment
+                Available soon
               </p>
               <ul className="space-y-2 text-xs md:text-sm text-gray-700 text-left mb-6 list-none pl-0 flex-grow">
                 <li className="flex items-center gap-2">
@@ -984,7 +984,7 @@ function App() {
                     : "bg-gray-400 text-gray-600 cursor-not-allowed opacity-50"
                 }`}
               >
-                {IS_TEST_MODE ? "Buy Interactive (Test)" : "Coming Soon"}
+                {IS_TEST_MODE ? "Buy Interactive Guide" : "Coming Soon"}
               </button>
             </div>
           </div>
