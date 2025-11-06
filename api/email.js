@@ -10,9 +10,7 @@ const resend = process.env.RESEND_API_KEY
 const fromEmail = "Hausa Room <support@hausaroom.com>"; // Client's verified domain
 const logoUrl =
   "https://nhmuzzvuwcecgfejdmyi.supabase.co/storage/v1/object/public/logopublic/logowhite.jpg"; // Supabase logo URL
-const siteUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "https://the-hausa-weding-guide.vercel.app"; // Fallback needed for site link in footer
+const siteUrl = "https://www.hausaroom.com"; // Main website URL
 
 /**
  * Reusable function to send an email using Resend.
