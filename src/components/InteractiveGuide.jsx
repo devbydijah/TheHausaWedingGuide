@@ -1,9 +1,18 @@
-import { useState, useEffect, lazy, Suspense } from "react";
-import { SignOut, Moon, Sun, List, X } from "@phosphor-icons/react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  lazy,
+  Suspense,
+} from "react";
+import { SignOutIcon, MoonIcon, SunIcon, ListIcon, X } from "@phosphor-icons/react";
 import { useSyncToCloud } from "../hooks/useSyncToCloud";
 import { Toast } from "./ui";
 import Modal from "./ui/Modal";
 import { DEFAULT_GUIDE } from "../lib/constants";
+import normalizeGuideData from "../lib/normalizeGuideData";
+import texts from "../lib/northern-general-text";
 
 // Feature Components - Lazy loaded for better code splitting
 import { Dashboard } from "../features/dashboard";
@@ -36,6 +45,9 @@ const LoadingSpinner = () => (
  *
  * Refactored: Sprint 2 - Reduced from 3753 lines to ~400 lines
  */
+export const AppContext = createContext();
+export const useAppContext = () => useContext(AppContext);
+
 export default function InteractiveGuide({
   onLogout,
   accessStatus,
@@ -45,14 +57,28 @@ export default function InteractiveGuide({
 }) {
   // Cloud sync hook - replaces localStorage-only approach
   const {
-    data,
-    updateData: setData,
+    data: cloudData,
+    updateData: setCloudData,
     syncStatus,
     lastSynced,
     isCloudEnabled,
   } = useSyncToCloud(user?.email || userEmail, DEFAULT_GUIDE);
 
-  const [activeSection, setActiveSection] = useState("dashboard");
+  // Load and normalize data
+  const [data, setData] = useState(() => {
+    const raw = localStorage.getItem("weddingGuideData");
+    return normalizeGuideData(raw ? JSON.parse(raw) : {});
+  });
+
+  // Example: updateData helper
+  const updateData = (patch) => {
+    setData((prev) => {
+      const updated = { ...prev, ...patch };
+      localStorage.setItem("weddingGuideData", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem("hwg:darkMode");
     return saved === "true";
@@ -60,6 +86,7 @@ export default function InteractiveGuide({
   const [toasts, setToasts] = useState([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [activeSection, setActiveSection] = useState("dashboard");
 
   // Toast notification system
   const showToast = (message, type = "success") => {
@@ -111,11 +138,6 @@ export default function InteractiveGuide({
 
   const cancelLogout = () => {
     setShowLogoutModal(false);
-  };
-
-  // Wrapper to update data
-  const updateData = (updater) => {
-    setData(updater);
   };
 
   // ===== DATA UPDATE HANDLERS =====
@@ -301,350 +323,363 @@ export default function InteractiveGuide({
   ];
 
   return (
-    <div className={`min-h-screen ${darkMode ? "bg-gray-900" : "bg-gray-50"}`}>
-      {/* Toast Notifications */}
-      <Toast toasts={toasts} onRemove={removeToast} />
-
-      {/* Header with navigation */}
-      <header
-        className={`${darkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"} sticky top-0 z-50 border-b shadow-sm backdrop-blur-sm bg-opacity-95`}
+    <AppContext.Provider
+      value={{
+        data,
+        updateData,
+        texts,
+        // darkMode, activeSection, syncStatus, toasts, etc.
+      }}
+    >
+      <div
+        className={`min-h-screen ${darkMode ? "bg-gray-900" : "bg-gray-50"}`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Top Bar */}
-          <div className="flex items-center justify-between h-16">
-            {/* Logo/Title */}
-            <div className="flex items-center gap-3">
-              <img
-                src="/logowhite.svg"
-                alt="Hausa Room Logo"
-                className="w-10 h-10 sm:w-12 sm:h-12"
-              />
-              <div className="hidden sm:block">
-                <h1
-                  className={`font-playfair text-lg sm:text-xl font-bold ${darkMode ? "text-white" : "text-gray-900"}`}
+        {/* Toast Notifications */}
+        <Toast toasts={toasts} onRemove={removeToast} />
+
+        {/* Header with navigation */}
+        <header
+          className={`${darkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"} sticky top-0 z-50 border-b shadow-sm backdrop-blur-sm bg-opacity-95`}
+        >
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Top Bar */}
+            <div className="flex items-center justify-between h-16">
+              {/* Logo/Title */}
+              <div className="flex items-center gap-3">
+                <img
+                  src="/logowhite.svg"
+                  alt="Hausa Room Logo"
+                  className="w-10 h-10 sm:w-12 sm:h-12"
+                />
+                <div className="hidden sm:block">
+                  <h1
+                    className={`font-playfair text-lg sm:text-xl font-bold ${darkMode ? "text-white" : "text-gray-900"}`}
+                  >
+                    Wedding Planner
+                  </h1>
+                  <p
+                    className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-500"}`}
+                  >
+                    Your Planning Dashboard
+                  </p>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-2">
+                {/* Sync Status */}
+                {isCloudEnabled && (
+                  <div
+                    className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg ${
+                      darkMode ? "bg-gray-800" : "bg-gray-100"
+                    }`}
+                  >
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        syncStatus === "syncing"
+                          ? "bg-yellow-500 animate-pulse"
+                          : syncStatus === "success"
+                            ? "bg-green-500"
+                            : "bg-red-500"
+                      }`}
+                    />
+                    <span
+                      className={`text-xs font-medium ${darkMode ? "text-gray-300" : "text-gray-700"}`}
+                    >
+                      {syncStatus === "syncing" && "Syncing"}
+                      {syncStatus === "success" && "Saved"}
+                      {syncStatus === "error" && "Error"}
+                    </span>
+                  </div>
+                )}
+
+                {/* Dark Mode Toggle - Always Visible */}
+                <button
+                  onClick={toggleDarkMode}
+                  className={`p-2.5 rounded-lg transition-all ${
+                    darkMode
+                      ? "bg-gray-800 hover:bg-gray-700 text-yellow-400"
+                      : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                  }`}
+                  aria-label={
+                    darkMode ? "Switch to light mode" : "Switch to dark mode"
+                  }
+                  title={darkMode ? "Light mode" : "Dark mode"}
                 >
-                  Wedding Planner
-                </h1>
-                <p
-                  className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-500"}`}
+                  {darkMode ? (
+                    <SunIcon size={20} weight="duotone" />
+                  ) : (
+                    <MoonIcon size={20} weight="duotone" />
+                  )}
+                </button>
+
+                {/* Logout Button - Desktop Only (≥1024px) */}
+                <button
+                  onClick={handleLogout}
+                  className={`!hidden lg:!flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                    darkMode
+                      ? "bg-gray-800 hover:bg-gray-700 text-gray-300"
+                      : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                  }`}
+                  aria-label="Logout from wedding planner"
                 >
-                  Your Planning Dashboard
-                </p>
+                  <SignOutIcon size={20} weight="bold" aria-hidden="true" />
+                  <span className="text-sm">Logout</span>
+                </button>
+
+                {/* Mobile Menu Toggle - Mobile/Tablet Only (<1024px) */}
+                <button
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className={`lg:!hidden p-2.5 rounded-lg transition-all ${
+                    darkMode
+                      ? "bg-gray-800 hover:bg-gray-700"
+                      : "bg-gray-100 hover:bg-gray-200"
+                  }`}
+                  aria-label="Toggle menu"
+                  aria-expanded={mobileMenuOpen}
+                >
+                  {mobileMenuOpen ? (
+                    <X size={24} weight="bold" />
+                  ) : (
+                    <ListIcon size={24} weight="bold" />
+                  )}
+                </button>
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-2">
-              {/* Sync Status */}
-              {isCloudEnabled && (
-                <div
-                  className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg ${
-                    darkMode ? "bg-gray-800" : "bg-gray-100"
+            {/* Navigation Tabs - Desktop Only (≥1024px) */}
+            <nav
+              className="!hidden lg:!flex gap-2 pb-3 overflow-x-auto scrollbar-hide"
+              role="navigation"
+              aria-label="Main sections"
+            >
+              {sections.map((section) => (
+                <button
+                  key={section.id}
+                  onClick={() => setActiveSection(section.id)}
+                  className={`px-4 py-2.5 rounded-lg font-medium whitespace-nowrap transition-all ${
+                    activeSection === section.id
+                      ? "bg-gradient-to-r from-[#740015] to-[#531946] text-white shadow-md"
+                      : darkMode
+                        ? "text-gray-400 hover:bg-gray-800 hover:text-white"
+                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                   }`}
+                  aria-current={
+                    activeSection === section.id ? "page" : undefined
+                  }
                 >
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      syncStatus === "syncing"
-                        ? "bg-yellow-500 animate-pulse"
-                        : syncStatus === "success"
-                          ? "bg-green-500"
-                          : "bg-red-500"
-                    }`}
-                  />
-                  <span
-                    className={`text-xs font-medium ${darkMode ? "text-gray-300" : "text-gray-700"}`}
-                  >
-                    {syncStatus === "syncing" && "Syncing"}
-                    {syncStatus === "success" && "Saved"}
-                    {syncStatus === "error" && "Error"}
-                  </span>
-                </div>
-              )}
+                  {section.name}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </header>
 
-              {/* Dark Mode Toggle - Always Visible */}
+        {/* Mobile Menu Slide-out Panel - Mobile/Tablet Only (<1024px) */}
+        <div
+          className={`fixed top-0 right-0 h-screen w-72 shadow-2xl z-[80] lg:!hidden transform transition-transform duration-300 ease-in-out ${
+            mobileMenuOpen ? "translate-x-0" : "translate-x-full"
+          } ${darkMode ? "bg-gray-800" : "bg-white"}`}
+        >
+          <div className="px-4 py-6 space-y-3">
+            {/* Action Buttons */}
+            <div className="space-y-2 pb-4 border-b border-gray-200 dark:border-gray-700">
+              {/* Dark Mode Toggle */}
               <button
                 onClick={toggleDarkMode}
-                className={`p-2.5 rounded-lg transition-all ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
                   darkMode
-                    ? "bg-gray-800 hover:bg-gray-700 text-yellow-400"
+                    ? "bg-gray-700 hover:bg-gray-600 text-yellow-400"
                     : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                 }`}
-                aria-label={
-                  darkMode ? "Switch to light mode" : "Switch to dark mode"
-                }
-                title={darkMode ? "Light mode" : "Dark mode"}
               >
                 {darkMode ? (
-                  <Sun size={20} weight="duotone" />
+                  <SunIcon size={20} weight="duotone" />
                 ) : (
-                  <Moon size={20} weight="duotone" />
+                  <MoonIcon size={20} weight="duotone" />
                 )}
+                <span className="text-sm">
+                  {darkMode ? "Light Mode" : "Dark Mode"}
+                </span>
               </button>
 
-              {/* Logout Button - Desktop Only (≥1024px) */}
+              {/* Logout */}
               <button
-                onClick={handleLogout}
-                className={`!hidden lg:!flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                  darkMode
-                    ? "bg-gray-800 hover:bg-gray-700 text-gray-300"
-                    : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-                }`}
-                aria-label="Logout from wedding planner"
-              >
-                <SignOut size={20} weight="bold" aria-hidden="true" />
-                <span className="text-sm">Logout</span>
-              </button>
-
-              {/* Mobile Menu Toggle - Mobile/Tablet Only (<1024px) */}
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`lg:!hidden p-2.5 rounded-lg transition-all ${
-                  darkMode
-                    ? "bg-gray-800 hover:bg-gray-700"
-                    : "bg-gray-100 hover:bg-gray-200"
-                }`}
-                aria-label="Toggle menu"
-                aria-expanded={mobileMenuOpen}
-              >
-                {mobileMenuOpen ? (
-                  <X size={24} weight="bold" />
-                ) : (
-                  <List size={24} weight="bold" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Navigation Tabs - Desktop Only (≥1024px) */}
-          <nav
-            className="!hidden lg:!flex gap-2 pb-3 overflow-x-auto scrollbar-hide"
-            role="navigation"
-            aria-label="Main sections"
-          >
-            {sections.map((section) => (
-              <button
-                key={section.id}
-                onClick={() => setActiveSection(section.id)}
-                className={`px-4 py-2.5 rounded-lg font-medium whitespace-nowrap transition-all ${
-                  activeSection === section.id
-                    ? "bg-gradient-to-r from-[#740015] to-[#531946] text-white shadow-md"
-                    : darkMode
-                      ? "text-gray-400 hover:bg-gray-800 hover:text-white"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                }`}
-                aria-current={activeSection === section.id ? "page" : undefined}
-              >
-                {section.name}
-              </button>
-            ))}
-          </nav>
-        </div>
-      </header>
-
-      {/* Mobile Menu Slide-out Panel - Mobile/Tablet Only (<1024px) */}
-      <div
-        className={`fixed top-0 right-0 h-screen w-72 shadow-2xl z-[80] lg:!hidden transform transition-transform duration-300 ease-in-out ${
-          mobileMenuOpen ? "translate-x-0" : "translate-x-full"
-        } ${darkMode ? "bg-gray-800" : "bg-white"}`}
-      >
-        <div className="px-4 py-6 space-y-3">
-          {/* Action Buttons */}
-          <div className="space-y-2 pb-4 border-b border-gray-200 dark:border-gray-700">
-            {/* Dark Mode Toggle */}
-            <button
-              onClick={toggleDarkMode}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
-                darkMode
-                  ? "bg-gray-700 hover:bg-gray-600 text-yellow-400"
-                  : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-              }`}
-            >
-              {darkMode ? (
-                <Sun size={20} weight="duotone" />
-              ) : (
-                <Moon size={20} weight="duotone" />
-              )}
-              <span className="text-sm">
-                {darkMode ? "Light Mode" : "Dark Mode"}
-              </span>
-            </button>
-
-            {/* Logout */}
-            <button
-              onClick={() => {
-                handleLogout();
-                setMobileMenuOpen(false);
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
-                darkMode
-                  ? "bg-gray-700 hover:bg-gray-600 text-gray-300"
-                  : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-              }`}
-            >
-              <SignOut size={20} weight="bold" />
-              <span className="text-sm">Logout</span>
-            </button>
-          </div>
-
-          {/* Navigation Sections */}
-          <div className="space-y-2">
-            {sections.map((section) => (
-              <button
-                key={section.id}
                 onClick={() => {
-                  setActiveSection(section.id);
+                  handleLogout();
                   setMobileMenuOpen(false);
                 }}
-                className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all ${
-                  activeSection === section.id
-                    ? "bg-gradient-to-r from-[#740015] to-[#531946] text-white shadow-lg"
-                    : darkMode
-                      ? "text-gray-300 hover:bg-gray-700"
-                      : "text-gray-700 hover:bg-gray-50"
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
+                  darkMode
+                    ? "bg-gray-700 hover:bg-gray-600 text-gray-300"
+                    : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                 }`}
               >
-                {section.name}
+                <SignOutIcon size={20} weight="bold" />
+                <span className="text-sm">Logout</span>
               </button>
-            ))}
-          </div>
-        </div>
-      </div>
+            </div>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        {activeSection === "dashboard" && (
-          <Dashboard
-            data={data}
-            setActiveSection={setActiveSection}
-            darkMode={darkMode}
-          />
-        )}
-
-        <Suspense fallback={<LoadingSpinner />}>
-          {activeSection === "quiz" && (
-            <VisionQuiz
-              data={data}
-              updateQuizAnswer={updateQuizAnswer}
-              submitQuiz={submitQuiz}
-              resetQuiz={resetQuiz}
-              setActiveSection={setActiveSection}
-              darkMode={darkMode}
-            />
-          )}
-        </Suspense>
-
-        <Suspense fallback={<LoadingSpinner />}>
-          {activeSection === "vision" && (
-            <VisionPlanner
-              data={data}
-              updatePriorities={updatePriorities}
-              updateField={updateField}
-              setActiveSection={setActiveSection}
-            />
-          )}
-        </Suspense>
-
-        <Suspense fallback={<LoadingSpinner />}>
-          {activeSection === "budget" && (
-            <BudgetBuilder
-              data={data}
-              updateTotalBudget={updateTotalBudget}
-              updateCategoryField={updateCategoryField}
-              setActiveSection={setActiveSection}
-            />
-          )}
-        </Suspense>
-
-        <Suspense fallback={<LoadingSpinner />}>
-          {activeSection === "vendors" && (
-            <VendorTracker
-              data={data}
-              addVendor={addVendor}
-              updateVendor={updateVendor}
-              deleteVendor={deleteVendor}
-              setActiveSection={setActiveSection}
-            />
-          )}
-        </Suspense>
-
-        <Suspense fallback={<LoadingSpinner />}>
-          {activeSection === "timeline" && (
-            <TimelineManager
-              data={data}
-              addTask={addTask}
-              updateTask={updateTask}
-              deleteTask={deleteTask}
-              updateWeddingDate={updateWeddingDate}
-              toggleShowCompleted={toggleShowCompleted}
-              setActiveSection={setActiveSection}
-            />
-          )}
-        </Suspense>
-
-        <Suspense fallback={<LoadingSpinner />}>
-          {activeSection === "blueprint" && (
-            <FinalBlueprint
-              data={data}
-              setActiveSection={setActiveSection}
-              userData={userData}
-              userEmail={user?.email || userEmail}
-              darkMode={darkMode}
-            />
-          )}
-        </Suspense>
-      </main>
-
-      {/* Logout Confirmation Modal */}
-      <Modal
-        isOpen={showLogoutModal}
-        onClose={cancelLogout}
-        title="Logout"
-        size="sm"
-      >
-        <div className="space-y-6">
-          {/* Icon */}
-          <div className="flex justify-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#990200] to-[#531946] flex items-center justify-center">
-              <SignOut size={32} weight="bold" className="text-white" />
+            {/* Navigation Sections */}
+            <div className="space-y-2">
+              {sections.map((section) => (
+                <button
+                  key={section.id}
+                  onClick={() => {
+                    setActiveSection(section.id);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all ${
+                    activeSection === section.id
+                      ? "bg-gradient-to-r from-[#740015] to-[#531946] text-white shadow-lg"
+                      : darkMode
+                        ? "text-gray-300 hover:bg-gray-700"
+                        : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  {section.name}
+                </button>
+              ))}
             </div>
           </div>
-
-          {/* Message */}
-          <div className="text-center space-y-2">
-            <h3
-              className={`text-xl font-semibold ${darkMode ? "text-white" : "text-gray-900"}`}
-            >
-              Ready to go?
-            </h3>
-            <p
-              className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-600"}`}
-            >
-              Don't worry, all your wedding plans are safely saved and will be
-              here when you return.
-            </p>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-3">
-            <button
-              onClick={cancelLogout}
-              className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all ${
-                darkMode
-                  ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              Stay
-            </button>
-            <button
-              onClick={confirmLogout}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-[#990200] to-[#531946] text-white rounded-xl font-medium hover:shadow-lg transform hover:scale-105 transition-all"
-            >
-              Logout
-            </button>
-          </div>
         </div>
-      </Modal>
-    </div>
+
+        {/* Main Content */}
+        <main className="max-w-7xl mx-auto px-4 py-8">
+          {activeSection === "dashboard" && (
+            <Dashboard
+              data={data}
+              setActiveSection={setActiveSection}
+              darkMode={darkMode}
+            />
+          )}
+
+          <Suspense fallback={<LoadingSpinner />}>
+            {activeSection === "quiz" && (
+              <VisionQuiz
+                data={data}
+                updateQuizAnswer={updateQuizAnswer}
+                submitQuiz={submitQuiz}
+                resetQuiz={resetQuiz}
+                setActiveSection={setActiveSection}
+                darkMode={darkMode}
+              />
+            )}
+          </Suspense>
+
+          <Suspense fallback={<LoadingSpinner />}>
+            {activeSection === "vision" && (
+              <VisionPlanner
+                data={data}
+                updatePriorities={updatePriorities}
+                updateField={updateField}
+                setActiveSection={setActiveSection}
+              />
+            )}
+          </Suspense>
+
+          <Suspense fallback={<LoadingSpinner />}>
+            {activeSection === "budget" && (
+              <BudgetBuilder
+                data={data}
+                updateTotalBudget={updateTotalBudget}
+                updateCategoryField={updateCategoryField}
+                setActiveSection={setActiveSection}
+              />
+            )}
+          </Suspense>
+
+          <Suspense fallback={<LoadingSpinner />}>
+            {activeSection === "vendors" && (
+              <VendorTracker
+                data={data}
+                addVendor={addVendor}
+                updateVendor={updateVendor}
+                deleteVendor={deleteVendor}
+                setActiveSection={setActiveSection}
+              />
+            )}
+          </Suspense>
+
+          <Suspense fallback={<LoadingSpinner />}>
+            {activeSection === "timeline" && (
+              <TimelineManager
+                data={data}
+                addTask={addTask}
+                updateTask={updateTask}
+                deleteTask={deleteTask}
+                updateWeddingDate={updateWeddingDate}
+                toggleShowCompleted={toggleShowCompleted}
+                setActiveSection={setActiveSection}
+              />
+            )}
+          </Suspense>
+
+          <Suspense fallback={<LoadingSpinner />}>
+            {activeSection === "blueprint" && (
+              <FinalBlueprint
+                data={data}
+                setActiveSection={setActiveSection}
+                userData={userData}
+                userEmail={user?.email || userEmail}
+                darkMode={darkMode}
+              />
+            )}
+          </Suspense>
+        </main>
+
+        {/* Logout Confirmation Modal */}
+        <Modal
+          isOpen={showLogoutModal}
+          onClose={cancelLogout}
+          title="Logout"
+          size="sm"
+        >
+          <div className="space-y-6">
+            {/* Icon */}
+            <div className="flex justify-center">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#990200] to-[#531946] flex items-center justify-center">
+                <SignOutIcon size={32} weight="bold" className="text-white" />
+              </div>
+            </div>
+
+            {/* Message */}
+            <div className="text-center space-y-2">
+              <h3
+                className={`text-xl font-semibold ${darkMode ? "text-white" : "text-gray-900"}`}
+              >
+                Ready to go?
+              </h3>
+              <p
+                className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-600"}`}
+              >
+                Don't worry, all your wedding plans are safely saved and will be
+                here when you return.
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={cancelLogout}
+                className={`flex-1 px-6 py-3 rounded-xl font-medium transition-all ${
+                  darkMode
+                    ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                Stay
+              </button>
+              <button
+                onClick={confirmLogout}
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-[#990200] to-[#531946] text-white rounded-xl font-medium hover:shadow-lg transform hover:scale-105 transition-all"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </Modal>
+      </div>
+    </AppContext.Provider>
   );
 }

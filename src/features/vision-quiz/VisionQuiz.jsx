@@ -2,21 +2,15 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { VISION_QUIZ_QUESTIONS } from "../../lib/constants";
 import {
-  CheckCircle,
-  Crown,
-  Sparkle,
-  Diamond,
-  CaretRight,
-  CaretLeft,
-  ArrowRight,
+  CheckCircleIcon,
+  CrownIcon,
+  SparkleIcon,
+  DiamondIcon,
+  CaretRightIcon,
+  CaretLeftIcon,
+  ArrowRightIcon,
 } from "@phosphor-icons/react";
-// Material UI Icons for vision styles
-import {
-  EmojiEvents,
-  AutoAwesome,
-  Diamond as MuiDiamond,
-  CheckCircle as MuiCheckCircle,
-} from "@mui/icons-material";
+import { useAppContext } from "../../components/InteractiveGuide"; // Import context
 
 /**
  * VisionQuiz Component
@@ -24,14 +18,8 @@ import {
  * Interactive quiz to discover wedding style (Traditional/Modern/Fusion)
  * Features: Progress navigation, results screen, accessible form controls
  */
-export default function VisionQuiz({
-  data,
-  updateQuizAnswer,
-  submitQuiz,
-  resetQuiz,
-  setActiveSection,
-  darkMode,
-}) {
+export default function VisionQuiz({ setActiveSection, darkMode }) {
+  const { data, updateData, texts } = useAppContext();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const quizContainerRef = useRef(null);
 
@@ -76,6 +64,33 @@ export default function VisionQuiz({
     if (scores.traditional === maxScore) return "traditional";
     if (scores.fusion === maxScore) return "fusion";
     return "modern";
+  };
+
+  const updateQuizAnswer = (id, value) => {
+    updateData({
+      visionQuiz: {
+        ...data.visionQuiz,
+        answers: { ...data.visionQuiz.answers, [id]: value },
+      },
+    });
+  };
+
+  const submitQuiz = (result) => {
+    updateData({
+      visionQuiz: {
+        ...data.visionQuiz,
+        result,
+      },
+      visionResult: result,
+    });
+  };
+
+  const resetQuiz = () => {
+    updateData({
+      visionQuiz: { answers: {}, result: null },
+      visionResult: null,
+    });
+    setCurrentQuestion(0);
   };
 
   const handleSelectOption = (optionValue) => {
@@ -137,7 +152,7 @@ export default function VisionQuiz({
   // Result configurations
   const resultConfig = {
     traditional: {
-      icon: EmojiEvents,
+      icon: EmojiEventsIcon,
       title: "The Traditional Hausa Bride",
       description:
         "You deeply value cultural heritage and want your wedding to honor Hausa customs fully. Your celebration will be rich in tradition, from the Kayan Lefe to traditional attire and ceremonies.",
@@ -155,7 +170,7 @@ export default function VisionQuiz({
       gradientTo: "#531946",
     },
     fusion: {
-      icon: AutoAwesome,
+      icon: AwesomeIcon,
       title: "The Modern Fusion Bride",
       description:
         "You beautifully balance tradition with contemporary style. Your wedding will blend the best of both worlds - honoring cultural roots while adding modern touches that reflect your personal taste.",
@@ -173,7 +188,7 @@ export default function VisionQuiz({
       gradientTo: "#B87050",
     },
     modern: {
-      icon: MuiDiamond,
+      icon: DiamondIcon,
       title: "The Modern Minimalist Bride",
       description:
         "You envision a contemporary, elegant celebration with subtle nods to culture. Your wedding will be refined, minimalist, and reflect modern sensibilities while respecting key traditions.",
@@ -307,7 +322,7 @@ export default function VisionQuiz({
                     background: `linear-gradient(135deg, ${currentResult.gradientFrom} 0%, ${currentResult.gradientTo} 100%)`,
                   }}
                 >
-                  <MuiCheckCircle
+                  <CheckCircleIcon
                     sx={{ fontSize: 16 }}
                     className="text-white"
                   />
@@ -342,7 +357,7 @@ export default function VisionQuiz({
             aria-label={`Continue to ${currentResult.nextStep}`}
           >
             {currentResult.nextStepText}
-            <ArrowRight size={20} weight="bold" />
+            <ArrowRightIcon size={20} weight="bold" />
           </motion.button>
 
           <motion.button
@@ -406,7 +421,7 @@ export default function VisionQuiz({
             transition={{ type: "spring", duration: 0.6 }}
             className="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full mb-4 backdrop-blur-sm"
           >
-            <Diamond size={48} weight="bold" />
+            <DiamondIcon size={48} weight="bold" />
           </motion.div>
           <h1 className="font-playfair text-3xl sm:text-4xl font-bold mb-3">
             Vision Quiz
@@ -495,7 +510,7 @@ export default function VisionQuiz({
                 aria-current={isCurrent ? "step" : undefined}
               >
                 {isAnswered && !isCurrent ? (
-                  <MuiCheckCircle sx={{ fontSize: 20 }} className="mx-auto" />
+                  <CheckCircleIcon sx={{ fontSize: 20 }} className="mx-auto" />
                 ) : (
                   index + 1
                 )}
@@ -626,7 +641,7 @@ export default function VisionQuiz({
           }`}
           aria-label="Go to previous question"
         >
-          <CaretLeft size={18} weight="bold" />
+          <CaretLeftIcon size={18} weight="bold" />
           Previous
         </motion.button>
 
@@ -644,7 +659,7 @@ export default function VisionQuiz({
             aria-label="Go to next question"
           >
             Next
-            <CaretRight size={18} weight="bold" />
+            <CaretRightIcon size={18} weight="bold" />
           </motion.button>
         ) : (
           <motion.button
@@ -660,7 +675,7 @@ export default function VisionQuiz({
             aria-label="Finish quiz and see results"
           >
             Finish Quiz
-            <MuiCheckCircle sx={{ fontSize: 18 }} />
+            <CheckCircleIcon sx={{ fontSize: 18 }} />
           </motion.button>
         )}
       </motion.div>

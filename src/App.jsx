@@ -23,12 +23,27 @@ import OnboardingForm from "./components/OnboardingForm";
 import supabase from "./supabaseClient"; // Import the centralized client
 
 // --- PAYSTACK LINKS (Updated Bundle Link) ---
-const PDF_GUIDE_PRODUCT_URL =
-  "https://paystack.com/buy/hausa-wedding-guide-by-hausaroom-vzdojl"; // PDF Test Link
-const WEB_APP_PRODUCT_URL =
-  "https://paystack.com/buy/interactive-hausa-wedding-web-guide-btclqx"; // Web App Test Link
-const BUNDLE_PRODUCT_URL =
-  "https://paystack.com/buy/hausa-wedding-guide-bundle--scykqb"; // NEW Bundle Test Link
+// Test Links
+const PDF_GUIDE_TEST_URL =
+  "https://paystack.com/buy/hausa-wedding-guide-by-hausaroom-vzdojl"; // PDF Test Link (₦110)
+const WEB_APP_TEST_URL =
+  "https://paystack.com/buy/interactive-hausa-wedding-web-guide-btclqx"; // Web App Test Link (₦100)
+const BUNDLE_TEST_URL =
+  "https://paystack.com/buy/hausa-wedding-guide-bundle--scykqb"; // Bundle Test Link (₦120)
+
+// Live Links (Production)
+const PDF_GUIDE_LIVE_URL =
+  "https://paystack.com/buy/hausa-wedding-guide-live-xxxxxx"; // PDF Live Link (₦9,990) - REPLACE WITH ACTUAL LIVE LINK
+const WEB_APP_LIVE_URL = ""; // Coming Soon
+const BUNDLE_LIVE_URL = ""; // Coming Soon
+
+// Choose environment (change to false for production)
+const IS_TEST_MODE = true;
+
+// Active URLs
+const PDF_GUIDE_PRODUCT_URL = IS_TEST_MODE ? PDF_GUIDE_TEST_URL : PDF_GUIDE_LIVE_URL;
+const WEB_APP_PRODUCT_URL = IS_TEST_MODE ? WEB_APP_TEST_URL : WEB_APP_LIVE_URL;
+const BUNDLE_PRODUCT_URL = IS_TEST_MODE ? BUNDLE_TEST_URL : BUNDLE_LIVE_URL;
 // --- END PAYSTACK LINKS ---
 
 function App() {
@@ -124,11 +139,19 @@ function App() {
   };
 
   const handlePurchaseWebApp = () => {
+    if (!WEB_APP_PRODUCT_URL || IS_TEST_MODE) {
+      alert("Interactive Guide coming soon! Available for testing only.");
+      return;
+    }
     window.location.href = WEB_APP_PRODUCT_URL;
   };
 
   const handlePurchaseBundle = () => {
-    window.location.href = BUNDLE_PRODUCT_URL; // Use the direct bundle link
+    if (!BUNDLE_PRODUCT_URL || IS_TEST_MODE) {
+      alert("Bundle Deal coming soon! Available for testing only.");
+      return;
+    }
+    window.location.href = BUNDLE_PRODUCT_URL;
   };
 
   const toggleFAQ = (index) => {
@@ -201,8 +224,9 @@ function App() {
     },
     {
       question: "Is there a discount if I buy both (the Bundle)?",
-      answer:
-        "Yes! Purchasing the Bundle Deal gives you both the PDF Guide and access to the Interactive Web Planner at a special discounted price (₦120) compared to buying them separately (total ₦210).",
+      answer: IS_TEST_MODE
+        ? "Yes! Purchasing the Bundle Deal gives you both the PDF Guide and access to the Interactive Web Planner at a special discounted price (₦120) compared to buying them separately (total ₦210). Bundle is currently available for testing only."
+        : "The Bundle Deal is coming soon! Currently, only the PDF Guide is available for purchase at ₦9,990.",
     },
     {
       question: "How long do I have access to the Interactive Guide?",
@@ -300,15 +324,25 @@ function App() {
           </button>
           <button
             onClick={handlePurchaseWebApp}
-            className="w-full mt-2 px-6 py-3 bg-[#740015] hover:bg-[#531946] text-white font-semibold rounded-lg shadow-md transition-all duration-300 flex items-center justify-center gap-2"
+            disabled={!IS_TEST_MODE}
+            className={`w-full mt-2 px-6 py-3 font-semibold rounded-lg shadow-md transition-all duration-300 flex items-center justify-center gap-2 ${
+              IS_TEST_MODE
+                ? "bg-[#740015] hover:bg-[#531946] text-white"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
           >
-            <MonitorPlayIcon size={18} weight="bold" /> Get Interactive Guide
+            <MonitorPlayIcon size={18} weight="bold" /> {IS_TEST_MODE ? "Get Interactive Guide" : "Coming Soon"}
           </button>
           <button
             onClick={handlePurchaseBundle}
-            className="w-full mt-2 px-6 py-3 border-2 border-[#740015] text-[#740015] font-semibold rounded-lg shadow-sm hover:bg-[#740015]/5 transition-all duration-300 flex items-center justify-center gap-2"
+            disabled={!IS_TEST_MODE}
+            className={`w-full mt-2 px-6 py-3 font-semibold rounded-lg shadow-sm transition-all duration-300 flex items-center justify-center gap-2 ${
+              IS_TEST_MODE
+                ? "border-2 border-[#740015] text-[#740015] hover:bg-[#740015]/5"
+                : "border-2 border-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
           >
-            <PackageIcon size={18} weight="bold" /> Get Bundle Deal
+            <PackageIcon size={18} weight="bold" /> {IS_TEST_MODE ? "Get Bundle Deal" : "Coming Soon"}
           </button>
         </div>
       </div>
@@ -720,8 +754,9 @@ function App() {
               Choose Your Perfect Guide
             </h2>
             <p className="text-gray-600 text-base md:text-lg max-w-2xl mx-auto">
-              Select your planning tool or get the bundle for the best value!
-              (Test prices shown).
+              {IS_TEST_MODE 
+                ? "Select your planning tool or get the bundle for the best value! (Test prices shown)."
+                : "Get your comprehensive PDF wedding guide now! More options coming soon."}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10 items-stretch">
@@ -739,7 +774,7 @@ function App() {
                 Comprehensive & Printable
               </p>
               <p className="font-playfair text-4xl md:text-5xl font-bold text-[#740015] mb-2">
-                ₦110
+                {IS_TEST_MODE ? "₦110" : "₦9,990"}
               </p>
               <p className="text-gray-500 text-xs md:text-sm mb-6">
                 One-time payment
@@ -782,18 +817,23 @@ function App() {
                 onClick={handlePurchasePDF}
                 className="w-full mt-auto px-6 py-2.5 bg-[#CE805C] hover:bg-[#B87050] text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-sm"
               >
-                Buy PDF (Test)
+                {IS_TEST_MODE ? "Buy PDF (Test)" : "Buy PDF Guide"}
               </button>
             </div>
 
             {/* Bundle Pricing Card */}
             <div
-              className="bg-gradient-to-br from-[#740015] to-[#531946] rounded-2xl p-6 md:p-8 border-4 border-[#D4A574] shadow-2xl text-center flex flex-col items-center transform md:scale-105 z-10 animate-slide-up"
+              className="bg-gradient-to-br from-[#740015] to-[#531946] rounded-2xl p-6 md:p-8 border-4 border-[#D4A574] shadow-2xl text-center flex flex-col items-center transform md:scale-105 z-10 animate-slide-up relative"
               style={{ animationDelay: "0.1s" }}
             >
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-[#D4A574] text-[#740015] px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg">
-                Best Value
+                {IS_TEST_MODE ? "Best Value" : "Coming Soon"}
               </div>
+              {!IS_TEST_MODE && (
+                <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm rounded-2xl z-20 flex items-center justify-center">
+                  <span className="text-white text-2xl font-bold">Coming Soon</span>
+                </div>
+              )}
               <PackageIcon
                 size={40}
                 weight="duotone"
@@ -847,17 +887,27 @@ function App() {
               </ul>
               <button
                 onClick={handlePurchaseBundle}
-                className="w-full mt-auto px-6 py-2.5 bg-[#D4A574] hover:bg-[#CE805C] text-[#740015] font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-sm"
+                disabled={!IS_TEST_MODE}
+                className={`w-full mt-auto px-6 py-2.5 font-semibold rounded-lg shadow-md transition-all duration-300 text-sm ${
+                  IS_TEST_MODE
+                    ? "bg-[#D4A574] hover:bg-[#CE805C] text-[#740015] hover:shadow-lg"
+                    : "bg-gray-400 text-gray-600 cursor-not-allowed opacity-50"
+                }`}
               >
-                Buy Bundle (Test)
+                {IS_TEST_MODE ? "Buy Bundle (Test)" : "Coming Soon"}
               </button>
             </div>
 
             {/* Interactive Guide Pricing */}
             <div
-              className="bg-white rounded-2xl p-6 md:p-8 border-2 border-[#740015]/30 shadow-lg text-center flex flex-col items-center animate-slide-up"
+              className="bg-white rounded-2xl p-6 md:p-8 border-2 border-[#740015]/30 shadow-lg text-center flex flex-col items-center animate-slide-up relative"
               style={{ animationDelay: "0.2s" }}
             >
+              {!IS_TEST_MODE && (
+                <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm rounded-2xl z-20 flex items-center justify-center">
+                  <span className="text-white text-2xl font-bold">Coming Soon</span>
+                </div>
+              )}
               <MonitorPlayIcon
                 size={40}
                 weight="duotone"
@@ -927,9 +977,14 @@ function App() {
               </ul>
               <button
                 onClick={handlePurchaseWebApp}
-                className="w-full mt-auto px-6 py-2.5 bg-[#740015] hover:bg-[#531946] text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-sm"
+                disabled={!IS_TEST_MODE}
+                className={`w-full mt-auto px-6 py-2.5 font-semibold rounded-lg shadow-md transition-all duration-300 text-sm ${
+                  IS_TEST_MODE
+                    ? "bg-[#740015] hover:bg-[#531946] text-white hover:shadow-lg"
+                    : "bg-gray-400 text-gray-600 cursor-not-allowed opacity-50"
+                }`}
               >
-                Buy Interactive (Test)
+                {IS_TEST_MODE ? "Buy Interactive (Test)" : "Coming Soon"}
               </button>
             </div>
           </div>
