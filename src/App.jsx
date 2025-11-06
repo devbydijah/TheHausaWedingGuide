@@ -38,7 +38,7 @@ const WEB_APP_LIVE_URL = ""; // Coming Soon
 const BUNDLE_LIVE_URL = ""; // Coming Soon
 
 // Choose environment (change to false for production)
-const IS_TEST_MODE = true;
+const IS_TEST_MODE = false;
 
 // Active URLs
 const PDF_GUIDE_PRODUCT_URL = IS_TEST_MODE
