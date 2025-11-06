@@ -326,27 +326,17 @@ function App() {
           </button>
           <button
             onClick={handlePurchaseWebApp}
-            disabled={!IS_TEST_MODE}
-            className={`w-full mt-2 px-6 py-3 font-semibold rounded-lg shadow-md transition-all duration-300 flex items-center justify-center gap-2 ${
-              IS_TEST_MODE
-                ? "bg-[#740015] hover:bg-[#531946] text-white"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
-            }`}
+            disabled={true}
+            className="w-full mt-2 px-6 py-3 font-semibold rounded-lg shadow-md transition-all duration-300 flex items-center justify-center gap-2 bg-gray-300 text-gray-500 cursor-not-allowed"
           >
-            <MonitorPlayIcon size={18} weight="bold" />{" "}
-            {IS_TEST_MODE ? "Get Interactive Guide" : "Coming Soon"}
+            <MonitorPlayIcon size={18} weight="bold" /> Coming Soon!
           </button>
           <button
             onClick={handlePurchaseBundle}
-            disabled={!IS_TEST_MODE}
-            className={`w-full mt-2 px-6 py-3 font-semibold rounded-lg shadow-sm transition-all duration-300 flex items-center justify-center gap-2 ${
-              IS_TEST_MODE
-                ? "border-2 border-[#740015] text-[#740015] hover:bg-[#740015]/5"
-                : "border-2 border-gray-300 text-gray-500 cursor-not-allowed"
-            }`}
+            disabled={true}
+            className="w-full mt-2 px-6 py-3 font-semibold rounded-lg shadow-sm transition-all duration-300 flex items-center justify-center gap-2 border-2 border-gray-300 text-gray-500 cursor-not-allowed"
           >
-            <PackageIcon size={18} weight="bold" />{" "}
-            {IS_TEST_MODE ? "Get Bundle Deal" : "Coming Soon"}
+            <PackageIcon size={18} weight="bold" /> Coming Soon!
           </button>
         </div>
       </div>
@@ -885,14 +875,10 @@ function App() {
               </ul>
               <button
                 onClick={handlePurchaseBundle}
-                disabled={!IS_TEST_MODE}
-                className={`w-full mt-auto px-6 py-2.5 font-semibold rounded-lg shadow-md transition-all duration-300 text-sm ${
-                  IS_TEST_MODE
-                    ? "bg-[#D4A574] hover:bg-[#CE805C] text-[#740015] hover:shadow-lg"
-                    : "bg-gray-400 text-gray-600 cursor-not-allowed opacity-50"
-                }`}
+                disabled={true}
+                className="w-full mt-auto px-6 py-2.5 font-semibold rounded-lg shadow-md transition-all duration-300 text-sm bg-gray-400 text-gray-600 cursor-not-allowed opacity-50"
               >
-                {IS_TEST_MODE ? "Buy Bundle" : "Coming Soon"}
+                Coming Soon!
               </button>
             </div>
 
@@ -977,14 +963,10 @@ function App() {
               </ul>
               <button
                 onClick={handlePurchaseWebApp}
-                disabled={!IS_TEST_MODE}
-                className={`w-full mt-auto px-6 py-2.5 font-semibold rounded-lg shadow-md transition-all duration-300 text-sm ${
-                  IS_TEST_MODE
-                    ? "bg-[#740015] hover:bg-[#531946] text-white hover:shadow-lg"
-                    : "bg-gray-400 text-gray-600 cursor-not-allowed opacity-50"
-                }`}
+                disabled={true}
+                className="w-full mt-auto px-6 py-2.5 font-semibold rounded-lg shadow-md transition-all duration-300 text-sm bg-gray-400 text-gray-600 cursor-not-allowed opacity-50"
               >
-                {IS_TEST_MODE ? "Buy Interactive Guide" : "Coming Soon"}
+                Coming Soon!
               </button>
             </div>
           </div>
