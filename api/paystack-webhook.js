@@ -9,7 +9,7 @@ import {
 
 // Environment variables
 const PAYSTACK_TEST_SECRET = process.env.PAYSTACK_TEST_SECRET_KEY;
-const PAYSTACK_LIVE_SECRET = process.env.PAYSTACK_SECRET_KEY;
+const PAYSTACK_LIVE_SECRET = process.env.PAYSTACK_LIVE_SECRET_KEY; // Changed from PAYSTACK_SECRET_KEY
 // --- FIX: Use the production URL for all email links ---
 const BASE_URL = "https://the-hausa-weding-guide.vercel.app";
 const DOWNLOAD_TOKEN_SECRET_TEST = process.env.DOWNLOAD_TOKEN_SECRET_TEST;
@@ -75,7 +75,7 @@ export default async function handler(req, res) {
   const bundleAmountKobo_Test = 12000; // ₦120.00 (Bundle Test)
 
   // Live prices
-  const pdfAmountKobo_Live = 999000; // ₦9,990.00 (PDF Live)
+  const pdfAmountKobo_Live = 999000; // ₦  const PAYSTACK_LIVE_SECRET = process.env.PAYSTACK_LIVE_SECRET_KEY;0.00 (PDF Live)
   const webAppAmountKobo_Live = 10000; // ₦100.00 (Web App Live - Coming Soon)
   const bundleAmountKobo_Live = 12000; // ₦120.00 (Bundle Live - Coming Soon)
 
