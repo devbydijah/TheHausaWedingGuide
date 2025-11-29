@@ -217,7 +217,7 @@ export default function MobileNav({
         {/* Footer */}
         <div className="p-6 border-t border-gray-200 dark:border-gray-700">
           <p className="font-inter text-xs text-gray-500 dark:text-gray-400 text-center">
-            Hausa Wedding Guide
+            Northern Wedding Guide
           </p>
         </div>
       </div>

@@ -138,7 +138,7 @@ export default function Dashboard({
       {/* Welcome Header */}
       <div className="bg-gradient-to-r from-[#CE805C] to-[#b86a4a] rounded-xl p-6 sm:p-8 text-white">
         <h1 className="font-playfair text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
-          Welcome to Your Hausa Wedding Guide
+          Welcome to Your Northern Wedding Guide
         </h1>
         <p className="font-inter text-base sm:text-lg md:text-xl opacity-90">
           Your personalized planning dashboard for a beautiful and blessed

@@ -243,7 +243,7 @@ function App() {
     {
       question: "Is the content culturally authentic?",
       answer:
-        "Absolutely. Both guides are created with deep respect for Hausa and Northern Nigerian traditions, covering ceremonies, customs, and etiquette accurately.",
+        "Absolutely. Both guides are created with deep respect for Northern Nigerian traditions, covering ceremonies, customs, and etiquette accurately.",
     },
     {
       question: "What happens after the 20-day access expires?",
@@ -367,7 +367,7 @@ function App() {
           >
             Plan Your Perfect{" "}
             <span className="bg-gradient-to-r from-white via-[#D4A574] to-white bg-clip-text text-transparent animate-gradient">
-              Hausa Wedding
+              Northern Wedding
             </span>
           </h1>
           <p
@@ -458,10 +458,10 @@ function App() {
                 Authentic Guidance for Your Modern Wedding
               </h2>
               <p className="font-inter text-base md:text-lg text-gray-700 leading-relaxed">
-                Our guides merge deep respect for Hausa & Northern Nigerian
-                traditions with practical tools for today's couples. Easily
-                navigate cultural customs, budgets, and timelines using either
-                the comprehensive <strong>PDF Guide</strong> or the dynamic{" "}
+                Our guides merge deep respect for Northern Nigerian traditions
+                with practical tools for today's couples. Easily navigate
+                cultural customs, budgets, and timelines using either the
+                comprehensive <strong>PDF Guide</strong> or the dynamic{" "}
                 <strong>Interactive Planner</strong>.
               </p>
               <div className="bg-gradient-to-r from-[#740015]/5 to-[#CE805C]/5 p-6 rounded-2xl border-l-4 border-[#CE805C] shadow-lg space-y-4">
@@ -1148,7 +1148,7 @@ function App() {
           <div className="text-center">
             <p className="font-inter text-white/60 text-xs">
               © {new Date().getFullYear()} Hausa Room. All rights reserved.
-              Made with ❤️ for Hausa traditions.
+              Made with ❤️ for Northern traditions.
             </p>
           </div>
         </div>

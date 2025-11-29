@@ -43,8 +43,8 @@ const Hero = () => {
           </p>
 
           <p className="font-inter text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
-            Plan your perfect Hausa wedding with our comprehensive interactive
-            tools and cultural guidance
+            Plan your perfect Northern Nigerian wedding with our comprehensive
+            interactive tools and cultural guidance
           </p>
         </section>
 
@@ -52,13 +52,13 @@ const Hero = () => {
         <div
           className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20 animate-fade-in-delay"
           role="img"
-          aria-label="Traditional Hausa wedding photography gallery"
+          aria-label="Traditional Northern Nigerian wedding photography gallery"
         >
           <div className="group mx-auto">
             <div className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-72 md:h-72 lg:w-80 lg:h-80 rounded-full overflow-hidden shadow-2xl transform hover:scale-105 transition-all duration-500 hover:shadow-secondary-500/40">
               <img
                 src="/assets/couple2.png"
-                alt="Traditional Hausa wedding couple celebrating"
+                alt="Traditional Northern Nigerian wedding couple celebrating"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary-500/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full"></div>
@@ -69,7 +69,7 @@ const Hero = () => {
             <div className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-72 md:h-72 lg:w-80 lg:h-80 rounded-full overflow-hidden shadow-2xl transform hover:scale-105 transition-all duration-500 hover:shadow-secondary-500/40">
               <img
                 src="/assets/bride2.png"
-                alt="Hausa bride in traditional wedding attire"
+                alt="Northern Nigerian bride in traditional wedding attire"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary-500/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full"></div>
@@ -80,7 +80,7 @@ const Hero = () => {
             <div className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-72 md:h-72 lg:w-80 lg:h-80 rounded-full overflow-hidden shadow-2xl transform hover:scale-105 transition-all duration-500 hover:shadow-secondary-500/40">
               <img
                 src="/assets/bride3.png"
-                alt="Beautiful Hausa bride portrait"
+                alt="Beautiful Northern Nigerian bride portrait"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary-500/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full"></div>

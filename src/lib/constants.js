@@ -82,7 +82,7 @@ export const VISION_QUIZ_QUESTIONS = [
     options: [
       {
         value: "traditional",
-        text: "Traditional and cultural - honoring Hausa customs fully",
+        text: "Traditional and cultural - honoring Northern customs fully",
         points: { traditional: 3, modern: 0, fusion: 1 },
       },
       {
@@ -92,7 +92,7 @@ export const VISION_QUIZ_QUESTIONS = [
       },
       {
         value: "fusion",
-        text: "Fusion - blending Hausa traditions with modern elements",
+        text: "Fusion - blending Northern traditions with modern elements",
         points: { traditional: 1, modern: 1, fusion: 3 },
       },
       {
@@ -135,7 +135,7 @@ export const VISION_QUIZ_QUESTIONS = [
     options: [
       {
         value: "full-traditional",
-        text: "Full traditional Hausa attire for all events",
+        text: "Full traditional Northern attire for all events",
         points: { traditional: 3, modern: 0, fusion: 1 },
       },
       {
@@ -187,7 +187,7 @@ export const VISION_QUIZ_QUESTIONS = [
     options: [
       {
         value: "cultural-colors",
-        text: "Rich cultural colors and traditional Hausa patterns",
+        text: "Rich cultural colors and traditional Northern patterns",
         points: { traditional: 3, modern: 0, fusion: 1 },
       },
       {
@@ -235,7 +235,8 @@ export const VISION_QUIZ_QUESTIONS = [
   },
   {
     id: "q7",
-    question: "How important is it to have traditional Hausa entertainment?",
+    question:
+      "How important is it to have traditional Northern Nigerian entertainment?",
     options: [
       {
         value: "must-have",
@@ -265,12 +266,12 @@ export const VISION_QUIZ_QUESTIONS = [
     options: [
       {
         value: "all-hausa",
-        text: "All traditional Hausa cuisine - Tuwo, Miyan Kuka, etc.",
+        text: "All traditional Northern cuisine - Tuwo, Miyan Kuka, etc.",
         points: { traditional: 3, modern: 0, fusion: 1 },
       },
       {
         value: "nigerian-variety",
-        text: "Variety of Nigerian cuisines including Hausa favorites",
+        text: "Variety of Nigerian cuisines including Northern favorites",
         points: { traditional: 2, modern: 1, fusion: 3 },
       },
       {

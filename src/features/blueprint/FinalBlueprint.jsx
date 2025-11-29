@@ -148,16 +148,16 @@ export default function FinalBlueprint({
 
     const details = {
       traditional: {
-        title: "Traditional Hausa Wedding",
+        title: "Traditional Northern Nigerian Wedding",
         description:
-          "Your wedding will honor authentic Hausa customs with full traditional ceremonies, attire, and cultural elements.",
+          "Your wedding will honor authentic Northern Nigerian customs with full traditional ceremonies, attire, and cultural elements.",
         icon: <EmojiEvents sx={{ fontSize: 64 }} />,
         color: "from-[#CE805C] to-[#B87050]",
       },
       fusion: {
         title: "Fusion Wedding Style",
         description:
-          "You'll blend cherished Hausa traditions with modern elements for a unique celebration that honors both heritage and contemporary style.",
+          "You'll blend cherished Northern Nigerian traditions with modern elements for a unique celebration that honors both heritage and contemporary style.",
         icon: <AutoAwesome sx={{ fontSize: 64 }} />,
         color: "from-[#531946] to-[#740015]",
       },

@@ -1,11 +1,11 @@
 // src/SuccessPage.jsx
 
 import {
-  CheckCircleIcon, 
+  CheckCircleIcon,
   SparkleIcon,
-  CloudIcon, 
-  LockKeyIcon, 
-  EnvelopeSimpleIcon, 
+  CloudIcon,
+  LockKeyIcon,
+  EnvelopeSimpleIcon,
 } from "@phosphor-icons/react";
 // --- END CORRECTED ICON IMPORTS ---
 
@@ -35,7 +35,7 @@ function SuccessPage() {
               What's Included:
             </h2>
             <p className="text-white/90 text-sm">
-              Everything you need to plan your perfect Hausa wedding
+              Everything you need to plan your perfect Northern Nigerian wedding
             </p>
           </div>
 

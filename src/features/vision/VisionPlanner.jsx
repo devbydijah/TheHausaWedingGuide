@@ -66,7 +66,7 @@ export default function VisionPlanner({
       label: "Cultural Traditions",
       icon: <Palette size={24} weight="bold" />,
       description:
-        "How important is honoring Hausa traditions and customs in your wedding?",
+        "How important is honoring Northern Nigerian traditions and customs in your wedding?",
       lowLabel: "Minimal traditions",
       highLabel: "Full traditional",
     },
@@ -145,13 +145,13 @@ export default function VisionPlanner({
       value: "tradition",
       label: "Cultural Heritage",
       icon: Crown,
-      description: "Honoring Hausa customs and traditions",
+      description: "Honoring Northern Nigerian customs and traditions",
       detailedDescription:
-        "Embrace and celebrate authentic Hausa wedding customs, from Kayan Lefe to traditional ceremonies. This value honors your cultural roots and preserves heritage for future generations.",
+        "Embrace and celebrate authentic Northern Nigerian wedding customs, from Kayan Lefe to traditional ceremonies. This value honors your cultural roots and preserves heritage for future generations.",
       recommendations: [
-        "Include all traditional Hausa wedding ceremonies",
+        "Include all traditional Northern Nigerian wedding ceremonies",
         "Present authentic Kayan Lefe collection",
-        "Wear traditional Hausa attire and accessories",
+        "Wear traditional Northern Nigerian attire and accessories",
         "Serve traditional Northern Nigerian cuisine",
       ],
       combinations: {
@@ -339,23 +339,23 @@ export default function VisionPlanner({
 
     const details = {
       traditional: {
-        title: "Traditional Hausa Wedding",
+        title: "Traditional Northern Nigerian Wedding",
         description:
-          "Your wedding will honor authentic Hausa customs with full traditional ceremonies, attire, and cultural elements.",
+          "Your wedding will honor authentic Northern Nigerian customs with full traditional ceremonies, attire, and cultural elements.",
         icon: Crown,
         color: "from-[#740015] to-[#531946]",
         recommendations: [
           "Complete Kayan Lefe collection",
           "Traditional Fatiha, Kamu, and Walima ceremonies",
-          "Full Hausa attire for all events",
+          "Full Northern attire for all events",
           "Traditional music and entertainment",
-          "Hausa cuisine menu",
+          "Northern cuisine menu",
         ],
       },
       fusion: {
         title: "Fusion Wedding Style",
         description:
-          "You'll blend cherished Hausa traditions with modern elements for a unique celebration that honors both heritage and contemporary style.",
+          "You'll blend cherished Northern Nigerian traditions with modern elements for a unique celebration that honors both heritage and contemporary style.",
         icon: Sparkle,
         color: "from-[#CE805C] to-[#B87050]",
         recommendations: [
@@ -1620,7 +1620,7 @@ export default function VisionPlanner({
                     onClick={() =>
                       updateField(
                         "visionAttire",
-                        "Traditional Hausa bridal attire with contemporary embellishments. Multiple outfit changes showcasing both heritage and modern style—incorporating handcrafted fabrics and beadwork."
+                        "Traditional Northern Nigerian bridal attire with contemporary embellishments. Multiple outfit changes showcasing both heritage and modern style—incorporating handcrafted fabrics and beadwork."
                       )
                     }
                     className={`text-xs px-2 py-1 rounded-lg border transition-all ${
@@ -1727,7 +1727,7 @@ export default function VisionPlanner({
                       ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-[#CE805C] focus:border-[#CE805C]"
                       : "bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:ring-[#740015] focus:border-[#740015]"
                   }`}
-                  placeholder="Which Hausa traditions are essential to include? Any modern twists on traditions?"
+                  placeholder="Which Northern Nigerian traditions are essential to include? Any modern twists on traditions?"
                 />
               </div>
 

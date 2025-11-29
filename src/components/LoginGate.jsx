@@ -737,7 +737,7 @@ export default function LoginGate({ children, onAuthenticated }) {
             <Favorite sx={{ fontSize: 40, color: "white" }} />
           </div>
           <h1 className="font-playfair text-3xl font-bold bg-gradient-to-r from-[#740015] to-[#531946] bg-clip-text text-transparent mb-2">
-            Hausa Wedding Guide
+            Northern Wedding Guide
           </h1>
           <p className="text-gray-600 font-inter">
             Interactive Wedding Planner

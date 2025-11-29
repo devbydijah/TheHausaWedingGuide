@@ -153,14 +153,14 @@ export default function VisionQuiz({ setActiveSection, darkMode }) {
   const resultConfig = {
     traditional: {
       icon: EmojiEventsIcon,
-      title: "The Traditional Hausa Bride",
+      title: "The Traditional Northern Nigerian Bride",
       description:
-        "You deeply value cultural heritage and want your wedding to honor Hausa customs fully. Your celebration will be rich in tradition, from the Kayan Lefe to traditional attire and ceremonies.",
+        "You deeply value cultural heritage and want your wedding to honor Northern customs fully. Your celebration will be rich in tradition, from the Kayan Lefe to traditional attire and ceremonies.",
       recommendations: [
-        "Prioritize finding vendors experienced in traditional Hausa weddings",
+        "Prioritize finding vendors experienced in traditional Northern Nigerian weddings",
         "Book traditional musicians and cultural performers",
         "Invest in authentic traditional attire and accessories",
-        "Serve a full traditional Hausa menu",
+        "Serve a full traditional Northern menu",
         "Consult with family elders to ensure all customs are honored",
         "Use rich cultural colors and traditional patterns in your decor",
       ],
