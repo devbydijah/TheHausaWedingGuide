@@ -93,23 +93,25 @@ export default async function handler(req, res) {
     "";
   const productNameLower = productName.toLowerCase();
 
-  console.log(
-    `[WEBHOOK] 🔍 Determining product type...`
-  );
+  console.log(`[WEBHOOK] 🔍 Determining product type...`);
   console.log(`[WEBHOOK]    Amount: ${amount} kobo (₦${amount / 100})`);
   console.log(`[WEBHOOK]    Product name: "${productName}"`);
   console.log(`[WEBHOOK]    Mode: ${mode}`);
   console.log(`[WEBHOOK]    Full metadata: ${JSON.stringify(metadata)}`);
 
   // FIRST: Check product name/description (most reliable)
+  // Exact product name on Paystack: "Northern Wedding Guide(by HausaRoom)"
   if (
-    productNameLower.includes("pdf") ||
-    productNameLower.includes("hausa wedding guide") ||
     productNameLower.includes("northern wedding guide") ||
-    productNameLower.includes("northern-wedding-guide")
+    productNameLower.includes("northern-wedding-guide") ||
+    productNameLower.includes("hausaroom") ||
+    productNameLower.includes("hausa room") ||
+    productNameLower.includes("pdf")
   ) {
     productType = "pdf";
-    console.log(`[WEBHOOK] ✅ Identified as PDF Guide (by product name)`);
+    console.log(
+      `[WEBHOOK] ✅ Identified as PDF Guide (by product name: "${productName}")`
+    );
   } else if (
     productNameLower.includes("bundle") ||
     productNameLower.includes("complete package")
@@ -122,7 +124,9 @@ export default async function handler(req, res) {
     productNameLower.includes("webapp")
   ) {
     productType = "webapp";
-    console.log(`[WEBHOOK] ✅ Identified as Interactive Guide (by product name)`);
+    console.log(
+      `[WEBHOOK] ✅ Identified as Interactive Guide (by product name)`
+    );
   }
   // FALLBACK: Check amount if product name didn't match
   else if (mode === "test") {
@@ -134,7 +138,9 @@ export default async function handler(req, res) {
       console.log(`[WEBHOOK] ✅ Identified as Bundle Deal (by test amount)`);
     } else if (amount === webAppAmountKobo_Test) {
       productType = "webapp";
-      console.log(`[WEBHOOK] ✅ Identified as Interactive Guide (by test amount)`);
+      console.log(
+        `[WEBHOOK] ✅ Identified as Interactive Guide (by test amount)`
+      );
     }
   } else if (mode === "live") {
     if (amount === pdfAmountKobo_Live) {
@@ -145,7 +151,9 @@ export default async function handler(req, res) {
       console.log(`[WEBHOOK] ✅ Identified as Bundle Deal (by live amount)`);
     } else if (amount === webAppAmountKobo_Live) {
       productType = "webapp";
-      console.log(`[WEBHOOK] ✅ Identified as Interactive Guide (by live amount)`);
+      console.log(
+        `[WEBHOOK] ✅ Identified as Interactive Guide (by live amount)`
+      );
     }
   }
 
