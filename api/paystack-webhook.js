@@ -84,6 +84,7 @@ export default async function handler(req, res) {
   let productType = null;
 
   // Extract product information from Paystack data
+  const data = event.data;
   const metadata = data.metadata || {};
   const productName =
     metadata.product_name ||
