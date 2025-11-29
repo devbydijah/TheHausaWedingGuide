@@ -26,6 +26,7 @@ export const useSyncToCloud = (userEmail, initialData = {}) => {
   const [data, setData] = useState(initialData);
   const [syncStatus, setSyncStatus] = useState("idle"); // 'idle' | 'syncing' | 'success' | 'error' | 'offline'
   const [lastSynced, setLastSynced] = useState(null);
+  const [lastError, setLastError] = useState(null); // Store error details for user feedback
   const [userId, setUserId] = useState(null);
   const isMounted = useRef(true);
   const saveTimeoutRef = useRef(null);
@@ -33,6 +34,33 @@ export const useSyncToCloud = (userEmail, initialData = {}) => {
   // ============================================
   // INITIALIZATION: Load data on mount
   // ============================================
+
+  // Helper: Get user-friendly error messages
+  const getErrorMessage = (error) => {
+    if (!navigator.onLine) {
+      return "You're offline. Changes saved locally and will sync when you're back online.";
+    }
+
+    if (error?.message?.includes("fetch")) {
+      return "Network error. Your changes are saved locally.";
+    }
+
+    if (error?.message?.includes("auth") || error?.code === "PGRST301") {
+      return "Authentication issue. Please try logging out and back in.";
+    }
+
+    if (error?.code === "23505") {
+      return "Duplicate entry detected. Your data is safe locally.";
+    }
+
+    if (error?.message?.includes("timeout")) {
+      return "Request timed out. Your changes are saved locally.";
+    }
+
+    // Generic fallback
+    return "Sync failed, but your data is safe locally. We'll retry automatically.";
+  };
+
   useEffect(() => {
     isMounted.current = true;
 
@@ -203,6 +231,14 @@ export const useSyncToCloud = (userEmail, initialData = {}) => {
       setSyncStatus("success");
     } catch (error) {
       console.error("Error loading from cloud:", error);
+
+      // Store error details
+      const errorMessage = getErrorMessage(error);
+      setLastError({
+        message: errorMessage,
+        timestamp: new Date(),
+        originalError: error,
+      });
       setSyncStatus("error");
 
       // Fallback to localStorage
@@ -248,9 +284,17 @@ export const useSyncToCloud = (userEmail, initialData = {}) => {
       console.log("✅ Synced to cloud");
     } catch (error) {
       console.error("Error saving to cloud:", error);
+
+      // Store error details for user feedback
+      const errorMessage = getErrorMessage(error);
+      setLastError({
+        message: errorMessage,
+        timestamp: new Date(),
+        originalError: error,
+      });
       setSyncStatus("error");
 
-      // Still save to localStorage
+      // Still save to localStorage as backup
       localStorage.setItem("hausaGuideData", JSON.stringify(newData));
     }
   };
@@ -290,6 +334,30 @@ export const useSyncToCloud = (userEmail, initialData = {}) => {
   }, [data, userId]);
 
   // ============================================
+  // RETRY SYNC (Retry after error)
+  // ============================================
+  const retrySync = useCallback(async () => {
+    if (!navigator.onLine) {
+      setLastError({
+        message: "You're still offline. Please check your internet connection.",
+        timestamp: new Date(),
+      });
+      return false;
+    }
+
+    setLastError(null); // Clear previous error
+    setSyncStatus("syncing");
+
+    try {
+      await saveToCloud(data);
+      return true; // Success
+    } catch (error) {
+      console.error("Retry failed:", error);
+      return false; // Failed
+    }
+  }, [data, userId]);
+
+  // ============================================
   // RETURN API
   // ============================================
   return {
@@ -297,7 +365,9 @@ export const useSyncToCloud = (userEmail, initialData = {}) => {
     updateData, // Function to update data: updateData({key: value})
     syncStatus, // Current sync status
     lastSynced, // Last successful sync timestamp
+    lastError, // Last error details with message
     forceSync, // Manually trigger sync
+    retrySync, // Retry after error
     isCloudEnabled: isSupabaseConfigured() && userId !== null,
   };
 };

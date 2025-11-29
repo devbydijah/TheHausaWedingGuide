@@ -92,6 +92,8 @@ export default function InteractiveGuide({
     updateData: setCloudData,
     syncStatus,
     lastSynced,
+    lastError,
+    retrySync,
     isCloudEnabled,
   } = useSyncToCloud(user?.email || userEmail, DEFAULT_GUIDE);
 
@@ -140,10 +142,35 @@ export default function InteractiveGuide({
     // if (syncStatus === "success" && lastSynced) {
     //   showToast("Changes saved", "success");
     // } else if (syncStatus === "error") {
-    if (syncStatus === "error") {
-      showToast("Failed to sync - saved locally", "error");
+    if (syncStatus === "error" && lastError) {
+      showToast(lastError.message, "error");
     }
-  }, [syncStatus, lastSynced]);
+  }, [syncStatus, lastSynced, lastError]);
+
+  // Network status detection - auto-retry when back online
+  useEffect(() => {
+    const handleOnline = async () => {
+      if (syncStatus === "error" || syncStatus === "offline") {
+        showToast("Connection restored! Syncing...", "info");
+        const success = await retrySync();
+        if (success) {
+          showToast("Successfully synced your data!", "success");
+        }
+      }
+    };
+
+    const handleOffline = () => {
+      showToast("You're offline. Data will sync when reconnected.", "warning");
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [syncStatus, retrySync]);
 
   // Dark mode toggle
   const toggleDarkMode = () => {
@@ -402,14 +429,22 @@ export default function InteractiveGuide({
                 {isCloudEnabled && (
                   <div
                     className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg ${
-                      darkMode ? "bg-gray-800" : "bg-gray-100"
+                      syncStatus === "error"
+                        ? darkMode
+                          ? "bg-red-900/30 border border-red-700"
+                          : "bg-red-50 border border-red-200"
+                        : darkMode
+                          ? "bg-gray-800"
+                          : "bg-gray-100"
                     }`}
                     title={
                       syncStatus === "success" && lastSynced
                         ? `Last saved: ${new Date(lastSynced).toLocaleTimeString()}`
                         : syncStatus === "offline"
                           ? "Working offline - will sync when reconnected"
-                          : ""
+                          : syncStatus === "error" && lastError
+                            ? lastError.message
+                            : ""
                     }
                   >
                     <div
@@ -424,7 +459,15 @@ export default function InteractiveGuide({
                       }`}
                     />
                     <span
-                      className={`text-xs font-medium ${darkMode ? "text-gray-300" : "text-gray-700"}`}
+                      className={`text-xs font-medium ${
+                        syncStatus === "error"
+                          ? darkMode
+                            ? "text-red-300"
+                            : "text-red-700"
+                          : darkMode
+                            ? "text-gray-300"
+                            : "text-gray-700"
+                      }`}
                     >
                       {syncStatus === "syncing" && "Syncing..."}
                       {syncStatus === "success" && "Saved"}
@@ -432,6 +475,31 @@ export default function InteractiveGuide({
                       {syncStatus === "error" && "Error"}
                       {syncStatus === "idle" && "Ready"}
                     </span>
+
+                    {/* Retry Button for Errors */}
+                    {syncStatus === "error" && (
+                      <button
+                        onClick={async () => {
+                          const success = await retrySync();
+                          if (success) {
+                            showToast("Successfully synced!", "success");
+                          } else {
+                            showToast(
+                              "Retry failed. Will try again later.",
+                              "error"
+                            );
+                          }
+                        }}
+                        className={`ml-1 px-2 py-0.5 text-xs rounded transition-all ${
+                          darkMode
+                            ? "bg-red-700 hover:bg-red-600 text-white"
+                            : "bg-red-600 hover:bg-red-700 text-white"
+                        }`}
+                        title="Retry syncing to cloud"
+                      >
+                        Retry
+                      </button>
+                    )}
                   </div>
                 )}
 
@@ -548,54 +616,97 @@ export default function InteractiveGuide({
               <div
                 className={`px-4 py-3 rounded-lg mb-4 ${
                   isCloudEnabled
-                    ? darkMode
-                      ? "bg-gray-700"
-                      : "bg-gray-100"
+                    ? syncStatus === "error"
+                      ? darkMode
+                        ? "bg-red-900/30 border border-red-700"
+                        : "bg-red-50 border border-red-200"
+                      : darkMode
+                        ? "bg-gray-700"
+                        : "bg-gray-100"
                     : darkMode
                       ? "bg-yellow-900/30 border border-yellow-700"
                       : "bg-yellow-50 border border-yellow-200"
                 }`}
               >
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      !isCloudEnabled
-                        ? "bg-yellow-500"
-                        : syncStatus === "syncing"
-                          ? "bg-yellow-500 animate-pulse"
-                          : syncStatus === "success"
-                            ? "bg-green-500"
-                            : syncStatus === "offline"
-                              ? "bg-gray-400"
-                              : syncStatus === "error"
-                                ? "bg-red-500"
-                                : "bg-blue-500"
-                    }`}
-                  />
-                  <span
-                    className={`text-xs font-medium ${
-                      !isCloudEnabled
-                        ? darkMode
-                          ? "text-yellow-300"
-                          : "text-yellow-700"
-                        : darkMode
-                          ? "text-gray-300"
-                          : "text-gray-700"
-                    }`}
-                  >
-                    {!isCloudEnabled && "Working Offline"}
-                    {isCloudEnabled && syncStatus === "syncing" && "Syncing..."}
-                    {isCloudEnabled && syncStatus === "success" && "Saved"}
-                    {isCloudEnabled && syncStatus === "offline" && "Offline"}
-                    {isCloudEnabled && syncStatus === "error" && "Error"}
-                    {isCloudEnabled && syncStatus === "idle" && "Ready"}
-                  </span>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        !isCloudEnabled
+                          ? "bg-yellow-500"
+                          : syncStatus === "syncing"
+                            ? "bg-yellow-500 animate-pulse"
+                            : syncStatus === "success"
+                              ? "bg-green-500"
+                              : syncStatus === "offline"
+                                ? "bg-gray-400"
+                                : syncStatus === "error"
+                                  ? "bg-red-500"
+                                  : "bg-blue-500"
+                      }`}
+                    />
+                    <span
+                      className={`text-xs font-medium ${
+                        !isCloudEnabled
+                          ? darkMode
+                            ? "text-yellow-300"
+                            : "text-yellow-700"
+                          : syncStatus === "error"
+                            ? darkMode
+                              ? "text-red-300"
+                              : "text-red-700"
+                            : darkMode
+                              ? "text-gray-300"
+                              : "text-gray-700"
+                      }`}
+                    >
+                      {!isCloudEnabled && "Working Offline"}
+                      {isCloudEnabled &&
+                        syncStatus === "syncing" &&
+                        "Syncing..."}
+                      {isCloudEnabled && syncStatus === "success" && "Saved"}
+                      {isCloudEnabled && syncStatus === "offline" && "Offline"}
+                      {isCloudEnabled && syncStatus === "error" && "Error"}
+                      {isCloudEnabled && syncStatus === "idle" && "Ready"}
+                    </span>
+                  </div>
+
+                  {/* Retry Button for Errors */}
+                  {isCloudEnabled && syncStatus === "error" && (
+                    <button
+                      onClick={async () => {
+                        const success = await retrySync();
+                        if (success) {
+                          showToast("Successfully synced!", "success");
+                        } else {
+                          showToast(
+                            "Retry failed. Will try again later.",
+                            "error"
+                          );
+                        }
+                      }}
+                      className={`px-3 py-1 text-xs rounded transition-all ${
+                        darkMode
+                          ? "bg-red-700 hover:bg-red-600 text-white"
+                          : "bg-red-600 hover:bg-red-700 text-white"
+                      }`}
+                    >
+                      Retry
+                    </button>
+                  )}
                 </div>
                 {isCloudEnabled && syncStatus === "success" && lastSynced && (
                   <p
                     className={`text-xs mt-1 ${darkMode ? "text-gray-400" : "text-gray-500"}`}
                   >
                     Last saved: {new Date(lastSynced).toLocaleTimeString()}
+                  </p>
+                )}
+                {isCloudEnabled && syncStatus === "error" && lastError && (
+                  <p
+                    className={`text-xs mt-2 ${darkMode ? "text-red-300" : "text-red-600"}`}
+                  >
+                    {lastError.message}
                   </p>
                 )}
                 {!isCloudEnabled && (
