@@ -120,6 +120,7 @@ export default function InteractiveGuide({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [activeSection, setActiveSection] = useState("dashboard");
+  const [showSaveAnimation, setShowSaveAnimation] = useState(false); // For save feedback
 
   // Toast notification system
   const showToast = (message, type = "success") => {
@@ -146,6 +147,18 @@ export default function InteractiveGuide({
       showToast(lastError.message, "error");
     }
   }, [syncStatus, lastSynced, lastError]);
+
+  // Subtle save animation when sync succeeds
+  useEffect(() => {
+    if (syncStatus === "success" && lastSynced) {
+      setShowSaveAnimation(true);
+      // Reset animation after 2 seconds
+      const timer = setTimeout(() => {
+        setShowSaveAnimation(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [syncStatus, lastSynced]);
 
   // Network status detection - auto-retry when back online
   useEffect(() => {
@@ -198,6 +211,15 @@ export default function InteractiveGuide({
     setShowLogoutModal(false);
   };
 
+  // Helper function for explicit save confirmations
+  const showSaveConfirmation = (message = "Changes saved successfully!") => {
+    showToast(message, "success");
+    setShowSaveAnimation(true);
+    setTimeout(() => {
+      setShowSaveAnimation(false);
+    }, 2000);
+  };
+
   // ===== DATA UPDATE HANDLERS =====
 
   // Vision Quiz handlers
@@ -216,6 +238,8 @@ export default function InteractiveGuide({
       ...prev,
       visionQuiz: { ...prev.visionQuiz, result },
     }));
+    // Show explicit confirmation for quiz completion
+    showSaveConfirmation("Quiz results saved! Your wedding vision is ready.");
   };
 
   const resetQuiz = () => {
@@ -386,6 +410,11 @@ export default function InteractiveGuide({
         data,
         updateData,
         texts,
+        showToast,
+        showSaveConfirmation,
+        syncStatus,
+        lastSynced,
+        darkMode,
         // darkMode, activeSection, syncStatus, toasts, etc.
       }}
     >
@@ -428,14 +457,22 @@ export default function InteractiveGuide({
                 {/* Sync Status */}
                 {isCloudEnabled && (
                   <div
-                    className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg ${
+                    className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all ${
+                      showSaveAnimation
+                        ? "ring-2 ring-green-500 ring-opacity-50"
+                        : ""
+                    } ${
                       syncStatus === "error"
                         ? darkMode
                           ? "bg-red-900/30 border border-red-700"
                           : "bg-red-50 border border-red-200"
-                        : darkMode
-                          ? "bg-gray-800"
-                          : "bg-gray-100"
+                        : showSaveAnimation
+                          ? darkMode
+                            ? "bg-green-900/20 border border-green-700"
+                            : "bg-green-50 border border-green-200"
+                          : darkMode
+                            ? "bg-gray-800"
+                            : "bg-gray-100"
                     }`}
                     title={
                       syncStatus === "success" && lastSynced
@@ -447,34 +484,74 @@ export default function InteractiveGuide({
                             : ""
                     }
                   >
-                    <div
-                      className={`w-2 h-2 rounded-full ${
-                        syncStatus === "syncing"
-                          ? "bg-yellow-500 animate-pulse"
-                          : syncStatus === "success"
-                            ? "bg-green-500"
-                            : syncStatus === "offline"
-                              ? "bg-gray-400"
-                              : "bg-red-500"
-                      }`}
-                    />
+                    {/* Animated checkmark on successful save */}
+                    {showSaveAnimation && (
+                      <svg
+                        className="w-4 h-4 text-green-500 animate-bounce"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    )}
+
+                    {/* Status indicator dot */}
+                    {!showSaveAnimation && (
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          syncStatus === "syncing"
+                            ? "bg-yellow-500 animate-pulse"
+                            : syncStatus === "success"
+                              ? "bg-green-500"
+                              : syncStatus === "offline"
+                                ? "bg-gray-400"
+                                : "bg-red-500"
+                        }`}
+                      />
+                    )}
+
                     <span
                       className={`text-xs font-medium ${
                         syncStatus === "error"
                           ? darkMode
                             ? "text-red-300"
                             : "text-red-700"
-                          : darkMode
-                            ? "text-gray-300"
-                            : "text-gray-700"
+                          : showSaveAnimation
+                            ? darkMode
+                              ? "text-green-300"
+                              : "text-green-700"
+                            : darkMode
+                              ? "text-gray-300"
+                              : "text-gray-700"
                       }`}
                     >
                       {syncStatus === "syncing" && "Syncing..."}
-                      {syncStatus === "success" && "Saved"}
+                      {syncStatus === "success" &&
+                        (showSaveAnimation ? "Saved!" : "Saved")}
                       {syncStatus === "offline" && "Offline"}
                       {syncStatus === "error" && "Error"}
                       {syncStatus === "idle" && "Ready"}
                     </span>
+
+                    {/* Timestamp display for successful saves */}
+                    {syncStatus === "success" &&
+                      lastSynced &&
+                      !showSaveAnimation && (
+                        <span
+                          className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-500"}`}
+                        >
+                          {new Date(lastSynced).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      )}
 
                     {/* Retry Button for Errors */}
                     {syncStatus === "error" && (
@@ -614,15 +691,23 @@ export default function InteractiveGuide({
             {/* Sync Status - Mobile */}
             {(isCloudEnabled || !isCloudEnabled) && (
               <div
-                className={`px-4 py-3 rounded-lg mb-4 ${
+                className={`px-4 py-3 rounded-lg mb-4 transition-all ${
+                  showSaveAnimation && isCloudEnabled
+                    ? "ring-2 ring-green-500 ring-opacity-50"
+                    : ""
+                } ${
                   isCloudEnabled
                     ? syncStatus === "error"
                       ? darkMode
                         ? "bg-red-900/30 border border-red-700"
                         : "bg-red-50 border border-red-200"
-                      : darkMode
-                        ? "bg-gray-700"
-                        : "bg-gray-100"
+                      : showSaveAnimation
+                        ? darkMode
+                          ? "bg-green-900/20 border border-green-700"
+                          : "bg-green-50 border border-green-200"
+                        : darkMode
+                          ? "bg-gray-700"
+                          : "bg-gray-100"
                     : darkMode
                       ? "bg-yellow-900/30 border border-yellow-700"
                       : "bg-yellow-50 border border-yellow-200"
@@ -630,21 +715,42 @@ export default function InteractiveGuide({
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <div
-                      className={`w-2 h-2 rounded-full ${
-                        !isCloudEnabled
-                          ? "bg-yellow-500"
-                          : syncStatus === "syncing"
-                            ? "bg-yellow-500 animate-pulse"
-                            : syncStatus === "success"
-                              ? "bg-green-500"
-                              : syncStatus === "offline"
-                                ? "bg-gray-400"
-                                : syncStatus === "error"
-                                  ? "bg-red-500"
-                                  : "bg-blue-500"
-                      }`}
-                    />
+                    {/* Animated checkmark on successful save */}
+                    {showSaveAnimation && isCloudEnabled && (
+                      <svg
+                        className="w-4 h-4 text-green-500 animate-bounce"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    )}
+
+                    {/* Status indicator dot */}
+                    {!(showSaveAnimation && isCloudEnabled) && (
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          !isCloudEnabled
+                            ? "bg-yellow-500"
+                            : syncStatus === "syncing"
+                              ? "bg-yellow-500 animate-pulse"
+                              : syncStatus === "success"
+                                ? "bg-green-500"
+                                : syncStatus === "offline"
+                                  ? "bg-gray-400"
+                                  : syncStatus === "error"
+                                    ? "bg-red-500"
+                                    : "bg-blue-500"
+                        }`}
+                      />
+                    )}
+
                     <span
                       className={`text-xs font-medium ${
                         !isCloudEnabled
@@ -655,16 +761,22 @@ export default function InteractiveGuide({
                             ? darkMode
                               ? "text-red-300"
                               : "text-red-700"
-                            : darkMode
-                              ? "text-gray-300"
-                              : "text-gray-700"
+                            : showSaveAnimation
+                              ? darkMode
+                                ? "text-green-300"
+                                : "text-green-700"
+                              : darkMode
+                                ? "text-gray-300"
+                                : "text-gray-700"
                       }`}
                     >
                       {!isCloudEnabled && "Working Offline"}
                       {isCloudEnabled &&
                         syncStatus === "syncing" &&
                         "Syncing..."}
-                      {isCloudEnabled && syncStatus === "success" && "Saved"}
+                      {isCloudEnabled &&
+                        syncStatus === "success" &&
+                        (showSaveAnimation ? "Saved!" : "Saved")}
                       {isCloudEnabled && syncStatus === "offline" && "Offline"}
                       {isCloudEnabled && syncStatus === "error" && "Error"}
                       {isCloudEnabled && syncStatus === "idle" && "Ready"}
