@@ -80,7 +80,7 @@ export default async function handler(req, res) {
   const bundleAmountKobo_Live = 12000; // ₦120.00 (Bundle Live - Coming Soon)
 
   // --- DETERMINE PRODUCT TYPE ---
-  // Check product type based on amount OR product metadata/description
+  // PRIORITIZE product name/description over amount (to handle discount codes)
   let productType = null;
 
   // Extract product information from Paystack data
@@ -89,53 +89,63 @@ export default async function handler(req, res) {
     metadata.product_name ||
     data.description ||
     metadata.custom_fields?.product_name ||
+    data.plan ||
     "";
   const productNameLower = productName.toLowerCase();
 
   console.log(
-    `[WEBHOOK] Checking product type. Amount: ${amount}, Product name: "${productName}", Mode: ${mode}`
+    `[WEBHOOK] 🔍 Determining product type...`
   );
+  console.log(`[WEBHOOK]    Amount: ${amount} kobo (₦${amount / 100})`);
+  console.log(`[WEBHOOK]    Product name: "${productName}"`);
+  console.log(`[WEBHOOK]    Mode: ${mode}`);
+  console.log(`[WEBHOOK]    Full metadata: ${JSON.stringify(metadata)}`);
 
-  // Check amount based on mode, with fallback to product name checking
-  if (mode === "test") {
-    if (
-      amount === bundleAmountKobo_Test ||
-      productNameLower.includes("bundle")
-    ) {
-      productType = "bundle";
-    } else if (
-      amount === pdfAmountKobo_Test ||
-      productNameLower.includes("pdf") ||
-      productNameLower.includes("hausa wedding guide") ||
-      productNameLower.includes("northern wedding guide")
-    ) {
+  // FIRST: Check product name/description (most reliable)
+  if (
+    productNameLower.includes("pdf") ||
+    productNameLower.includes("hausa wedding guide") ||
+    productNameLower.includes("northern wedding guide") ||
+    productNameLower.includes("northern-wedding-guide")
+  ) {
+    productType = "pdf";
+    console.log(`[WEBHOOK] ✅ Identified as PDF Guide (by product name)`);
+  } else if (
+    productNameLower.includes("bundle") ||
+    productNameLower.includes("complete package")
+  ) {
+    productType = "bundle";
+    console.log(`[WEBHOOK] ✅ Identified as Bundle Deal (by product name)`);
+  } else if (
+    productNameLower.includes("interactive") ||
+    productNameLower.includes("web app") ||
+    productNameLower.includes("webapp")
+  ) {
+    productType = "webapp";
+    console.log(`[WEBHOOK] ✅ Identified as Interactive Guide (by product name)`);
+  }
+  // FALLBACK: Check amount if product name didn't match
+  else if (mode === "test") {
+    if (amount === pdfAmountKobo_Test) {
       productType = "pdf";
-    } else if (
-      amount === webAppAmountKobo_Test ||
-      productNameLower.includes("interactive") ||
-      productNameLower.includes("web app")
-    ) {
+      console.log(`[WEBHOOK] ✅ Identified as PDF Guide (by test amount)`);
+    } else if (amount === bundleAmountKobo_Test) {
+      productType = "bundle";
+      console.log(`[WEBHOOK] ✅ Identified as Bundle Deal (by test amount)`);
+    } else if (amount === webAppAmountKobo_Test) {
       productType = "webapp";
+      console.log(`[WEBHOOK] ✅ Identified as Interactive Guide (by test amount)`);
     }
   } else if (mode === "live") {
-    if (
-      amount === bundleAmountKobo_Live ||
-      productNameLower.includes("bundle")
-    ) {
-      productType = "bundle";
-    } else if (
-      amount === pdfAmountKobo_Live ||
-      productNameLower.includes("pdf") ||
-      productNameLower.includes("hausa wedding guide") ||
-      productNameLower.includes("northern wedding guide")
-    ) {
+    if (amount === pdfAmountKobo_Live) {
       productType = "pdf";
-    } else if (
-      amount === webAppAmountKobo_Live ||
-      productNameLower.includes("interactive") ||
-      productNameLower.includes("web app")
-    ) {
+      console.log(`[WEBHOOK] ✅ Identified as PDF Guide (by live amount)`);
+    } else if (amount === bundleAmountKobo_Live) {
+      productType = "bundle";
+      console.log(`[WEBHOOK] ✅ Identified as Bundle Deal (by live amount)`);
+    } else if (amount === webAppAmountKobo_Live) {
       productType = "webapp";
+      console.log(`[WEBHOOK] ✅ Identified as Interactive Guide (by live amount)`);
     }
   }
 
