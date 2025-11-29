@@ -88,10 +88,10 @@ export default async function handler(req, res) {
   const metadata = data.metadata || {};
   const productName = String(
     metadata.product_name ||
-    data.description ||
-    metadata.custom_fields?.product_name ||
-    data.plan ||
-    ""
+      data.description ||
+      metadata.custom_fields?.product_name ||
+      data.plan ||
+      ""
   );
   const productNameLower = productName.toLowerCase();
 
