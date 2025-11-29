@@ -86,6 +86,9 @@ export default async function handler(req, res) {
   // Extract product information from Paystack data
   const data = event.data;
   const metadata = data.metadata || {};
+  
+  // Check multiple sources for product identification
+  const referrer = String(metadata.referrer || "");
   const productName = String(
     metadata.product_name ||
       data.description ||
@@ -94,25 +97,29 @@ export default async function handler(req, res) {
       ""
   );
   const productNameLower = productName.toLowerCase();
+  const referrerLower = referrer.toLowerCase();
 
   console.log(`[WEBHOOK] 🔍 Determining product type...`);
   console.log(`[WEBHOOK]    Amount: ${amount} kobo (₦${amount / 100})`);
   console.log(`[WEBHOOK]    Product name: "${productName}"`);
+  console.log(`[WEBHOOK]    Referrer: "${referrer}"`);
   console.log(`[WEBHOOK]    Mode: ${mode}`);
   console.log(`[WEBHOOK]    Full metadata: ${JSON.stringify(metadata)}`);
 
-  // FIRST: Check product name/description (most reliable)
+  // FIRST: Check product name/description AND referrer (most reliable)
   // Exact product name on Paystack: "Northern Wedding Guide(by HausaRoom)"
   if (
     productNameLower.includes("northern wedding guide") ||
     productNameLower.includes("northern-wedding-guide") ||
     productNameLower.includes("hausaroom") ||
     productNameLower.includes("hausa room") ||
-    productNameLower.includes("pdf")
+    productNameLower.includes("pdf") ||
+    referrerLower.includes("northern-wedding-guide") ||
+    referrerLower.includes("northern-wedding-guideby-hausaroom")
   ) {
     productType = "pdf";
     console.log(
-      `[WEBHOOK] ✅ Identified as PDF Guide (by product name: "${productName}")`
+      `[WEBHOOK] ✅ Identified as PDF Guide (by product name/referrer: "${productName}" / "${referrer}")`
     );
   } else if (
     productNameLower.includes("bundle") ||
