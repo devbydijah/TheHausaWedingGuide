@@ -16,9 +16,11 @@ import {
 import { useSyncToCloud } from "../hooks/useSyncToCloud";
 import { Toast, Spinner } from "./ui";
 import Modal from "./ui/Modal";
+import ConflictResolutionModal from "./ConflictResolutionModal";
 import { DEFAULT_GUIDE } from "../lib/constants";
 import normalizeGuideData from "../lib/normalizeGuideData";
 import texts from "../lib/northern-general-text";
+import DebugPanel from "./DebugPanel";
 
 // Feature Components - Lazy loaded for better code splitting
 import { Dashboard } from "../features/dashboard";
@@ -95,22 +97,14 @@ export default function InteractiveGuide({
     lastError,
     retrySync,
     isCloudEnabled,
+    conflictData,
+    showConflictModal,
+    resolveConflict,
   } = useSyncToCloud(user?.email || userEmail, DEFAULT_GUIDE);
 
-  // Load and normalize data
-  const [data, setData] = useState(() => {
-    const raw = localStorage.getItem("weddingGuideData");
-    return normalizeGuideData(raw ? JSON.parse(raw) : {});
-  });
-
-  // Example: updateData helper
-  const updateData = (patch) => {
-    setData((prev) => {
-      const updated = { ...prev, ...patch };
-      localStorage.setItem("weddingGuideData", JSON.stringify(updated));
-      return updated;
-    });
-  };
+  // Use cloudData as the single source of truth
+  const data = cloudData;
+  const updateData = setCloudData;
 
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem("hwg:darkMode");
@@ -256,8 +250,10 @@ export default function InteractiveGuide({
   };
 
   // Vision & Values handlers
-  const updatePriorities = (priorities) =>
-    updateData((p) => ({ ...p, weddingPriorities: priorities }));
+  const updatePriorities = (priorities) => {
+    console.log("🔄 updatePriorities called with:", priorities);
+    updateData((p) => ({ ...p, priorities }));
+  };
 
   const updateField = (field, value) =>
     updateData((p) => ({ ...p, [field]: value }));
@@ -906,10 +902,6 @@ export default function InteractiveGuide({
           <Suspense fallback={<FeatureSkeleton darkMode={darkMode} />}>
             {activeSection === "quiz" && (
               <VisionQuiz
-                data={data}
-                updateQuizAnswer={updateQuizAnswer}
-                submitQuiz={submitQuiz}
-                resetQuiz={resetQuiz}
                 setActiveSection={setActiveSection}
                 darkMode={darkMode}
               />
@@ -923,6 +915,7 @@ export default function InteractiveGuide({
                 updatePriorities={updatePriorities}
                 updateField={updateField}
                 setActiveSection={setActiveSection}
+                darkMode={darkMode}
               />
             )}
           </Suspense>
@@ -1028,6 +1021,21 @@ export default function InteractiveGuide({
             </div>
           </div>
         </Modal>
+
+        {/* Debug Panel - Only visible in test mode */}
+        <DebugPanel />
+
+        {/* Conflict Resolution Modal */}
+        {showConflictModal && conflictData && (
+          <ConflictResolutionModal
+            isOpen={showConflictModal}
+            onClose={() => {}} // Prevent closing without resolution
+            cloudData={conflictData.cloud}
+            localData={conflictData.local}
+            onResolve={resolveConflict}
+            darkMode={darkMode}
+          />
+        )}
       </div>
     </AppContext.Provider>
   );

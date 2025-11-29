@@ -9,6 +9,8 @@ import {
   CaretRightIcon,
   CaretLeftIcon,
   ArrowRightIcon,
+  Trophy,
+  Sparkle,
 } from "@phosphor-icons/react";
 import { useAppContext } from "../../components/InteractiveGuide"; // Import context
 
@@ -152,7 +154,7 @@ export default function VisionQuiz({ setActiveSection, darkMode }) {
   // Result configurations
   const resultConfig = {
     traditional: {
-      icon: EmojiEventsIcon,
+      icon: Trophy,
       title: "The Traditional Northern Nigerian Bride",
       description:
         "You deeply value cultural heritage and want your wedding to honor Northern customs fully. Your celebration will be rich in tradition, from the Kayan Lefe to traditional attire and ceremonies.",
@@ -170,7 +172,7 @@ export default function VisionQuiz({ setActiveSection, darkMode }) {
       gradientTo: "#531946",
     },
     fusion: {
-      icon: AwesomeIcon,
+      icon: Sparkle,
       title: "The Modern Fusion Bride",
       description:
         "You beautifully balance tradition with contemporary style. Your wedding will blend the best of both worlds - honoring cultural roots while adding modern touches that reflect your personal taste.",

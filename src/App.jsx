@@ -69,8 +69,10 @@ function App() {
     const guideParam = params.get("guide");
     const purchasedParam = params.get("purchased");
     const emailParam = params.get("email");
+    const testParam = params.get("test"); // Development mode
 
-    if (guideParam === "1") {
+    // Development mode - direct access to Interactive Guide
+    if (testParam === "true" || guideParam === "1") {
       setShowGuide(true);
       if (emailParam) {
         setUserEmail(emailParam);
@@ -194,6 +196,40 @@ function App() {
   };
 
   if (showGuide) {
+    // Check for test mode to bypass authentication
+    const params = new URLSearchParams(window.location.search);
+    const testMode = params.get("test") === "true";
+
+    if (testMode) {
+      // Test mode - bypass authentication
+      const testUser = {
+        email: "test@hausaroom.com",
+        id: "test-user-123",
+      };
+
+      const testAccessStatus = {
+        hasAccess: true,
+        user: testUser,
+        userData: {
+          email: "test@hausaroom.com",
+          bride_name: "Test Bride",
+          groom_name: "Test Groom",
+        },
+        isOnboarded: true,
+      };
+
+      return (
+        <InteractiveGuide
+          onLogout={handleLogout}
+          accessStatus={testAccessStatus}
+          userEmail="test@hausaroom.com"
+          user={testUser}
+          userData={testAccessStatus.userData}
+        />
+      );
+    }
+
+    // Normal authentication flow
     return (
       <LoginGate
         onAuthenticated={handleAuthenticated}

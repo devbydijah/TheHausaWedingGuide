@@ -44,6 +44,18 @@ export default function Dashboard({
   const totalVendors = data.vendorList?.length || 0;
   const totalTasks = data.taskList?.length || 0;
 
+  // Helper function to format quiz result
+  const getQuizStatusLabel = () => {
+    if (!data.visionQuiz?.result) return "Not taken";
+
+    // Result is a string: "traditional", "modern", or "fusion"
+    const result = data.visionQuiz.result;
+    if (result === "traditional") return "Traditional";
+    if (result === "modern") return "Modern";
+    if (result === "fusion") return "Fusion";
+    return "Completed";
+  };
+
   // Section navigation cards
   const sectionCards = [
     {
@@ -54,9 +66,7 @@ export default function Dashboard({
       bgGradient: "from-[#531946] to-[#740015]",
       accentShape: "star", // Star burst for discovery
       description: "Discover your wedding style with our quiz",
-      stats: data.visionQuiz?.result
-        ? `${data.visionQuiz.result.title}`
-        : "Not taken",
+      stats: getQuizStatusLabel(),
     },
     {
       id: "vision",

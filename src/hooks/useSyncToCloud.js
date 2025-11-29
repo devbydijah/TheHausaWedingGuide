@@ -28,6 +28,8 @@ export const useSyncToCloud = (userEmail, initialData = {}) => {
   const [lastSynced, setLastSynced] = useState(null);
   const [lastError, setLastError] = useState(null); // Store error details for user feedback
   const [userId, setUserId] = useState(null);
+  const [conflictData, setConflictData] = useState(null); // { cloud, local } when conflict detected
+  const [showConflictModal, setShowConflictModal] = useState(false);
   const isMounted = useRef(true);
   const saveTimeoutRef = useRef(null);
 
@@ -215,8 +217,37 @@ export const useSyncToCloud = (userEmail, initialData = {}) => {
       } else if (progressError) {
         throw progressError;
       } else {
-        // Progress exists - use cloud data (cloud wins)
-        setData(progressData.data);
+        // Progress exists - check for conflicts with localStorage
+        const localData = localStorage.getItem("hausaGuideData");
+
+        if (localData) {
+          const parsedLocal = JSON.parse(localData);
+          const cloudData = progressData.data;
+
+          // Detect if there are meaningful differences
+          const hasConflict =
+            JSON.stringify(cloudData) !== JSON.stringify(parsedLocal);
+
+          if (hasConflict) {
+            console.log("⚠️ Conflict detected between cloud and local data");
+            // Store conflict data for resolution
+            setConflictData({
+              cloud: cloudData,
+              local: parsedLocal,
+            });
+            setShowConflictModal(true);
+
+            // Use cloud data temporarily while user decides
+            setData(cloudData);
+          } else {
+            // No conflict - use cloud data
+            setData(progressData.data);
+          }
+        } else {
+          // No local data - use cloud data
+          setData(progressData.data);
+        }
+
         setLastSynced(new Date(progressData.updated_at));
 
         // Also update localStorage as backup
@@ -358,6 +389,31 @@ export const useSyncToCloud = (userEmail, initialData = {}) => {
   }, [data, userId]);
 
   // ============================================
+  // CONFLICT RESOLUTION
+  // ============================================
+  const resolveConflict = useCallback(
+    async (resolvedData) => {
+      console.log("✅ Conflict resolved, applying data:", resolvedData);
+
+      // Update local state
+      setData(resolvedData);
+
+      // Update localStorage
+      localStorage.setItem("hausaGuideData", JSON.stringify(resolvedData));
+
+      // Save to cloud
+      if (isSupabaseConfigured() && userId) {
+        await saveToCloud(resolvedData);
+      }
+
+      // Clear conflict state
+      setConflictData(null);
+      setShowConflictModal(false);
+    },
+    [userId]
+  );
+
+  // ============================================
   // RETURN API
   // ============================================
   return {
@@ -369,6 +425,10 @@ export const useSyncToCloud = (userEmail, initialData = {}) => {
     forceSync, // Manually trigger sync
     retrySync, // Retry after error
     isCloudEnabled: isSupabaseConfigured() && userId !== null,
+    // Conflict resolution
+    conflictData, // { cloud, local } when conflict exists
+    showConflictModal, // Boolean to show modal
+    resolveConflict, // Function to resolve conflict
   };
 };
 

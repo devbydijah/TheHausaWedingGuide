@@ -134,11 +134,18 @@ export default function FinalBlueprint({
 
   // Handle PDF export with personalized data
   const handleExport = () => {
-    generatePersonalizedPDF(data, {
-      brideName: userData?.brideName || "Bride",
-      email: userEmail || "your-email@example.com",
-      weddingDate: userData?.weddingDate || data?.weddingDate || "TBD",
-    });
+    try {
+      console.log("🎉 Generating PDF with data:", data);
+      generatePersonalizedPDF(data, {
+        brideName: userData?.brideName || "Bride",
+        email: userEmail || "your-email@example.com",
+        weddingDate: userData?.weddingDate || data?.weddingDate || "TBD",
+      });
+      console.log("✅ PDF generation complete!");
+    } catch (error) {
+      console.error("❌ PDF generation failed:", error);
+      alert("Failed to generate PDF. Please try again.");
+    }
   };
 
   // Get vision result details
@@ -176,7 +183,7 @@ export default function FinalBlueprint({
   const visionDetails = getVisionDetails();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 print:block">
       {/* Header */}
       <div className="bg-gradient-to-r from-[#531946] to-[#740015] rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden print:hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
@@ -381,22 +388,10 @@ export default function FinalBlueprint({
       <div className="flex flex-wrap gap-3 print:hidden">
         <button
           onClick={handleExport}
-          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#CE805C] to-[#B87050] text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[#CE805C]/50"
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#CE805C] to-[#B87050] text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[#CE805C]/50"
         >
           <Download sx={{ fontSize: 20 }} />
-          Export PDF
-        </button>
-
-        <button
-          onClick={handlePrint}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold border-2 transition-all hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[#CE805C]/50 ${
-            darkMode
-              ? "border-gray-600 text-gray-300 hover:bg-gray-700"
-              : "border-gray-300 text-gray-700 hover:bg-gray-50"
-          }`}
-        >
-          <Print sx={{ fontSize: 20 }} />
-          Print
+          Download Complete Wedding Plan (PDF)
         </button>
       </div>
 
@@ -1049,15 +1044,30 @@ export default function FinalBlueprint({
       {/* Print Styles */}
       <style jsx>{`
         @media print {
-          body * {
-            visibility: hidden;
+          /* Hide navigation, buttons, and UI elements */
+          .print\\:hidden,
+          button,
+          nav,
+          header,
+          .no-print {
+            display: none !important;
           }
-          .print\\:block,
-          .print\\:block * {
+
+          /* Ensure content is visible */
+          body,
+          body * {
             visibility: visible;
           }
-          .print\\:hidden {
-            display: none !important;
+
+          /* Position content at top of page */
+          .print\\:block {
+            position: static;
+          }
+
+          /* Improve print layout */
+          * {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
         }
       `}</style>
