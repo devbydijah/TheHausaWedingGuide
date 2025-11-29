@@ -75,38 +75,77 @@ export default async function handler(req, res) {
   const bundleAmountKobo_Test = 12000; // ₦120.00 (Bundle Test)
 
   // Live prices
-  const pdfAmountKobo_Live = 999000; // ₦  const PAYSTACK_LIVE_SECRET = process.env.PAYSTACK_LIVE_SECRET_KEY;0.00 (PDF Live)
+  const pdfAmountKobo_Live = 999000; // ₦9,990.00 (PDF Live)
   const webAppAmountKobo_Live = 10000; // ₦100.00 (Web App Live - Coming Soon)
   const bundleAmountKobo_Live = 12000; // ₦120.00 (Bundle Live - Coming Soon)
 
+  // --- DETERMINE PRODUCT TYPE ---
+  // Check product type based on amount OR product metadata/description
   let productType = null;
 
-  // Check amount based on mode
+  // Extract product information from Paystack data
+  const metadata = data.metadata || {};
+  const productName =
+    metadata.product_name ||
+    data.description ||
+    metadata.custom_fields?.product_name ||
+    "";
+  const productNameLower = productName.toLowerCase();
+
+  console.log(
+    `[WEBHOOK] Checking product type. Amount: ${amount}, Product name: "${productName}", Mode: ${mode}`
+  );
+
+  // Check amount based on mode, with fallback to product name checking
   if (mode === "test") {
-    if (amount === bundleAmountKobo_Test) {
+    if (
+      amount === bundleAmountKobo_Test ||
+      productNameLower.includes("bundle")
+    ) {
       productType = "bundle";
-    } else if (amount === pdfAmountKobo_Test) {
+    } else if (
+      amount === pdfAmountKobo_Test ||
+      productNameLower.includes("pdf") ||
+      productNameLower.includes("hausa wedding guide") ||
+      productNameLower.includes("northern wedding guide")
+    ) {
       productType = "pdf";
-    } else if (amount === webAppAmountKobo_Test) {
+    } else if (
+      amount === webAppAmountKobo_Test ||
+      productNameLower.includes("interactive") ||
+      productNameLower.includes("web app")
+    ) {
       productType = "webapp";
     }
   } else if (mode === "live") {
-    if (amount === bundleAmountKobo_Live) {
+    if (
+      amount === bundleAmountKobo_Live ||
+      productNameLower.includes("bundle")
+    ) {
       productType = "bundle";
-    } else if (amount === pdfAmountKobo_Live) {
+    } else if (
+      amount === pdfAmountKobo_Live ||
+      productNameLower.includes("pdf") ||
+      productNameLower.includes("hausa wedding guide") ||
+      productNameLower.includes("northern wedding guide")
+    ) {
       productType = "pdf";
-    } else if (amount === webAppAmountKobo_Live) {
+    } else if (
+      amount === webAppAmountKobo_Live ||
+      productNameLower.includes("interactive") ||
+      productNameLower.includes("web app")
+    ) {
       productType = "webapp";
     }
   }
 
   if (!productType) {
     console.error(
-      `[WEBHOOK] ❌ Unrecognized amount: ${amount} kobo in ${mode} mode.`
+      `[WEBHOOK] ❌ Could not identify product type. Amount: ${amount} kobo, Mode: ${mode}, Product name: "${productName}", Metadata: ${JSON.stringify(metadata)}`
     );
     return res.status(200).json({
       received: true,
-      warning: "Unrecognized amount, no product email sent.",
+      warning: "Unrecognized amount and product name, no product email sent.",
     });
   }
 
