@@ -6,9 +6,15 @@ import {
   lazy,
   Suspense,
 } from "react";
-import { SignOutIcon, MoonIcon, SunIcon, ListIcon, X } from "@phosphor-icons/react";
+import {
+  SignOutIcon,
+  MoonIcon,
+  SunIcon,
+  ListIcon,
+  X,
+} from "@phosphor-icons/react";
 import { useSyncToCloud } from "../hooks/useSyncToCloud";
-import { Toast } from "./ui";
+import { Toast, Spinner } from "./ui";
 import Modal from "./ui/Modal";
 import { DEFAULT_GUIDE } from "../lib/constants";
 import normalizeGuideData from "../lib/normalizeGuideData";
@@ -31,8 +37,33 @@ const FinalBlueprint = lazy(
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-screen">
     <div className="text-center">
-      <div className="w-16 h-16 border-4 border-[#CE805C] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-      <p className="text-gray-600">Loading...</p>
+      <Spinner size="lg" className="mx-auto mb-4" />
+      <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+    </div>
+  </div>
+);
+
+// Feature skeleton loader for better UX
+const FeatureSkeleton = ({ darkMode }) => (
+  <div
+    className={`space-y-6 p-6 ${darkMode ? "bg-gray-900" : "bg-gray-50"} rounded-lg animate-pulse`}
+  >
+    <div
+      className={`h-8 ${darkMode ? "bg-gray-800" : "bg-gray-200"} rounded w-1/3`}
+    ></div>
+    <div
+      className={`h-4 ${darkMode ? "bg-gray-800" : "bg-gray-200"} rounded w-2/3`}
+    ></div>
+    <div className="space-y-3">
+      <div
+        className={`h-32 ${darkMode ? "bg-gray-800" : "bg-gray-200"} rounded`}
+      ></div>
+      <div
+        className={`h-32 ${darkMode ? "bg-gray-800" : "bg-gray-200"} rounded`}
+      ></div>
+      <div
+        className={`h-32 ${darkMode ? "bg-gray-800" : "bg-gray-200"} rounded`}
+      ></div>
     </div>
   </div>
 );
@@ -373,6 +404,13 @@ export default function InteractiveGuide({
                     className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg ${
                       darkMode ? "bg-gray-800" : "bg-gray-100"
                     }`}
+                    title={
+                      syncStatus === "success" && lastSynced
+                        ? `Last saved: ${new Date(lastSynced).toLocaleTimeString()}`
+                        : syncStatus === "offline"
+                          ? "Working offline - will sync when reconnected"
+                          : ""
+                    }
                   >
                     <div
                       className={`w-2 h-2 rounded-full ${
@@ -380,15 +418,38 @@ export default function InteractiveGuide({
                           ? "bg-yellow-500 animate-pulse"
                           : syncStatus === "success"
                             ? "bg-green-500"
-                            : "bg-red-500"
+                            : syncStatus === "offline"
+                              ? "bg-gray-400"
+                              : "bg-red-500"
                       }`}
                     />
                     <span
                       className={`text-xs font-medium ${darkMode ? "text-gray-300" : "text-gray-700"}`}
                     >
-                      {syncStatus === "syncing" && "Syncing"}
+                      {syncStatus === "syncing" && "Syncing..."}
                       {syncStatus === "success" && "Saved"}
+                      {syncStatus === "offline" && "Offline"}
                       {syncStatus === "error" && "Error"}
+                      {syncStatus === "idle" && "Ready"}
+                    </span>
+                  </div>
+                )}
+
+                {/* Offline Mode Banner */}
+                {!isCloudEnabled && (
+                  <div
+                    className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg ${
+                      darkMode
+                        ? "bg-yellow-900/30 border border-yellow-700"
+                        : "bg-yellow-50 border border-yellow-200"
+                    }`}
+                    title="Data is saved locally and will sync when you're back online"
+                  >
+                    <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                    <span
+                      className={`text-xs font-medium ${darkMode ? "text-yellow-300" : "text-yellow-700"}`}
+                    >
+                      Working Offline
                     </span>
                   </div>
                 )}
@@ -482,6 +543,71 @@ export default function InteractiveGuide({
           } ${darkMode ? "bg-gray-800" : "bg-white"}`}
         >
           <div className="px-4 py-6 space-y-3">
+            {/* Sync Status - Mobile */}
+            {(isCloudEnabled || !isCloudEnabled) && (
+              <div
+                className={`px-4 py-3 rounded-lg mb-4 ${
+                  isCloudEnabled
+                    ? darkMode
+                      ? "bg-gray-700"
+                      : "bg-gray-100"
+                    : darkMode
+                      ? "bg-yellow-900/30 border border-yellow-700"
+                      : "bg-yellow-50 border border-yellow-200"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      !isCloudEnabled
+                        ? "bg-yellow-500"
+                        : syncStatus === "syncing"
+                          ? "bg-yellow-500 animate-pulse"
+                          : syncStatus === "success"
+                            ? "bg-green-500"
+                            : syncStatus === "offline"
+                              ? "bg-gray-400"
+                              : syncStatus === "error"
+                                ? "bg-red-500"
+                                : "bg-blue-500"
+                    }`}
+                  />
+                  <span
+                    className={`text-xs font-medium ${
+                      !isCloudEnabled
+                        ? darkMode
+                          ? "text-yellow-300"
+                          : "text-yellow-700"
+                        : darkMode
+                          ? "text-gray-300"
+                          : "text-gray-700"
+                    }`}
+                  >
+                    {!isCloudEnabled && "Working Offline"}
+                    {isCloudEnabled && syncStatus === "syncing" && "Syncing..."}
+                    {isCloudEnabled && syncStatus === "success" && "Saved"}
+                    {isCloudEnabled && syncStatus === "offline" && "Offline"}
+                    {isCloudEnabled && syncStatus === "error" && "Error"}
+                    {isCloudEnabled && syncStatus === "idle" && "Ready"}
+                  </span>
+                </div>
+                {isCloudEnabled && syncStatus === "success" && lastSynced && (
+                  <p
+                    className={`text-xs mt-1 ${darkMode ? "text-gray-400" : "text-gray-500"}`}
+                  >
+                    Last saved: {new Date(lastSynced).toLocaleTimeString()}
+                  </p>
+                )}
+                {!isCloudEnabled && (
+                  <p
+                    className={`text-xs mt-1 ${darkMode ? "text-yellow-400" : "text-yellow-600"}`}
+                  >
+                    Data saved locally, will sync when online
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Action Buttons */}
             <div className="space-y-2 pb-4 border-b border-gray-200 dark:border-gray-700">
               {/* Dark Mode Toggle */}
@@ -554,7 +680,7 @@ export default function InteractiveGuide({
             />
           )}
 
-          <Suspense fallback={<LoadingSpinner />}>
+          <Suspense fallback={<FeatureSkeleton darkMode={darkMode} />}>
             {activeSection === "quiz" && (
               <VisionQuiz
                 data={data}
@@ -567,7 +693,7 @@ export default function InteractiveGuide({
             )}
           </Suspense>
 
-          <Suspense fallback={<LoadingSpinner />}>
+          <Suspense fallback={<FeatureSkeleton darkMode={darkMode} />}>
             {activeSection === "vision" && (
               <VisionPlanner
                 data={data}
@@ -578,7 +704,7 @@ export default function InteractiveGuide({
             )}
           </Suspense>
 
-          <Suspense fallback={<LoadingSpinner />}>
+          <Suspense fallback={<FeatureSkeleton darkMode={darkMode} />}>
             {activeSection === "budget" && (
               <BudgetBuilder
                 data={data}
@@ -589,7 +715,7 @@ export default function InteractiveGuide({
             )}
           </Suspense>
 
-          <Suspense fallback={<LoadingSpinner />}>
+          <Suspense fallback={<FeatureSkeleton darkMode={darkMode} />}>
             {activeSection === "vendors" && (
               <VendorTracker
                 data={data}
@@ -601,7 +727,7 @@ export default function InteractiveGuide({
             )}
           </Suspense>
 
-          <Suspense fallback={<LoadingSpinner />}>
+          <Suspense fallback={<FeatureSkeleton darkMode={darkMode} />}>
             {activeSection === "timeline" && (
               <TimelineManager
                 data={data}
@@ -615,7 +741,7 @@ export default function InteractiveGuide({
             )}
           </Suspense>
 
-          <Suspense fallback={<LoadingSpinner />}>
+          <Suspense fallback={<FeatureSkeleton darkMode={darkMode} />}>
             {activeSection === "blueprint" && (
               <FinalBlueprint
                 data={data}
