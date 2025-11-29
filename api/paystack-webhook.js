@@ -86,12 +86,13 @@ export default async function handler(req, res) {
   // Extract product information from Paystack data
   const data = event.data;
   const metadata = data.metadata || {};
-  const productName =
+  const productName = String(
     metadata.product_name ||
     data.description ||
     metadata.custom_fields?.product_name ||
     data.plan ||
-    "";
+    ""
+  );
   const productNameLower = productName.toLowerCase();
 
   console.log(`[WEBHOOK] 🔍 Determining product type...`);
