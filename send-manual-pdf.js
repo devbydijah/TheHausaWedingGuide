@@ -8,8 +8,8 @@ dotenv.config({ path: ".env.production" });
 const { sendDownloadEmail } = await import("./api/email.js");
 
 // Customer details
-const email = "zeeidris77@yahoo.com";
-const firstName = "Valued Customer"; // Update with actual name if available
+const email = "itsdrmadina@gmail.com";
+const firstName = "Dr. Madina"; // Update with actual name if available
 const mode = "live";
 
 // Generate secure download link

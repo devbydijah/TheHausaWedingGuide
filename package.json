@@ -30,6 +30,7 @@
     "framer-motion": "^12.23.22",
     "jspdf": "^3.0.3",
     "jspdf-autotable": "^5.0.2",
+    "pdfmake": "^0.2.20",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "resend": "^4.8.0"
