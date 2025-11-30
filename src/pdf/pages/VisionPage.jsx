@@ -93,8 +93,8 @@ const styles = StyleSheet.create({
   },
 
   inspirationBox: {
-    width: "30%",
-    aspectRatio: 1.2,
+    width: "100%",
+    height: 80,
     backgroundColor: theme.colors.background,
     borderWidth: 1,
     borderColor: theme.colors.border,
@@ -102,6 +102,24 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 4,
+  },
+
+  inspirationPlaceholder: {
+    alignItems: "center",
+  },
+
+  inspirationIcon: {
+    fontFamily: theme.fonts.body,
+    fontSize: 24,
+    color: theme.colors.borderLight,
+    marginBottom: 4,
+  },
+
+  inspirationHint: {
+    fontFamily: theme.fonts.body,
+    fontSize: 7,
+    color: theme.colors.textMuted,
+    textAlign: "center",
   },
 
   inspirationLabel: {
@@ -177,27 +195,30 @@ export const VisionPage = ({ visionData }) => {
         </Text>
 
         <View style={styles.inspirationGrid}>
-          <View>
+          <View style={{ width: "31%" }}>
             <View style={styles.inspirationBox}>
-              <Text style={{ color: theme.colors.border, fontSize: 20 }}>
-                +
-              </Text>
+              <View style={styles.inspirationPlaceholder}>
+                <Text style={styles.inspirationIcon}>🏛️</Text>
+                <Text style={styles.inspirationHint}>Paste venue photo</Text>
+              </View>
             </View>
             <Text style={styles.inspirationLabel}>Venue</Text>
           </View>
-          <View>
+          <View style={{ width: "31%" }}>
             <View style={styles.inspirationBox}>
-              <Text style={{ color: theme.colors.border, fontSize: 20 }}>
-                +
-              </Text>
+              <View style={styles.inspirationPlaceholder}>
+                <Text style={styles.inspirationIcon}>👗</Text>
+                <Text style={styles.inspirationHint}>Paste attire ideas</Text>
+              </View>
             </View>
             <Text style={styles.inspirationLabel}>Attire</Text>
           </View>
-          <View>
+          <View style={{ width: "31%" }}>
             <View style={styles.inspirationBox}>
-              <Text style={{ color: theme.colors.border, fontSize: 20 }}>
-                +
-              </Text>
+              <View style={styles.inspirationPlaceholder}>
+                <Text style={styles.inspirationIcon}>🎨</Text>
+                <Text style={styles.inspirationHint}>Add color swatches</Text>
+              </View>
             </View>
             <Text style={styles.inspirationLabel}>Colors</Text>
           </View>

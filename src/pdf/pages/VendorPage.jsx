@@ -185,20 +185,24 @@ const VendorCard = ({ vendor, statusColor }) => (
 );
 
 export const VendorPage = ({ vendors = [] }) => {
-  const bookedVendors = vendors.filter(
+  // Filter out invalid vendor entries
+  const validVendors = vendors.filter(
+    (v) => v && v.name && typeof v.name === "string"
+  );
+
+  const bookedVendors = validVendors.filter(
     (v) =>
       v.status?.toLowerCase() === "booked" ||
       v.status?.toLowerCase() === "confirmed"
   );
-  const pendingVendors = vendors.filter(
+  const pendingVendors = validVendors.filter(
     (v) =>
       v.status?.toLowerCase() !== "booked" &&
-      v.status?.toLowerCase() !== "confirmed" &&
-      v.name
+      v.status?.toLowerCase() !== "confirmed"
   );
 
   // Find categories that don't have vendors yet
-  const vendorCategories = vendors.map((v) => v.category?.toLowerCase());
+  const vendorCategories = validVendors.map((v) => v.category?.toLowerCase());
   const missingCategories = essentialCategories.filter(
     (cat) => !vendorCategories.includes(cat.toLowerCase())
   );
@@ -261,9 +265,9 @@ export const VendorPage = ({ vendors = [] }) => {
         )}
 
         {/* Vendors Still Needed Table */}
-        {(vendors.length === 0 || missingCategories.length > 0) && (
+        {(validVendors.length === 0 || missingCategories.length > 0) && (
           <>
-            {vendors.length === 0 && (
+            {validVendors.length === 0 && (
               <View style={styles.emptyMessage}>
                 <Text style={styles.emptyTitle}>
                   Start Building Your Vendor Team!
@@ -274,7 +278,7 @@ export const VendorPage = ({ vendors = [] }) => {
               </View>
             )}
 
-            {missingCategories.length > 0 && vendors.length > 0 && (
+            {missingCategories.length > 0 && validVendors.length > 0 && (
               <View style={[styles.sectionTitle, { marginTop: 15 }]}>
                 <View
                   style={[
@@ -304,7 +308,7 @@ export const VendorPage = ({ vendors = [] }) => {
                 </Text>
               </View>
 
-              {(vendors.length === 0
+              {(validVendors.length === 0
                 ? essentialCategories
                 : missingCategories
               ).map((category, index) => (

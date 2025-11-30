@@ -166,8 +166,12 @@ const formatShortDate = (dateString) => {
 export const TimelinePage = ({ tasks = [], weddingDate }) => {
   const countdown = getCountdown(weddingDate);
 
-  const pendingTasks = tasks.filter((t) => !t.completed);
-  const completedTasks = tasks.filter((t) => t.completed);
+  // Filter out invalid tasks and ensure task property exists
+  const validTasks = tasks.filter(
+    (t) => t && t.task && typeof t.task === "string"
+  );
+  const pendingTasks = validTasks.filter((t) => !t.completed);
+  const completedTasks = validTasks.filter((t) => t.completed);
 
   return (
     <Page size="A4">
@@ -180,7 +184,7 @@ export const TimelinePage = ({ tasks = [], weddingDate }) => {
         )}
 
         {/* If user has tasks */}
-        {tasks.length > 0 ? (
+        {validTasks.length > 0 ? (
           <>
             {/* Pending Tasks */}
             {pendingTasks.length > 0 && (
